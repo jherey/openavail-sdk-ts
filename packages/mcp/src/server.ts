@@ -1,4 +1,4 @@
-import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { OpenavailClient } from '@openavail/sdk';
 import { registerCreateEvent } from './tools/compatibility/create-event.js';
 import { registerDeleteEvent } from './tools/compatibility/delete-event.js';
@@ -12,11 +12,8 @@ import { registerConfirmHold } from './tools/native/confirm-hold.js';
 import { registerGetPendingNotifications } from './tools/native/get-pending-notifications.js';
 import { registerSimulate } from './tools/native/simulate.js';
 
-export function buildServer(client: OpenavailClient): Server {
-  const server = new Server(
-    { name: '@openavail/mcp', version: '0.1.0' },
-    { capabilities: { tools: {} } },
-  );
+export function buildServer(client: OpenavailClient): McpServer {
+  const server = new McpServer({ name: '@openavail/mcp', version: '0.1.0' });
 
   registerListCalendars(server, client);
   registerListEvents(server, client);

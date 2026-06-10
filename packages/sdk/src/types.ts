@@ -19,7 +19,7 @@ export type AlternativeSlot = {
   reason_code: string;
 };
 
-export type Attendee = { email: string; displayName?: string };
+export type Attendee = { email: string; displayName?: string | undefined };
 
 export type OwnerCalendar = {
   calendar_type: 'work' | 'personal' | 'other' | null;
