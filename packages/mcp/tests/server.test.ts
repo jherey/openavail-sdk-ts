@@ -263,3 +263,22 @@ describe('MCP server tools', () => {
     });
   });
 });
+
+// ── bin.ts: OPENAVAIL_API_KEY guard ─────────────────────────────────────────
+
+describe('bin.ts', () => {
+  it('exits with code 1 when OPENAVAIL_API_KEY is not set', async () => {
+    const savedKey = process.env['OPENAVAIL_API_KEY'];
+    delete process.env['OPENAVAIL_API_KEY'];
+
+    const exitSpy = vi.spyOn(process, 'exit').mockImplementation((code) => {
+      throw new Error(`process.exit(${code ?? 'undefined'})`);
+    });
+
+    vi.resetModules();
+    await expect(import('../src/bin.js')).rejects.toThrow('process.exit(1)');
+
+    exitSpy.mockRestore();
+    if (savedKey !== undefined) process.env['OPENAVAIL_API_KEY'] = savedKey;
+  });
+});
