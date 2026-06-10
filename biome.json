@@ -2,12 +2,11 @@
   "$schema": "https://biomejs.dev/schemas/2.4.15/schema.json",
   "files": {
     "includes": [
-      "**/*.ts",
-      "**/*.js",
-      "**/*.json",
+      "packages/**/*.ts",
+      "packages/**/*.js",
+      "packages/**/*.json",
       "!!**/dist",
-      "!!**/node_modules",
-      "!!**/src/api-types.ts"
+      "!!**/node_modules"
     ]
   },
   "formatter": {
