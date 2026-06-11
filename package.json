@@ -1,31 +1,19 @@
 {
-  "name": "@availsync/sdk",
-  "version": "0.0.0",
+  "name": "openavail-sdk-ts",
   "private": true,
-  "type": "module",
-  "description": "Availsync TypeScript SDK — generated from the API's OpenAPI spec. Placeholder until v1.1.",
-  "engines": {
-    "node": ">=22"
-  },
   "packageManager": "pnpm@9.12.0",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "files": [
-    "dist"
-  ],
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
-    "generate": "openapi-typescript ./openapi.json -o ./src/api-types.ts",
-    "typecheck": "tsc --noEmit",
-    "test": "vitest run",
-    "lint": "biome check .",
-    "lint:fix": "biome check --write ."
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "lint": "biome check packages",
+    "lint:fix": "biome check --write packages",
+    "typecheck": "pnpm -r exec tsc --noEmit"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.15",
-    "@types/node": "^25.7.0",
-    "openapi-typescript": "^7.13.0",
-    "typescript": "^6.0.3",
-    "vitest": "^4.1.6"
+    "typescript": "^6.0.3"
   }
 }

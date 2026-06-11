@@ -1,0 +1,293 @@
+import { HttpClient } from './http.js';
+import type {
+  Booking,
+  BookingResult,
+  CancelBookingResult,
+  CheckAvailabilityOptions,
+  CheckAvailabilityResult,
+  ConfirmHoldOptions,
+  CreateBookingOptions,
+  ListBookingsOptions,
+  ListBookingsResult,
+  OwnerCalendar,
+  PendingNotification,
+  SimulateOptions,
+  SimulateResult,
+  UpdateBookingOptions,
+} from './types.js';
+
+const DEFAULT_BASE_URL = 'https://api.openavail.com';
+
+export class OpenavailClient {
+  readonly #http: HttpClient;
+
+  constructor(options: { apiKey: string; baseUrl?: string }) {
+    if (!options.apiKey) throw new Error('apiKey is required');
+    const base = (options.baseUrl ?? DEFAULT_BASE_URL).replace(/\/$/, '');
+    this.#http = new HttpClient(options.apiKey, base);
+  }
+
+  async checkAvailability(options: CheckAvailabilityOptions): Promise<CheckAvailabilityResult> {
+    type Raw = {
+      hold_id: string;
+      expires_at: string;
+      slots: { start: string; end: string }[];
+      pending_notifications: PendingNotification[];
+      resolved_calendar_type: string | null;
+      warnings: { code: 'CALENDAR_BUSY_STALE'; calendar_type: string | null; message: string }[];
+    };
+    const raw = await this.#http.request<Raw>({
+      method: 'POST',
+      path: '/availability',
+      body: {
+        owner_email: options.ownerEmail,
+        duration_minutes: options.durationMinutes,
+        window: options.window,
+        meeting_class: options.meetingClass,
+        ...(options.calendarType !== undefined && { calendar_type: options.calendarType }),
+        ...(options.nextAvailableLookaheadHours !== undefined && {
+          next_available_lookahead_hours: options.nextAvailableLookaheadHours,
+        }),
+      },
+      requiresIdempotency: true,
+      idempotencyKey: options.idempotencyKey,
+    });
+    return {
+      holdId: raw.hold_id,
+      expiresAt: raw.expires_at,
+      slots: raw.slots,
+      pendingNotifications: raw.pending_notifications,
+      resolvedCalendarType: raw.resolved_calendar_type,
+      warnings: raw.warnings,
+    };
+  }
+
+  async confirmHold(options: ConfirmHoldOptions): Promise<BookingResult> {
+    type Raw = {
+      booking_id: string;
+      correlation_id: string;
+      displaced_count?: number;
+      pending_notifications: PendingNotification[];
+    };
+    const raw = await this.#http.request<Raw>({
+      method: 'POST',
+      path: `/bookings/${options.holdId}/confirm`,
+      body: {
+        start: options.start,
+        end: options.end,
+        title: options.title,
+        ...(options.attendees !== undefined && { attendees: options.attendees }),
+      },
+      requiresIdempotency: true,
+      idempotencyKey: options.idempotencyKey,
+    });
+    return {
+      bookingId: raw.booking_id,
+      correlationId: raw.correlation_id,
+      displacedCount: raw.displaced_count ?? 0,
+      pendingNotifications: raw.pending_notifications,
+    };
+  }
+
+  async createBooking(options: CreateBookingOptions): Promise<BookingResult> {
+    type Raw = {
+      booking_id: string;
+      correlation_id: string;
+      displaced_count?: number;
+      pending_notifications: PendingNotification[];
+    };
+    const raw = await this.#http.request<Raw>({
+      method: 'POST',
+      path: '/bookings',
+      body: {
+        owner_email: options.ownerEmail,
+        start: options.start,
+        end: options.end,
+        meeting_class: options.meetingClass,
+        title: options.title,
+        ...(options.calendarType !== undefined && { calendar_type: options.calendarType }),
+        ...(options.attendees !== undefined && { attendees: options.attendees }),
+      },
+      requiresIdempotency: true,
+      idempotencyKey: options.idempotencyKey,
+    });
+    return {
+      bookingId: raw.booking_id,
+      correlationId: raw.correlation_id,
+      displacedCount: raw.displaced_count ?? 0,
+      pendingNotifications: raw.pending_notifications,
+    };
+  }
+
+  async simulate(options: SimulateOptions): Promise<SimulateResult> {
+    type Raw = {
+      decision: 'Accept' | 'Reject' | 'Preempt' | 'CounterPropose';
+      reason?: string;
+      alternatives?: { start: string; end: string; reason_code: string }[];
+      engine_trace: unknown;
+      pending_notifications: PendingNotification[];
+    };
+    const raw = await this.#http.request<Raw>({
+      method: 'POST',
+      path: '/simulate',
+      body: {
+        owner_email: options.ownerEmail,
+        start: options.start,
+        end: options.end,
+        meeting_class: options.meetingClass,
+        ...(options.calendarType !== undefined && { calendar_type: options.calendarType }),
+      },
+    });
+    return {
+      decision: raw.decision,
+      reason: raw.reason,
+      alternatives: raw.alternatives,
+      engineTrace: raw.engine_trace,
+      pendingNotifications: raw.pending_notifications,
+    };
+  }
+
+  async getPendingNotifications(): Promise<PendingNotification[]> {
+    type Raw = {
+      notifications: PendingNotification[];
+      pending_notifications: PendingNotification[];
+    };
+    const raw = await this.#http.request<Raw>({ method: 'GET', path: '/notifications/pending' });
+    return raw.notifications;
+  }
+
+  async listCalendars(ownerEmail: string): Promise<OwnerCalendar[]> {
+    type Raw = {
+      calendars: { calendar_type: 'work' | 'personal' | 'other' | null; is_primary: boolean }[];
+      pending_notifications: PendingNotification[];
+    };
+    const raw = await this.#http.request<Raw>({
+      method: 'GET',
+      path: `/calendar-owners/${encodeURIComponent(ownerEmail)}/calendars`,
+    });
+    return raw.calendars;
+  }
+
+  async listBookings(options: ListBookingsOptions): Promise<ListBookingsResult> {
+    type RawBooking = {
+      booking_id: string;
+      correlation_id: string;
+      start: string;
+      end: string;
+      meeting_class: string | null;
+      calendar_type: string | null;
+      created_at: string;
+      title?: string | null;
+      attendees?: { email: string; displayName?: string }[];
+    };
+    type Raw = {
+      bookings: RawBooking[];
+      next_cursor: string | null;
+      pending_notifications: PendingNotification[];
+    };
+    const raw = await this.#http.request<Raw>({
+      method: 'GET',
+      path: '/bookings',
+      query: {
+        owner_email: options.ownerEmail,
+        ...(options.start !== undefined && { start: options.start }),
+        ...(options.end !== undefined && { end: options.end }),
+        ...(options.calendarType !== undefined && { calendar_type: options.calendarType }),
+        ...(options.query !== undefined && { query: options.query }),
+        ...(options.limit !== undefined && { limit: options.limit }),
+        ...(options.cursor !== undefined && { cursor: options.cursor }),
+      },
+    });
+    return {
+      bookings: raw.bookings.map((b) => {
+        const booking: Booking = {
+          bookingId: b.booking_id,
+          correlationId: b.correlation_id,
+          start: b.start,
+          end: b.end,
+          meetingClass: b.meeting_class,
+          calendarType: b.calendar_type,
+          createdAt: b.created_at,
+        };
+        if (b.title !== undefined) booking.title = b.title ?? undefined;
+        if (b.attendees !== undefined) booking.attendees = b.attendees;
+        return booking;
+      }),
+      nextCursor: raw.next_cursor,
+      pendingNotifications: raw.pending_notifications,
+    };
+  }
+
+  async getBooking(bookingId: string): Promise<Booking> {
+    type RawBooking = {
+      booking_id: string;
+      correlation_id: string;
+      start: string;
+      end: string;
+      meeting_class: string | null;
+      calendar_type: string | null;
+      created_at: string;
+      title?: string | null;
+      attendees?: { email: string; displayName?: string }[];
+    };
+    type Raw = { booking: RawBooking; pending_notifications: PendingNotification[] };
+    const raw = await this.#http.request<Raw>({
+      method: 'GET',
+      path: `/bookings/${bookingId}`,
+    });
+    const b = raw.booking;
+    const booking: Booking = {
+      bookingId: b.booking_id,
+      correlationId: b.correlation_id,
+      start: b.start,
+      end: b.end,
+      meetingClass: b.meeting_class,
+      calendarType: b.calendar_type,
+      createdAt: b.created_at,
+    };
+    if (b.title !== undefined) booking.title = b.title ?? undefined;
+    if (b.attendees !== undefined) booking.attendees = b.attendees;
+    return booking;
+  }
+
+  async cancelBooking(
+    bookingId: string,
+    options?: { idempotencyKey?: string },
+  ): Promise<CancelBookingResult> {
+    type Raw = {
+      booking_id: string;
+      correlation_id: string;
+      pending_notifications: PendingNotification[];
+    };
+    const raw = await this.#http.request<Raw>({
+      method: 'DELETE',
+      path: `/bookings/${bookingId}`,
+      requiresIdempotency: true,
+      idempotencyKey: options?.idempotencyKey,
+    });
+    return {
+      bookingId: raw.booking_id,
+      correlationId: raw.correlation_id,
+      pendingNotifications: raw.pending_notifications,
+    };
+  }
+
+  async updateBooking(bookingId: string, options: UpdateBookingOptions): Promise<BookingResult> {
+    type Raw = {
+      booking_id: string;
+      correlation_id: string;
+      pending_notifications: PendingNotification[];
+    };
+    const raw = await this.#http.request<Raw>({
+      method: 'PATCH',
+      path: `/bookings/${bookingId}`,
+      body: options,
+    });
+    return {
+      bookingId: raw.booking_id,
+      correlationId: raw.correlation_id,
+      displacedCount: 0,
+      pendingNotifications: raw.pending_notifications,
+    };
+  }
+}

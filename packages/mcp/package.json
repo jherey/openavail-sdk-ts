@@ -1,0 +1,27 @@
+{
+  "name": "@openavail/mcp",
+  "version": "0.1.0",
+  "type": "module",
+  "bin": {
+    "openavail-mcp": "./dist/bin.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/bin.ts --format esm --clean && chmod +x dist/bin.js",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "@openavail/sdk": "workspace:*",
+    "zod": "^3.25"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsup": "^8.3.0",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.6"
+  }
+}
