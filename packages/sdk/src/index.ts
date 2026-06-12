@@ -32,6 +32,7 @@ export type {
   CreateBookingOptions,
   ListBookingsOptions,
   ListBookingsResult,
+  MeetingClass,
   OwnerCalendar,
   PendingNotification,
   SimulateOptions,

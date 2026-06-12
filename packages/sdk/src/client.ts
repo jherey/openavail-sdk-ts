@@ -9,6 +9,7 @@ import type {
   CreateBookingOptions,
   ListBookingsOptions,
   ListBookingsResult,
+  MeetingClass,
   OwnerCalendar,
   PendingNotification,
   SimulateOptions,
@@ -190,6 +191,21 @@ export class OpenavailClient {
       path: `/calendar-owners/${encodeURIComponent(ownerEmail)}/calendars`,
     });
     return raw.calendars;
+  }
+
+  async listMeetingClasses(): Promise<MeetingClass[]> {
+    type Raw = {
+      meeting_classes: { name: string; priority: number; preempt_policy: 'strict' | 'soft' | 'hard' }[];
+    };
+    const raw = await this.#http.request<Raw>({
+      method: 'GET',
+      path: '/meeting-classes/available',
+    });
+    return raw.meeting_classes.map((c) => ({
+      name: c.name,
+      priority: c.priority,
+      preemptPolicy: c.preempt_policy,
+    }));
   }
 
   async listBookings(options: ListBookingsOptions): Promise<ListBookingsResult> {
