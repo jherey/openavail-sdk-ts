@@ -35,6 +35,7 @@ export type Booking = {
   meetingClass: string | null;
   calendarType: string | null;
   createdAt: string;
+  status: string;
   title?: string | undefined;
   attendees?: Attendee[] | undefined;
 };

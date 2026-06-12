@@ -201,6 +201,7 @@ export class OpenavailClient {
       meeting_class: string | null;
       calendar_type: string | null;
       created_at: string;
+      status: string;
       title?: string | null;
       attendees?: { email: string; displayName?: string }[];
     };
@@ -232,6 +233,7 @@ export class OpenavailClient {
           meetingClass: b.meeting_class,
           calendarType: b.calendar_type,
           createdAt: b.created_at,
+          status: b.status,
         };
         if (b.title !== undefined) booking.title = b.title ?? undefined;
         if (b.attendees !== undefined) booking.attendees = b.attendees;
@@ -251,6 +253,7 @@ export class OpenavailClient {
       meeting_class: string | null;
       calendar_type: string | null;
       created_at: string;
+      status: string;
       title?: string | null;
       attendees?: { email: string; displayName?: string }[];
     };
@@ -268,6 +271,7 @@ export class OpenavailClient {
       meetingClass: b.meeting_class,
       calendarType: b.calendar_type,
       createdAt: b.created_at,
+      status: b.status,
     };
     if (b.title !== undefined) booking.title = b.title ?? undefined;
     if (b.attendees !== undefined) booking.attendees = b.attendees;
