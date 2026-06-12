@@ -2,9 +2,13 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { OpenavailClient } from '@openavail/sdk';
 import { OpenavailError } from '@openavail/sdk';
 import { z } from 'zod';
-import { ok, toolError } from '../error.js';
+import { missingOwnerEmail, ok, toolError } from '../error.js';
 
-export function registerSimulate(server: McpServer, client: OpenavailClient): void {
+export function registerSimulate(
+  server: McpServer,
+  client: OpenavailClient,
+  defaultOwnerEmail?: string,
+): void {
   server.tool(
     'simulate',
     [
@@ -13,7 +17,11 @@ export function registerSimulate(server: McpServer, client: OpenavailClient): vo
       'Use this to preview whether a booking would succeed before presenting options to a user.',
     ].join('\n'),
     {
-      owner_email: z.string().email().describe('Email of the calendar owner.'),
+      owner_email: z.string().email().optional().describe(
+        defaultOwnerEmail
+          ? `Email of the calendar owner. Defaults to ${defaultOwnerEmail}.`
+          : 'Email of the calendar owner.',
+      ),
       start: z.string().describe('Hypothetical meeting start (ISO 8601 UTC).'),
       end: z.string().describe('Hypothetical meeting end (ISO 8601 UTC).'),
       meeting_class: z.string().describe('Meeting class name.'),
@@ -23,10 +31,12 @@ export function registerSimulate(server: McpServer, client: OpenavailClient): vo
         .describe('Target calendar type hint.'),
     },
     async ({ owner_email, start, end, meeting_class, calendar_type }) => {
+      const email = owner_email ?? defaultOwnerEmail;
+      if (!email) return missingOwnerEmail();
       try {
         return ok(
           await client.simulate({
-            ownerEmail: owner_email,
+            ownerEmail: email,
             start,
             end,
             meetingClass: meeting_class,

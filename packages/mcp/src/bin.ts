@@ -14,6 +14,7 @@ const client = new OpenavailClient({
   ...(baseUrl !== undefined && { baseUrl }),
 });
 
-const server = buildServer(client);
+const defaultOwnerEmail = process.env['OPENAVAIL_OWNER_EMAIL'];
+const server = buildServer(client, { defaultOwnerEmail });
 const transport = new StdioServerTransport();
 await server.connect(transport);

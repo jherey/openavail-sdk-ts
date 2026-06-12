@@ -12,20 +12,24 @@ import { registerConfirmHold } from './tools/native/confirm-hold.js';
 import { registerGetPendingNotifications } from './tools/native/get-pending-notifications.js';
 import { registerSimulate } from './tools/native/simulate.js';
 
-export function buildServer(client: OpenavailClient): McpServer {
+export function buildServer(
+  client: OpenavailClient,
+  opts: { defaultOwnerEmail?: string } = {},
+): McpServer {
   const server = new McpServer({ name: '@openavail/mcp', version: '0.1.0' });
+  const { defaultOwnerEmail } = opts;
 
-  registerListCalendars(server, client);
-  registerListEvents(server, client);
+  registerListCalendars(server, client, defaultOwnerEmail);
+  registerListEvents(server, client, defaultOwnerEmail);
   registerGetEvent(server, client);
-  registerCreateEvent(server, client);
+  registerCreateEvent(server, client, defaultOwnerEmail);
   registerUpdateEvent(server, client);
   registerDeleteEvent(server, client);
-  registerSearchEvents(server, client);
+  registerSearchEvents(server, client, defaultOwnerEmail);
 
-  registerCheckAvailability(server, client);
+  registerCheckAvailability(server, client, defaultOwnerEmail);
   registerConfirmHold(server, client);
-  registerSimulate(server, client);
+  registerSimulate(server, client, defaultOwnerEmail);
   registerGetPendingNotifications(server, client);
 
   return server;

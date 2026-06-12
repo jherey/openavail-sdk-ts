@@ -2,14 +2,22 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { OpenavailClient } from '@openavail/sdk';
 import { OpenavailError } from '@openavail/sdk';
 import { z } from 'zod';
-import { ok, toolError } from '../error.js';
+import { missingOwnerEmail, ok, toolError } from '../error.js';
 
-export function registerListEvents(server: McpServer, client: OpenavailClient): void {
+export function registerListEvents(
+  server: McpServer,
+  client: OpenavailClient,
+  defaultOwnerEmail?: string,
+): void {
   server.tool(
     'list-events',
     'List committed bookings (calendar events) for a calendar owner. Equivalent to Google Calendar list-events. timeMin/timeMax filter by meeting start time (ISO 8601 UTC). Omitting timeMin/timeMax returns bookings in the next 3 days.',
     {
-      owner_email: z.string().email().describe('Email of the calendar owner.'),
+      owner_email: z.string().email().optional().describe(
+        defaultOwnerEmail
+          ? `Email of the calendar owner. Defaults to ${defaultOwnerEmail}.`
+          : 'Email of the calendar owner.',
+      ),
       timeMin: z
         .string()
         .optional()
@@ -28,10 +36,12 @@ export function registerListEvents(server: McpServer, client: OpenavailClient): 
       cursor: z.string().optional().describe('Pagination cursor from a previous response.'),
     },
     async ({ owner_email, timeMin, timeMax, maxResults, cursor }) => {
+      const email = owner_email ?? defaultOwnerEmail;
+      if (!email) return missingOwnerEmail();
       try {
         return ok(
           await client.listBookings({
-            ownerEmail: owner_email,
+            ownerEmail: email,
             ...(timeMin !== undefined && { start: timeMin }),
             ...(timeMax !== undefined && { end: timeMax }),
             ...(maxResults !== undefined && { limit: maxResults }),
