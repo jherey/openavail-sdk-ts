@@ -158,7 +158,11 @@ export class OpenavailClient {
 
   async listCalendars(ownerEmail: string): Promise<OwnerCalendar[]> {
     type Raw = {
-      calendars: { calendar_type: 'work' | 'personal' | 'other' | null; is_primary: boolean }[];
+      calendars: {
+        calendar_type: 'work' | 'personal' | 'other' | null;
+        is_primary: boolean;
+        timezone: string | null;
+      }[];
       pending_notifications: PendingNotification[];
     };
     const raw = await this.#http.request<Raw>({
