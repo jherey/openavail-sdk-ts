@@ -13,6 +13,7 @@ export function registerSimulate(
     'simulate',
     [
       'Simulate the arbitration decision for a hypothetical booking without creating any holds or commits.',
+      'REQUIRES PRO PLAN — returns PLAN_LIMIT_SIMULATION error on free accounts. Check the account plan before calling.',
       'Returns: decision (Accept/Reject/Preempt/CounterPropose), optional reason, optional alternative slots, and an engineTrace for debugging.',
       'Use this to preview whether a booking would succeed before presenting options to a user.',
     ].join('\n'),
