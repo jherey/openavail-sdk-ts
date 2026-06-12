@@ -34,3 +34,19 @@ export function toolError(err: OpenavailError) {
 export function ok(result: unknown) {
   return { content: [{ type: 'text' as const, text: JSON.stringify(result) }] };
 }
+
+export function missingOwnerEmail() {
+  return {
+    isError: true as const,
+    content: [
+      {
+        type: 'text' as const,
+        text: JSON.stringify({
+          error: 'MISSING_OWNER_EMAIL',
+          message:
+            'owner_email is required. Pass it explicitly or set OPENAVAIL_OWNER_EMAIL when starting the server.',
+        }),
+      },
+    ],
+  };
+}

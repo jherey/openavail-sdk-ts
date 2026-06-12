@@ -2,14 +2,18 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { OpenavailClient } from '@openavail/sdk';
 import { OpenavailError } from '@openavail/sdk';
 import { z } from 'zod';
-import { ok, toolError } from '../error.js';
+import { missingOwnerEmail, ok, toolError } from '../error.js';
 
 const AttendeeSchema = z.object({
   email: z.string().email(),
   displayName: z.string().optional(),
 });
 
-export function registerCreateEvent(server: McpServer, client: OpenavailClient): void {
+export function registerCreateEvent(
+  server: McpServer,
+  client: OpenavailClient,
+  defaultOwnerEmail?: string,
+): void {
   server.tool(
     'create-event',
     [
@@ -25,7 +29,12 @@ export function registerCreateEvent(server: McpServer, client: OpenavailClient):
       owner_email: z
         .string()
         .email()
-        .describe('Email of the calendar owner who will host the event.'),
+        .optional()
+        .describe(
+          defaultOwnerEmail
+            ? `Email of the calendar owner who will host the event. Defaults to ${defaultOwnerEmail}.`
+            : 'Email of the calendar owner who will host the event.',
+        ),
       meeting_class: z
         .string()
         .describe('Meeting class name (e.g. "internal_sync"). Must be configured in Openavail.'),
@@ -42,10 +51,12 @@ export function registerCreateEvent(server: McpServer, client: OpenavailClient):
         .describe('List of attendees. Each must have an email; displayName is optional.'),
     },
     async ({ owner_email, meeting_class, start, end, summary, calendar_type, attendees }) => {
+      const email = owner_email ?? defaultOwnerEmail;
+      if (!email) return missingOwnerEmail();
       try {
         return ok(
           await client.createBooking({
-            ownerEmail: owner_email,
+            ownerEmail: email,
             meetingClass: meeting_class,
             start,
             end,
