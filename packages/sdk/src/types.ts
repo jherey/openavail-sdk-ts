@@ -110,6 +110,11 @@ export type BookingResult = {
   correlationId: string;
   displacedCount: number;
   pendingNotifications: PendingNotification[];
+  start: string;
+  end: string;
+  title: string | null;
+  calendarType: string | null;
+  status: 'committed';
 };
 
 export type CancelBookingResult = {
