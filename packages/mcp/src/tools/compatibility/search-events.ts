@@ -13,11 +13,15 @@ export function registerSearchEvents(
     'search-events',
     'Search committed bookings by title text. Equivalent to Google Calendar search-events. Uses case-insensitive substring match on the event title.',
     {
-      owner_email: z.string().email().optional().describe(
-        defaultOwnerEmail
-          ? `Email of the calendar owner. Defaults to ${defaultOwnerEmail}.`
-          : 'Email of the calendar owner.',
-      ),
+      owner_email: z
+        .string()
+        .email()
+        .optional()
+        .describe(
+          defaultOwnerEmail
+            ? `Email of the calendar owner. Defaults to ${defaultOwnerEmail}.`
+            : 'Email of the calendar owner.',
+        ),
       q: z
         .string()
         .min(1)

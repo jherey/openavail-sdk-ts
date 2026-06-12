@@ -17,11 +17,15 @@ export function registerSimulate(
       'Use this to preview whether a booking would succeed before presenting options to a user.',
     ].join('\n'),
     {
-      owner_email: z.string().email().optional().describe(
-        defaultOwnerEmail
-          ? `Email of the calendar owner. Defaults to ${defaultOwnerEmail}.`
-          : 'Email of the calendar owner.',
-      ),
+      owner_email: z
+        .string()
+        .email()
+        .optional()
+        .describe(
+          defaultOwnerEmail
+            ? `Email of the calendar owner. Defaults to ${defaultOwnerEmail}.`
+            : 'Email of the calendar owner.',
+        ),
       start: z.string().describe('Hypothetical meeting start (ISO 8601 UTC).'),
       end: z.string().describe('Hypothetical meeting end (ISO 8601 UTC).'),
       meeting_class: z.string().describe('Meeting class name.'),

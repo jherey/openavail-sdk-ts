@@ -13,11 +13,15 @@ export function registerListCalendars(
     'list-calendars',
     'List the calendars (work, personal, other) connected to a calendar owner. Use owner_email to identify the owner — there is no calendarId concept in Openavail.',
     {
-      owner_email: z.string().email().optional().describe(
-        defaultOwnerEmail
-          ? `Email address of the calendar owner. Defaults to ${defaultOwnerEmail}.`
-          : 'Email address of the calendar owner.',
-      ),
+      owner_email: z
+        .string()
+        .email()
+        .optional()
+        .describe(
+          defaultOwnerEmail
+            ? `Email address of the calendar owner. Defaults to ${defaultOwnerEmail}.`
+            : 'Email address of the calendar owner.',
+        ),
     },
     async ({ owner_email }) => {
       const email = owner_email ?? defaultOwnerEmail;

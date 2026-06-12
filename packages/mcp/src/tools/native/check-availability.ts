@@ -21,11 +21,15 @@ export function registerCheckAvailability(
         : 'owner_email is required.',
     ].join('\n'),
     {
-      owner_email: z.string().email().optional().describe(
-        defaultOwnerEmail
-          ? `Email of the calendar owner. Defaults to ${defaultOwnerEmail}.`
-          : 'Email of the calendar owner.',
-      ),
+      owner_email: z
+        .string()
+        .email()
+        .optional()
+        .describe(
+          defaultOwnerEmail
+            ? `Email of the calendar owner. Defaults to ${defaultOwnerEmail}.`
+            : 'Email of the calendar owner.',
+        ),
       duration_minutes: z.number().int().min(5).max(480).describe('Meeting duration in minutes.'),
       window_start: z.string().describe('Start of the search window (ISO 8601 UTC).'),
       window_end: z.string().describe('End of the search window (ISO 8601 UTC).'),

@@ -13,11 +13,15 @@ export function registerListEvents(
     'list-events',
     'List committed bookings (calendar events) for a calendar owner. Equivalent to Google Calendar list-events. timeMin/timeMax filter by meeting start time (ISO 8601 UTC). Omitting timeMin/timeMax returns bookings in the next 3 days.',
     {
-      owner_email: z.string().email().optional().describe(
-        defaultOwnerEmail
-          ? `Email of the calendar owner. Defaults to ${defaultOwnerEmail}.`
-          : 'Email of the calendar owner.',
-      ),
+      owner_email: z
+        .string()
+        .email()
+        .optional()
+        .describe(
+          defaultOwnerEmail
+            ? `Email of the calendar owner. Defaults to ${defaultOwnerEmail}.`
+            : 'Email of the calendar owner.',
+        ),
       timeMin: z
         .string()
         .optional()
