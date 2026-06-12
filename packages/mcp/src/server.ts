@@ -10,6 +10,7 @@ import { registerUpdateEvent } from './tools/compatibility/update-event.js';
 import { registerCheckAvailability } from './tools/native/check-availability.js';
 import { registerConfirmHold } from './tools/native/confirm-hold.js';
 import { registerGetPendingNotifications } from './tools/native/get-pending-notifications.js';
+import { registerListMeetingClasses } from './tools/native/list-meeting-classes.js';
 import { registerSimulate } from './tools/native/simulate.js';
 
 export function buildServer(
@@ -27,6 +28,7 @@ export function buildServer(
   registerDeleteEvent(server, client);
   registerSearchEvents(server, client, defaultOwnerEmail);
 
+  registerListMeetingClasses(server, client);
   registerCheckAvailability(server, client, defaultOwnerEmail);
   registerConfirmHold(server, client);
   registerSimulate(server, client, defaultOwnerEmail);

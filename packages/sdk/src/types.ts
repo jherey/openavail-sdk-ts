@@ -21,6 +21,12 @@ export type AlternativeSlot = {
 
 export type Attendee = { email: string; displayName?: string | undefined };
 
+export type MeetingClass = {
+  name: string;
+  priority: number;
+  preemptPolicy: 'strict' | 'soft' | 'hard';
+};
+
 export type OwnerCalendar = {
   calendar_type: 'work' | 'personal' | 'other' | null;
   is_primary: boolean;
