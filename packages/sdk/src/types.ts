@@ -24,6 +24,7 @@ export type Attendee = { email: string; displayName?: string | undefined };
 export type OwnerCalendar = {
   calendar_type: 'work' | 'personal' | 'other' | null;
   is_primary: boolean;
+  timezone: string | null;
 };
 
 export type Booking = {
