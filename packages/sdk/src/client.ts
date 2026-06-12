@@ -68,6 +68,11 @@ export class OpenavailClient {
       correlation_id: string;
       displaced_count?: number;
       pending_notifications: PendingNotification[];
+      start: string;
+      end: string;
+      title: string | null;
+      calendar_type: string | null;
+      status: 'committed';
     };
     const raw = await this.#http.request<Raw>({
       method: 'POST',
@@ -86,6 +91,11 @@ export class OpenavailClient {
       correlationId: raw.correlation_id,
       displacedCount: raw.displaced_count ?? 0,
       pendingNotifications: raw.pending_notifications,
+      start: raw.start,
+      end: raw.end,
+      title: raw.title,
+      calendarType: raw.calendar_type,
+      status: raw.status,
     };
   }
 
@@ -95,6 +105,11 @@ export class OpenavailClient {
       correlation_id: string;
       displaced_count?: number;
       pending_notifications: PendingNotification[];
+      start: string;
+      end: string;
+      title: string | null;
+      calendar_type: string | null;
+      status: 'committed';
     };
     const raw = await this.#http.request<Raw>({
       method: 'POST',
@@ -116,6 +131,11 @@ export class OpenavailClient {
       correlationId: raw.correlation_id,
       displacedCount: raw.displaced_count ?? 0,
       pendingNotifications: raw.pending_notifications,
+      start: raw.start,
+      end: raw.end,
+      title: raw.title,
+      calendarType: raw.calendar_type,
+      status: raw.status,
     };
   }
 
@@ -281,6 +301,11 @@ export class OpenavailClient {
       booking_id: string;
       correlation_id: string;
       pending_notifications: PendingNotification[];
+      start: string;
+      end: string;
+      title: string | null;
+      calendar_type: string | null;
+      status: 'committed';
     };
     const raw = await this.#http.request<Raw>({
       method: 'PATCH',
@@ -292,6 +317,11 @@ export class OpenavailClient {
       correlationId: raw.correlation_id,
       displacedCount: 0,
       pendingNotifications: raw.pending_notifications,
+      start: raw.start,
+      end: raw.end,
+      title: raw.title,
+      calendarType: raw.calendar_type,
+      status: raw.status,
     };
   }
 }
