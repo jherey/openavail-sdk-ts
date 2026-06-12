@@ -195,7 +195,11 @@ export class OpenavailClient {
 
   async listMeetingClasses(): Promise<MeetingClass[]> {
     type Raw = {
-      meeting_classes: { name: string; priority: number; preempt_policy: 'strict' | 'soft' | 'hard' }[];
+      meeting_classes: {
+        name: string;
+        priority: number;
+        preempt_policy: 'strict' | 'soft' | 'hard';
+      }[];
     };
     const raw = await this.#http.request<Raw>({
       method: 'GET',
