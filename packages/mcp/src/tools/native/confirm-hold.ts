@@ -14,7 +14,7 @@ export function registerConfirmHold(server: McpServer, client: OpenavailClient):
     'confirm-hold',
     [
       'Confirm a hold created by check-availability, promoting it to a committed booking.',
-      'The chosen start/end slot must fall within the hold window. The hold expires after a short TTL — call this promptly after check-availability.',
+      'The chosen start/end slot must fall within the hold window. The hold expires after a short TTL (currently 5 minutes) — call this promptly after check-availability. Configurable TTL is coming soon.',
       'Returns: bookingId, correlationId, displacedCount (bookings preempted by higher priority), pendingNotifications.',
       'If arbitration rejects the slot, ArbitrationRejectedError is returned with alternative slots when available.',
     ].join('\n'),

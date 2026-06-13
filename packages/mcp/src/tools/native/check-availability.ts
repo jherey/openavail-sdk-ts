@@ -12,7 +12,8 @@ export function registerCheckAvailability(
   server.tool(
     'check-availability',
     [
-      'Find available time slots for a calendar owner and create a hold. The hold reserves the slot for a short TTL (default 5 minutes) while you confirm the booking.',
+      'Find available time slots for a calendar owner and create a hold. The hold reserves the slot for a short TTL (currently 5 minutes) while you confirm the booking.',
+      'Coming soon: user-configurable hold TTL — the 5-minute default suits fully autonomous agents; longer TTLs for human-in-the-loop slot selection are on the roadmap.',
       'Returns: holdId, expiresAt, available slots (start/end pairs), and pendingNotifications.',
       'After calling this tool, call confirm-hold with the holdId and a chosen slot to commit the booking.',
       'If no slots are available, throws NoSlotsError. The error carries reason_code (DAILY_HOURS_LIMIT or NO_FREE_SLOTS) and an optional nextAvailable: {start, end} hint pointing at the nearest free slot — use it to suggest an alternative window without a new search.',

@@ -22,7 +22,7 @@ export function registerCreateEvent(
       '  summary → title (required)',
       '  owner_email replaces calendarId — Openavail identifies owners by email, not calendar ID',
       '  meeting_class is required (e.g. "internal_sync", "customer_call") — no Google Calendar equivalent',
-      '  start/end must be ISO 8601 UTC; Openavail stores all times in UTC, convert before calling',
+      '  start/end must be ISO 8601 UTC; Openavail stores all times in UTC — call list-calendars first to get the owner\'s timezone (returned as the timezone field), then convert before calling',
       'NOT supported in v1: description (include in title if needed), location, timeZone, recurrence, calendarId',
     ].join('\n'),
     {
