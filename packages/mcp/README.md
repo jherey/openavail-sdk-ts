@@ -88,7 +88,7 @@ Then set env vars in `~/.claude.json` under the `openavail` entry as shown above
 
 ## Notes
 
-**Calendar types**: Openavail supports `work`, `personal`, and `other` calendar types per owner. If a user has only connected a personal calendar and you pass `calendar_type: "work"`, the request silently falls back to the primary calendar. Always call `list-calendars` first — it returns both connected calendars and an `unavailable_calendar_types` array so you know which types to avoid.
+**Calendar types**: Openavail supports `work`, `personal`, and `other` calendar types per owner. If a user has only connected a personal calendar and you pass `calendar_type: "work"`, the request silently falls back to the primary calendar. Always call `list-calendars` first — it returns both connected calendars and an `unavailable_calendar_types` array so you know which types to avoid. If the primary calendar is also missing or disabled, the fallback fails with `CALENDAR_NOT_FOUND` — there is no further fallback to other connected calendars.
 
 **Hold TTL**: `check-availability` creates a 5-minute hold. For human-in-the-loop flows where a user picks a slot, confirm promptly or the hold will expire. Configurable TTL is on the roadmap.
 
