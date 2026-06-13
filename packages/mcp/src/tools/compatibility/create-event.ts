@@ -22,7 +22,7 @@ export function registerCreateEvent(
       '  summary → title (required)',
       '  owner_email replaces calendarId — Openavail identifies owners by email, not calendar ID',
       '  meeting_class is required (e.g. "internal_sync", "customer_call") — no Google Calendar equivalent',
-      '  start/end must be ISO 8601 UTC; Openavail stores all times in UTC — call list-calendars first to get the owner\'s timezone (returned as the timezone field), then convert before calling',
+      "  start/end must be ISO 8601 UTC; Openavail stores all times in UTC — call list-calendars first to get the owner's timezone (returned as the timezone field), then convert before calling",
       'NOT supported in v1: location, timeZone, recurrence, calendarId',
     ].join('\n'),
     {
@@ -54,7 +54,16 @@ export function registerCreateEvent(
         .optional()
         .describe('List of attendees. Each must have an email; displayName is optional.'),
     },
-    async ({ owner_email, meeting_class, start, end, summary, description, calendar_type, attendees }) => {
+    async ({
+      owner_email,
+      meeting_class,
+      start,
+      end,
+      summary,
+      description,
+      calendar_type,
+      attendees,
+    }) => {
       const email = owner_email ?? defaultOwnerEmail;
       if (!email) return missingOwnerEmail();
       try {
