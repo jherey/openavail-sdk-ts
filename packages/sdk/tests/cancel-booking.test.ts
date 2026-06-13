@@ -61,6 +61,25 @@ describe('cancelBooking', () => {
     expect(headers['idempotency-key']).toBe('cancel-key-1');
   });
 
+  it('does not send Content-Type header on DELETE requests', async () => {
+    const spy = vi.fn().mockResolvedValue({ ok: true, json: async () => OK_RESPONSE });
+    vi.stubGlobal('fetch', spy);
+
+    await client.cancelBooking(BOOKING_ID);
+
+    const headers = spy.mock.calls[0]?.[1]?.headers as Record<string, string>;
+    expect(headers['content-type']).toBeUndefined();
+  });
+
+  it('returns bookingId, correlationId, and pendingNotifications on success', async () => {
+    mockFetch(200, OK_RESPONSE);
+
+    const result = await client.cancelBooking(BOOKING_ID);
+    expect(result.bookingId).toBe(BOOKING_ID);
+    expect(result.correlationId).toBeDefined();
+    expect(Array.isArray(result.pendingNotifications)).toBe(true);
+  });
+
   it('throws BookingNotFoundError on BOOKING_NOT_FOUND', async () => {
     mockFetch(404, {
       error: { code: 'BOOKING_NOT_FOUND', message: 'Not found' },

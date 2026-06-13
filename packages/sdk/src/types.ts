@@ -42,6 +42,7 @@ export type Booking = {
   calendarType: string | null;
   createdAt: string;
   title?: string | undefined;
+  description?: string | null | undefined;
   attendees?: Attendee[] | undefined;
 };
 
@@ -93,12 +94,14 @@ export type ListBookingsOptions = {
   end?: string;
   calendarType?: 'work' | 'personal' | 'other';
   query?: string;
+  attendeeEmail?: string;
   limit?: number;
   cursor?: string;
 };
 
 export type UpdateBookingOptions = {
   title?: string;
+  description?: string;
   attendees?: Attendee[];
 };
 
@@ -144,4 +147,21 @@ export type SimulateResult = {
   alternatives?: AlternativeSlot[] | undefined;
   engineTrace: unknown;
   pendingNotifications: PendingNotification[];
+};
+
+export type WorkingHoursRule = {
+  days: number[];
+  startTime: string;
+  endTime: string;
+  timezone: string;
+};
+
+export type ScheduleRules = {
+  workingHours: WorkingHoursRule[];
+  slotIntervalMinutes: number;
+  maxDailyMeetingHours: number | null;
+};
+
+export type GetScheduleRulesOptions = {
+  ownerEmail: string;
 };

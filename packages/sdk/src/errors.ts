@@ -67,17 +67,20 @@ export class LookaheadExceedsMaximumError extends OpenavailError {
 export class ArbitrationRejectedError extends OpenavailError {
   readonly reason: string;
   readonly alternatives: AlternativeSlot[];
+  readonly nextAvailable: Slot | undefined;
 
   constructor(
     message: string,
     pendingNotifications: PendingNotification[],
     reason: string,
     alternatives: AlternativeSlot[],
+    nextAvailable?: Slot,
   ) {
     super(message, 'ARBITRATION_REJECTED', 409, pendingNotifications);
     this.name = 'ArbitrationRejectedError';
     this.reason = reason;
     this.alternatives = alternatives;
+    this.nextAvailable = nextAvailable;
   }
 }
 

@@ -18,12 +18,10 @@ export function registerCreateEvent(
     'create-event',
     [
       'Create a booking (calendar event) for a calendar owner. Equivalent to Google Calendar create-event.',
-      'Parameter mapping from Google Calendar:',
-      '  summary → title (required)',
-      '  owner_email replaces calendarId — Openavail identifies owners by email, not calendar ID',
-      '  meeting_class is required (e.g. "internal_sync", "customer_call") — no Google Calendar equivalent',
-      "  start/end must be ISO 8601 UTC; Openavail stores all times in UTC — call list-calendars first to get the owner's timezone (returned as the timezone field), then convert before calling",
-      'NOT supported in v1: location, timeZone, recurrence, calendarId',
+      'owner_email replaces calendarId — Openavail identifies owners by email, not calendar ID.',
+      'meeting_class is required (e.g. "internal_sync", "customer_call") — no Google Calendar equivalent.',
+      "start/end must be ISO 8601 UTC; Openavail stores all times in UTC — call list-calendars first to get the owner's timezone (returned as the timezone field), then convert before calling.",
+      'NOT supported in v1: location, timeZone, recurrence, calendarId.',
       'calendar_type hint: if the requested type has no connected calendar, the booking silently lands on the primary calendar — check list-calendars first to confirm the type exists.',
     ].join('\n'),
     {
@@ -41,7 +39,7 @@ export function registerCreateEvent(
         .describe('Meeting class name (e.g. "internal_sync"). Must be configured in Openavail.'),
       start: z.string().describe('Event start time — ISO 8601 UTC (e.g. 2026-07-01T09:00:00Z).'),
       end: z.string().describe('Event end time — ISO 8601 UTC.'),
-      summary: z.string().min(1).describe('Event title (mapped from Google Calendar summary).'),
+      title: z.string().min(1).describe('Event title.'),
       description: z
         .string()
         .optional()
@@ -60,7 +58,7 @@ export function registerCreateEvent(
       meeting_class,
       start,
       end,
-      summary,
+      title,
       description,
       calendar_type,
       attendees,
@@ -74,7 +72,7 @@ export function registerCreateEvent(
             meetingClass: meeting_class,
             start,
             end,
-            title: summary,
+            title,
             ...(description !== undefined && { description }),
             ...(calendar_type !== undefined && { calendarType: calendar_type }),
             ...(attendees !== undefined && { attendees }),

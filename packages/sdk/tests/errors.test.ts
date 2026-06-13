@@ -86,6 +86,28 @@ describe('pending_notifications surfaced on thrown errors', () => {
     expect((err as ArbitrationRejectedError).alternatives).toEqual(alternatives);
   });
 
+  it('ArbitrationRejectedError.nextAvailable is populated when API returns next_available', async () => {
+    const nextAvailable = { start: '2026-07-03T09:00:00Z', end: '2026-07-03T10:00:00Z' };
+    mockFetch(409, {
+      error: { code: 'ARBITRATION_REJECTED', message: 'Rejected', reason: 'NO_CAPACITY' },
+      pending_notifications: [],
+      alternatives: [],
+      next_available: nextAvailable,
+    });
+
+    const err = await client
+      .confirmHold({
+        holdId: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
+        start: '2026-07-01T09:00:00Z',
+        end: '2026-07-01T10:00:00Z',
+        title: 'Test',
+      })
+      .catch((e: unknown) => e);
+
+    expect(err).toBeInstanceOf(ArbitrationRejectedError);
+    expect((err as ArbitrationRejectedError).nextAvailable).toEqual(nextAvailable);
+  });
+
   it('CalendarNotFoundError carries pendingNotifications', async () => {
     mockFetch(404, {
       error: { code: 'CALENDAR_NOT_FOUND', message: 'Not found' },

@@ -15,7 +15,7 @@ export function registerGetPendingNotifications(server: McpServer, client: Opena
     {},
     async () => {
       try {
-        return ok(await client.getPendingNotifications());
+        return ok({ notifications: await client.getPendingNotifications() });
       } catch (err) {
         if (err instanceof OpenavailError) return toolError(err);
         throw err;

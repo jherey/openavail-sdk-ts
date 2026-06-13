@@ -49,7 +49,13 @@ function throwFromErrorBody(body: ApiErrorBody, httpStatus: number): never {
     case 'LOOKAHEAD_EXCEEDS_MAXIMUM':
       throw new LookaheadExceedsMaximumError(message, pn);
     case 'ARBITRATION_REJECTED':
-      throw new ArbitrationRejectedError(message, pn, reason ?? 'UNKNOWN', body.alternatives ?? []);
+      throw new ArbitrationRejectedError(
+        message,
+        pn,
+        reason ?? 'UNKNOWN',
+        body.alternatives ?? [],
+        body.next_available,
+      );
     case 'HOLD_EXPIRED':
       throw new HoldExpiredError(message, pn);
     case 'HOLD_NOT_FOUND':
@@ -110,8 +116,11 @@ export class HttpClient {
 
     const headers: Record<string, string> = {
       authorization: `Bearer ${this.#apiKey}`,
-      'content-type': 'application/json',
     };
+
+    if (body !== undefined) {
+      headers['content-type'] = 'application/json';
+    }
 
     if (requiresIdempotency) {
       headers['idempotency-key'] = idempotencyKey ?? globalThis.crypto.randomUUID();

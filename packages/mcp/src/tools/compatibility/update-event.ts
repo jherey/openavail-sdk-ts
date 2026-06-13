@@ -13,25 +13,26 @@ export function registerUpdateEvent(server: McpServer, client: OpenavailClient):
   server.tool(
     'update-event',
     [
-      'Update booking metadata (title and/or attendees). Equivalent to Google Calendar update-event.',
+      'Update booking metadata (title, description, and/or attendees). Equivalent to Google Calendar update-event.',
       'IMPORTANT: Only metadata updates are supported. To change the meeting time, cancel and rebook instead.',
-      'At least one of summary or attendees must be provided.',
-      'summary maps to title. description, location, timeZone, and recurrence are not supported in v1.',
+      'At least one of title, description, or attendees must be provided.',
+      'NOT supported in v1: location, timeZone, recurrence.',
     ].join('\n'),
     {
       eventId: z.string().uuid().describe('The booking ID to update.'),
-      summary: z
+      title: z.string().min(1).optional().describe('New event title.'),
+      description: z
         .string()
-        .min(1)
         .optional()
-        .describe('New event title (mapped from Google Calendar summary).'),
+        .describe('Event body/notes — agenda, dial-in link, prep instructions, etc.'),
       attendees: z.array(AttendeeSchema).optional().describe('Replacement attendee list.'),
     },
-    async ({ eventId, summary, attendees }) => {
+    async ({ eventId, title, description, attendees }) => {
       try {
         return ok(
           await client.updateBooking(eventId, {
-            ...(summary !== undefined && { title: summary }),
+            ...(title !== undefined && { title }),
+            ...(description !== undefined && { description }),
             ...(attendees !== undefined && { attendees }),
           }),
         );

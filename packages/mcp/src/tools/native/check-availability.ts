@@ -35,7 +35,11 @@ export function registerCheckAvailability(
         ),
       duration_minutes: z.number().int().min(5).max(480).describe('Meeting duration in minutes.'),
       window_start: z.string().describe('Start of the search window (ISO 8601 UTC).'),
-      window_end: z.string().describe('End of the search window (ISO 8601 UTC).'),
+      window_end: z
+        .string()
+        .describe(
+          'End of the search window (ISO 8601 UTC). This is the latest a meeting may END (not start) — e.g. window_end 13:30 + 60-min meeting → last possible slot starts at 12:30.',
+        ),
       meeting_class: z.string().describe('Meeting class name (e.g. "internal_sync").'),
       calendar_type: z
         .enum(['work', 'personal', 'other'])
