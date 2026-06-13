@@ -10,7 +10,6 @@ import {
   IdempotencyInFlightError,
   LookaheadExceedsMaximumError,
   NoSlotsError,
-  OpenavailError,
   OpenavailUnexpectedError,
   OwnerScopeDeniedError,
   PermissionDeniedError,

@@ -12,12 +12,13 @@ export function registerCheckAvailability(
   server.tool(
     'check-availability',
     [
-      'Find available time slots for a calendar owner and create a hold. The hold reserves the slot for a short TTL (currently 5 minutes) while you confirm the booking.',
+      'Find available time slots for a calendar owner and create a hold so you can confirm the booking.',
       'Coming soon: user-configurable hold TTL — the 5-minute default suits fully autonomous agents; longer TTLs for human-in-the-loop slot selection are on the roadmap.',
-      'Returns: holdId, expiresAt, available slots (start/end pairs), and pendingNotifications.',
+      'Returns: holdId, expiresAt, slots (start/end pairs), and pendingNotifications.',
       "Slots are a sliding window stepped by the owner's slot interval (default 15 min) — e.g. 10:00–11:00, 10:15–11:15, 10:30–11:30. They overlap intentionally; pick one slot and pass it to confirm-hold, do not treat the list as discrete non-overlapping blocks.",
+      'Preemptable slots: some slots may include a preemptable: { occupying_class, occupying_priority } field. This means the slot is currently occupied by a lower-priority booking that your meeting class will automatically displace when you confirm. Pass preemptable slots to confirm-hold exactly like free slots — preemption is handled automatically. This flow fully supports preemption; you do not need create-event for high-priority bookings.',
       'After calling this tool, call confirm-hold with the holdId and a chosen slot to commit the booking.',
-      'If no slots are available, throws NoSlotsError. The error carries reason_code (DAILY_HOURS_LIMIT or NO_FREE_SLOTS) and an optional nextAvailable: {start, end} hint pointing at the nearest free slot — use it to suggest an alternative window without a new search.',
+      'If no slots are available (free or preemptable), throws NoSlotsError. The error carries reason_code (DAILY_HOURS_LIMIT or NO_FREE_SLOTS) and an optional nextAvailable: {start, end} hint pointing at the nearest free slot — use it to suggest an alternative window without a new search.',
       'calendar_type hint: if the requested type (e.g. "work") has no connected calendar, the request silently falls back to the primary calendar — resolvedCalendarType in the response tells you which type was actually used. Call list-calendars first to see which types are available.',
       defaultOwnerEmail
         ? `Default owner: ${defaultOwnerEmail} (set via OPENAVAIL_OWNER_EMAIL — override by passing owner_email explicitly).`

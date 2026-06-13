@@ -47,6 +47,12 @@ const BOOKING_RESULT: BookingResult = {
   correlationId: 'b1ffcd88-8d0c-5fg9-cc7e-7ccace491b22',
   displacedCount: 0,
   pendingNotifications: NO_NOTIFICATIONS,
+  start: '2026-07-01T09:00:00.000Z',
+  end: '2026-07-01T10:00:00.000Z',
+  title: 'Test meeting',
+  description: null,
+  calendarType: 'work',
+  status: 'committed',
 };
 
 const BOOKING: Booking = {
@@ -71,7 +77,9 @@ const LIST_RESULT: ListBookingsResult = {
   pendingNotifications: NO_NOTIFICATIONS,
 };
 
-const CALENDARS: OwnerCalendar[] = [{ calendar_type: 'work', is_primary: true }];
+const CALENDARS: OwnerCalendar[] = [
+  { calendar_type: 'work', is_primary: true, timezone: 'Europe/Berlin' },
+];
 
 const AVAILABILITY_RESULT: CheckAvailabilityResult = {
   holdId: 'c2ffde77-7e1d-4eh8-dd8f-8ddbdf582c33',
@@ -369,8 +377,8 @@ describe('MCP server tools', () => {
 
 describe('bin.ts', () => {
   it('exits with code 1 when OPENAVAIL_API_KEY is not set', async () => {
-    const savedKey = process.env['OPENAVAIL_API_KEY'];
-    delete process.env['OPENAVAIL_API_KEY'];
+    const savedKey = process.env.OPENAVAIL_API_KEY;
+    delete process.env.OPENAVAIL_API_KEY;
 
     const exitSpy = vi.spyOn(process, 'exit').mockImplementation((code) => {
       throw new Error(`process.exit(${code ?? 'undefined'})`);
@@ -380,6 +388,6 @@ describe('bin.ts', () => {
     await expect(import('../src/bin.js')).rejects.toThrow('process.exit(1)');
 
     exitSpy.mockRestore();
-    if (savedKey !== undefined) process.env['OPENAVAIL_API_KEY'] = savedKey;
+    if (savedKey !== undefined) process.env.OPENAVAIL_API_KEY = savedKey;
   });
 });

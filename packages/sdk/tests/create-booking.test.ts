@@ -44,9 +44,9 @@ describe('createBooking', () => {
     await client.createBooking(BASE_OPTS);
 
     const body = JSON.parse(spy.mock.calls[0]?.[1]?.body as string) as Record<string, unknown>;
-    expect(body['owner_email']).toBe('alex@acme.com');
-    expect(body['meeting_class']).toBe('internal_sync');
-    expect(body['title']).toBe('Deep work');
+    expect(body.owner_email).toBe('alex@acme.com');
+    expect(body.meeting_class).toBe('internal_sync');
+    expect(body.title).toBe('Deep work');
   });
 
   it('round-trips description in request and response', async () => {
@@ -62,7 +62,7 @@ describe('createBooking', () => {
     });
 
     const body = JSON.parse(spy.mock.calls[0]?.[1]?.body as string) as Record<string, unknown>;
-    expect(body['description']).toBe('Agenda: discuss roadmap');
+    expect(body.description).toBe('Agenda: discuss roadmap');
     expect(result.description).toBe('Agenda: discuss roadmap');
   });
 

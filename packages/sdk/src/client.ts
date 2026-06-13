@@ -34,7 +34,11 @@ export class OpenavailClient {
     type Raw = {
       hold_id: string;
       expires_at: string;
-      slots: { start: string; end: string }[];
+      slots: {
+        start: string;
+        end: string;
+        preemptable?: { occupying_class: string; occupying_priority: number };
+      }[];
       pending_notifications: PendingNotification[];
       resolved_calendar_type: string | null;
       warnings: { code: 'CALENDAR_BUSY_STALE'; calendar_type: string | null; message: string }[];
