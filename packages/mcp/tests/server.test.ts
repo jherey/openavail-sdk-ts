@@ -10,6 +10,7 @@ import {
   type ListBookingsResult,
   type OwnerCalendar,
   type PendingNotification,
+  type ScheduleRules,
 } from '@openavail/sdk';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { buildServer } from '../src/server.js';
@@ -26,9 +27,18 @@ function mockClient(overrides: Partial<OpenavailClient> = {}): OpenavailClient {
     getBooking: vi.fn(),
     cancelBooking: vi.fn(),
     updateBooking: vi.fn(),
+    getScheduleRules: vi.fn(),
     ...overrides,
   } as unknown as OpenavailClient;
 }
+
+const SCHEDULE_RULES: ScheduleRules = {
+  workingHours: [
+    { days: [1, 2, 3, 4, 5], startTime: '09:00', endTime: '17:00', timezone: 'Europe/Berlin' },
+  ],
+  slotIntervalMinutes: 15,
+  maxDailyMeetingHours: null,
+};
 
 const NO_NOTIFICATIONS: PendingNotification[] = [];
 
@@ -95,6 +105,7 @@ describe('MCP server tools', () => {
       updateBooking: vi.fn().mockResolvedValue(BOOKING_RESULT),
       checkAvailability: vi.fn().mockResolvedValue(AVAILABILITY_RESULT),
       getPendingNotifications: vi.fn().mockResolvedValue(NO_NOTIFICATIONS),
+      getScheduleRules: vi.fn().mockResolvedValue(SCHEDULE_RULES),
     });
     ({ mcpClient } = await setupServer(client));
   });
@@ -106,7 +117,7 @@ describe('MCP server tools', () => {
   // ── create-event ─────────────────────────────────────────────────────────────
 
   describe('create-event', () => {
-    it('maps summary → title and calls client.createBooking', async () => {
+    it('accepts title param and calls client.createBooking', async () => {
       const res = await mcpClient.callTool({
         name: 'create-event',
         arguments: {
@@ -114,7 +125,7 @@ describe('MCP server tools', () => {
           meeting_class: 'internal_sync',
           start: '2026-07-01T09:00:00Z',
           end: '2026-07-01T10:00:00Z',
-          summary: 'Sprint planning',
+          title: 'Sprint planning',
         },
       });
 
@@ -200,7 +211,7 @@ describe('MCP server tools', () => {
           meeting_class: 'internal_sync',
           start: '2026-07-01T09:00:00Z',
           end: '2026-07-01T10:00:00Z',
-          summary: 'Sprint planning',
+          title: 'Sprint planning',
         },
       });
 
@@ -264,6 +275,92 @@ describe('MCP server tools', () => {
       const res = await mcpClient.callTool({ name: 'get-pending-notifications', arguments: {} });
       expect(vi.mocked(client.getPendingNotifications)).toHaveBeenCalled();
       expect(res.isError).toBeFalsy();
+    });
+
+    it('returns { notifications: [...] } not a bare array', async () => {
+      const notifications: PendingNotification[] = [
+        { id: 'n1', kind: 'booking.cancelled', payload: {}, createdAt: '2026-06-01T00:00:00Z' },
+      ];
+      vi.mocked(client.getPendingNotifications).mockResolvedValue(notifications);
+
+      const res = await mcpClient.callTool({ name: 'get-pending-notifications', arguments: {} });
+      expect(res.isError).toBeFalsy();
+      const content = res.content as { type: string; text: string }[];
+      const body = JSON.parse(content[0]?.text ?? '{}') as { notifications: PendingNotification[] };
+      expect(Array.isArray(body.notifications)).toBe(true);
+      expect(body.notifications[0]?.id).toBe('n1');
+    });
+  });
+
+  // ── update-event ─────────────────────────────────────────────────────────────
+
+  describe('update-event', () => {
+    it('accepts title param and passes it through', async () => {
+      await mcpClient.callTool({
+        name: 'update-event',
+        arguments: {
+          eventId: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
+          title: 'Updated title',
+        },
+      });
+
+      expect(vi.mocked(client.updateBooking)).toHaveBeenCalledWith(
+        'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
+        expect.objectContaining({ title: 'Updated title' }),
+      );
+    });
+
+    it('accepts description param and passes it through', async () => {
+      await mcpClient.callTool({
+        name: 'update-event',
+        arguments: {
+          eventId: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
+          description: 'Updated agenda',
+        },
+      });
+
+      expect(vi.mocked(client.updateBooking)).toHaveBeenCalledWith(
+        'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
+        expect.objectContaining({ description: 'Updated agenda' }),
+      );
+    });
+  });
+
+  // ── get-schedule-rules ────────────────────────────────────────────────────────
+
+  describe('get-schedule-rules', () => {
+    it('is registered and returns structured schedule rules', async () => {
+      const res = await mcpClient.callTool({
+        name: 'get-schedule-rules',
+        arguments: { owner_email: 'owner@example.com' },
+      });
+
+      expect(vi.mocked(client.getScheduleRules)).toHaveBeenCalledWith(
+        expect.objectContaining({ ownerEmail: 'owner@example.com' }),
+      );
+      expect(res.isError).toBeFalsy();
+      const content = res.content as { type: string; text: string }[];
+      const body = JSON.parse(content[0]?.text ?? '{}') as ScheduleRules;
+      expect(Array.isArray(body.workingHours)).toBe(true);
+      expect(typeof body.slotIntervalMinutes).toBe('number');
+    });
+  });
+
+  // ── list-events attendee_email ────────────────────────────────────────────────
+
+  describe('list-events attendee_email filter', () => {
+    it('passes attendeeEmail to client.listBookings when attendee_email is provided', async () => {
+      await mcpClient.callTool({
+        name: 'list-events',
+        arguments: {
+          owner_email: 'owner@example.com',
+          attendee_email: 'attendee@example.com',
+        },
+      });
+
+      expect(vi.mocked(client.listBookings)).toHaveBeenCalledWith(
+        expect.objectContaining({ attendeeEmail: 'attendee@example.com' }),
+      );
     });
   });
 });

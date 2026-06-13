@@ -7,11 +7,13 @@ import type {
   CheckAvailabilityResult,
   ConfirmHoldOptions,
   CreateBookingOptions,
+  GetScheduleRulesOptions,
   ListBookingsOptions,
   ListBookingsResult,
   MeetingClass,
   OwnerCalendar,
   PendingNotification,
+  ScheduleRules,
   SimulateOptions,
   SimulateResult,
   UpdateBookingOptions,
@@ -228,6 +230,7 @@ export class OpenavailClient {
       calendar_type: string | null;
       created_at: string;
       title?: string | null;
+      description?: string | null;
       attendees?: { email: string; displayName?: string }[];
     };
     type Raw = {
@@ -244,6 +247,7 @@ export class OpenavailClient {
         ...(options.end !== undefined && { end: options.end }),
         ...(options.calendarType !== undefined && { calendar_type: options.calendarType }),
         ...(options.query !== undefined && { query: options.query }),
+        ...(options.attendeeEmail !== undefined && { attendee_email: options.attendeeEmail }),
         ...(options.limit !== undefined && { limit: options.limit }),
         ...(options.cursor !== undefined && { cursor: options.cursor }),
       },
@@ -260,6 +264,7 @@ export class OpenavailClient {
           createdAt: b.created_at,
         };
         if (b.title !== undefined) booking.title = b.title ?? undefined;
+        if (b.description !== undefined) booking.description = b.description ?? null;
         if (b.attendees !== undefined) booking.attendees = b.attendees;
         return booking;
       }),
@@ -278,6 +283,7 @@ export class OpenavailClient {
       calendar_type: string | null;
       created_at: string;
       title?: string | null;
+      description?: string | null;
       attendees?: { email: string; displayName?: string }[];
     };
     type Raw = { booking: RawBooking; pending_notifications: PendingNotification[] };
@@ -296,6 +302,7 @@ export class OpenavailClient {
       createdAt: b.created_at,
     };
     if (b.title !== undefined) booking.title = b.title ?? undefined;
+    if (b.description !== undefined) booking.description = b.description ?? null;
     if (b.attendees !== undefined) booking.attendees = b.attendees;
     return booking;
   }
@@ -350,6 +357,30 @@ export class OpenavailClient {
       description: raw.description ?? null,
       calendarType: raw.calendar_type,
       status: raw.status,
+    };
+  }
+
+  async getScheduleRules(options: GetScheduleRulesOptions): Promise<ScheduleRules> {
+    type Raw = {
+      working_hours: { days: number[]; start_time: string; end_time: string; timezone: string }[];
+      slot_interval_minutes: number;
+      max_daily_meeting_hours: number | null;
+      pending_notifications: PendingNotification[];
+    };
+    const raw = await this.#http.request<Raw>({
+      method: 'GET',
+      path: '/schedule-rules',
+      query: { owner_email: options.ownerEmail },
+    });
+    return {
+      workingHours: raw.working_hours.map((wh) => ({
+        days: wh.days,
+        startTime: wh.start_time,
+        endTime: wh.end_time,
+        timezone: wh.timezone,
+      })),
+      slotIntervalMinutes: raw.slot_interval_minutes,
+      maxDailyMeetingHours: raw.max_daily_meeting_hours,
     };
   }
 }

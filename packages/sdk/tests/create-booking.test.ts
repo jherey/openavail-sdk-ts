@@ -49,6 +49,23 @@ describe('createBooking', () => {
     expect(body['title']).toBe('Deep work');
   });
 
+  it('round-trips description in request and response', async () => {
+    const spy = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ ...OK_RESPONSE, description: 'Agenda: discuss roadmap' }),
+    });
+    vi.stubGlobal('fetch', spy);
+
+    const result = await client.createBooking({
+      ...BASE_OPTS,
+      description: 'Agenda: discuss roadmap',
+    });
+
+    const body = JSON.parse(spy.mock.calls[0]?.[1]?.body as string) as Record<string, unknown>;
+    expect(body['description']).toBe('Agenda: discuss roadmap');
+    expect(result.description).toBe('Agenda: discuss roadmap');
+  });
+
   it('throws ArbitrationRejectedError on 409 with alternatives', async () => {
     const alternatives = [
       { start: '2026-07-02T09:00:00Z', end: '2026-07-02T10:00:00Z', reason_code: 'NEXT' },

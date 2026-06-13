@@ -38,8 +38,15 @@ export function registerListEvents(
         .optional()
         .describe('Maximum number of events to return (1–100). Default 50.'),
       cursor: z.string().optional().describe('Pagination cursor from a previous response.'),
+      attendee_email: z
+        .string()
+        .email()
+        .optional()
+        .describe(
+          'Filter by attendee email — returns only bookings where this person is an attendee.',
+        ),
     },
-    async ({ owner_email, timeMin, timeMax, maxResults, cursor }) => {
+    async ({ owner_email, timeMin, timeMax, maxResults, cursor, attendee_email }) => {
       const email = owner_email ?? defaultOwnerEmail;
       if (!email) return missingOwnerEmail();
       try {
@@ -50,6 +57,7 @@ export function registerListEvents(
             ...(timeMax !== undefined && { end: timeMax }),
             ...(maxResults !== undefined && { limit: maxResults }),
             ...(cursor !== undefined && { cursor }),
+            ...(attendee_email !== undefined && { attendeeEmail: attendee_email }),
           }),
         );
       } catch (err) {

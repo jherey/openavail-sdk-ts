@@ -10,6 +10,7 @@ import { registerUpdateEvent } from './tools/compatibility/update-event.js';
 import { registerCheckAvailability } from './tools/native/check-availability.js';
 import { registerConfirmHold } from './tools/native/confirm-hold.js';
 import { registerGetPendingNotifications } from './tools/native/get-pending-notifications.js';
+import { registerGetScheduleRules } from './tools/native/get-schedule-rules.js';
 import { registerListMeetingClasses } from './tools/native/list-meeting-classes.js';
 import { registerSimulate } from './tools/native/simulate.js';
 
@@ -33,6 +34,7 @@ export function buildServer(
   registerConfirmHold(server, client);
   registerSimulate(server, client, defaultOwnerEmail);
   registerGetPendingNotifications(server, client);
+  registerGetScheduleRules(server, client, defaultOwnerEmail);
 
   return server;
 }
