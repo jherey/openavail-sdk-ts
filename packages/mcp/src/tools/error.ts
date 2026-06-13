@@ -15,14 +15,14 @@ export function toolError(err: OpenavailError) {
   };
 
   if (err instanceof ArbitrationRejectedError) {
-    body['reason'] = err.reason;
-    body['alternatives'] = err.alternatives;
+    body.reason = err.reason;
+    body.alternatives = err.alternatives;
   }
 
   if (err instanceof NoSlotsError) {
-    body['resolvedCalendarType'] = err.resolvedCalendarType;
-    body['warnings'] = err.warnings;
-    if (err.nextAvailable !== undefined) body['nextAvailable'] = err.nextAvailable;
+    body.resolvedCalendarType = err.resolvedCalendarType;
+    body.warnings = err.warnings;
+    if (err.nextAvailable !== undefined) body.nextAvailable = err.nextAvailable;
   }
 
   return {

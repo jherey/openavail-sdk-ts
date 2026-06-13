@@ -13,7 +13,7 @@ describe('OpenavailClient constructor', () => {
   it('strips trailing slash from baseUrl', async () => {
     // The internal baseUrl should not have a trailing slash.
     // Verify by observing the URL in a fetch call.
-    const fetchMock = globalThis.fetch as ReturnType<typeof vi.fn>;
+    const _fetchMock = globalThis.fetch as ReturnType<typeof vi.fn>;
     const { vi } = await import('vitest');
     const spy = vi.fn().mockResolvedValue({
       ok: true,

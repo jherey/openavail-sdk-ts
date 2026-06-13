@@ -49,10 +49,10 @@ describe('checkAvailability', () => {
     await client.checkAvailability(BASE_OPTS);
 
     const body = JSON.parse(spy.mock.calls[0]?.[1]?.body as string) as Record<string, unknown>;
-    expect(body['owner_email']).toBe('alex@acme.com');
-    expect(body['duration_minutes']).toBe(60);
-    expect(body['meeting_class']).toBe('internal_sync');
-    expect(body['window']).toEqual({ start: '2026-07-01T09:00:00Z', end: '2026-07-01T17:00:00Z' });
+    expect(body.owner_email).toBe('alex@acme.com');
+    expect(body.duration_minutes).toBe(60);
+    expect(body.meeting_class).toBe('internal_sync');
+    expect(body.window).toEqual({ start: '2026-07-01T09:00:00Z', end: '2026-07-01T17:00:00Z' });
   });
 
   it('auto-injects Idempotency-Key header when not provided', async () => {
