@@ -22,8 +22,9 @@ export function registerCreateEvent(
       '  summary → title (required)',
       '  owner_email replaces calendarId — Openavail identifies owners by email, not calendar ID',
       '  meeting_class is required (e.g. "internal_sync", "customer_call") — no Google Calendar equivalent',
-      '  start/end must be ISO 8601 UTC; Openavail stores all times in UTC, convert before calling',
-      'NOT supported in v1: description (include in title if needed), location, timeZone, recurrence, calendarId',
+      "  start/end must be ISO 8601 UTC; Openavail stores all times in UTC — call list-calendars first to get the owner's timezone (returned as the timezone field), then convert before calling",
+      'NOT supported in v1: location, timeZone, recurrence, calendarId',
+      'calendar_type hint: if the requested type has no connected calendar, the booking silently lands on the primary calendar — check list-calendars first to confirm the type exists.',
     ].join('\n'),
     {
       owner_email: z
@@ -41,6 +42,10 @@ export function registerCreateEvent(
       start: z.string().describe('Event start time — ISO 8601 UTC (e.g. 2026-07-01T09:00:00Z).'),
       end: z.string().describe('Event end time — ISO 8601 UTC.'),
       summary: z.string().min(1).describe('Event title (mapped from Google Calendar summary).'),
+      description: z
+        .string()
+        .optional()
+        .describe('Event body/notes — agenda, dial-in link, prep instructions, etc.'),
       calendar_type: z
         .enum(['work', 'personal', 'other'])
         .optional()
@@ -50,7 +55,16 @@ export function registerCreateEvent(
         .optional()
         .describe('List of attendees. Each must have an email; displayName is optional.'),
     },
-    async ({ owner_email, meeting_class, start, end, summary, calendar_type, attendees }) => {
+    async ({
+      owner_email,
+      meeting_class,
+      start,
+      end,
+      summary,
+      description,
+      calendar_type,
+      attendees,
+    }) => {
       const email = owner_email ?? defaultOwnerEmail;
       if (!email) return missingOwnerEmail();
       try {
@@ -61,6 +75,7 @@ export function registerCreateEvent(
             start,
             end,
             title: summary,
+            ...(description !== undefined && { description }),
             ...(calendar_type !== undefined && { calendarType: calendar_type }),
             ...(attendees !== undefined && { attendees }),
           }),

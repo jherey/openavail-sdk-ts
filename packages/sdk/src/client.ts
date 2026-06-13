@@ -72,6 +72,7 @@ export class OpenavailClient {
       start: string;
       end: string;
       title: string | null;
+      description?: string | null;
       calendar_type: string | null;
       status: 'committed';
     };
@@ -82,6 +83,7 @@ export class OpenavailClient {
         start: options.start,
         end: options.end,
         title: options.title,
+        ...(options.description !== undefined && { description: options.description }),
         ...(options.attendees !== undefined && { attendees: options.attendees }),
       },
       requiresIdempotency: true,
@@ -95,6 +97,7 @@ export class OpenavailClient {
       start: raw.start,
       end: raw.end,
       title: raw.title,
+      description: raw.description ?? null,
       calendarType: raw.calendar_type,
       status: raw.status,
     };
@@ -109,6 +112,7 @@ export class OpenavailClient {
       start: string;
       end: string;
       title: string | null;
+      description?: string | null;
       calendar_type: string | null;
       status: 'committed';
     };
@@ -121,6 +125,7 @@ export class OpenavailClient {
         end: options.end,
         meeting_class: options.meetingClass,
         title: options.title,
+        ...(options.description !== undefined && { description: options.description }),
         ...(options.calendarType !== undefined && { calendar_type: options.calendarType }),
         ...(options.attendees !== undefined && { attendees: options.attendees }),
       },
@@ -135,6 +140,7 @@ export class OpenavailClient {
       start: raw.start,
       end: raw.end,
       title: raw.title,
+      description: raw.description ?? null,
       calendarType: raw.calendar_type,
       status: raw.status,
     };
@@ -324,6 +330,7 @@ export class OpenavailClient {
       start: string;
       end: string;
       title: string | null;
+      description?: string | null;
       calendar_type: string | null;
       status: 'committed';
     };
@@ -340,6 +347,7 @@ export class OpenavailClient {
       start: raw.start,
       end: raw.end,
       title: raw.title,
+      description: raw.description ?? null,
       calendarType: raw.calendar_type,
       status: raw.status,
     };

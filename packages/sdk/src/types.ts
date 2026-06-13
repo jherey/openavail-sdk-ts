@@ -62,6 +62,7 @@ export type ConfirmHoldOptions = {
   start: string;
   end: string;
   title: string;
+  description?: string;
   attendees?: Attendee[];
   idempotencyKey?: string;
 };
@@ -72,6 +73,7 @@ export type CreateBookingOptions = {
   end: string;
   meetingClass: string;
   title: string;
+  description?: string;
   calendarType?: 'work' | 'personal' | 'other';
   attendees?: Attendee[];
   idempotencyKey?: string;
@@ -119,6 +121,7 @@ export type BookingResult = {
   start: string;
   end: string;
   title: string | null;
+  description: string | null;
   calendarType: string | null;
   status: 'committed';
 };

@@ -12,8 +12,8 @@ export function registerSimulate(
   server.tool(
     'simulate',
     [
+      'REQUIRES PRO PLAN — returns PLAN_LIMIT_SIMULATION on free accounts; skip this tool if the account is on the free tier.',
       'Simulate the arbitration decision for a hypothetical booking without creating any holds or commits.',
-      'REQUIRES PRO PLAN — returns PLAN_LIMIT_SIMULATION error on free accounts. If you receive that error, this feature is not available on the current plan.',
       'Returns: decision (Accept/Reject/Preempt/CounterPropose), optional reason, optional alternative slots, and an engineTrace for debugging.',
       'Use this to preview whether a booking would succeed before presenting options to a user.',
     ].join('\n'),
