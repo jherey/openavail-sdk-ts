@@ -27,9 +27,13 @@ export function registerConfirmHold(server: McpServer, client: OpenavailClient):
         .string()
         .describe('Chosen slot end time (ISO 8601 UTC). Must be within the hold window.'),
       title: z.string().min(1).describe('Meeting title.'),
+      description: z
+        .string()
+        .optional()
+        .describe('Event body/notes — agenda, dial-in link, prep instructions, etc.'),
       attendees: z.array(AttendeeSchema).optional().describe('Optional list of attendees.'),
     },
-    async ({ hold_id, start, end, title, attendees }) => {
+    async ({ hold_id, start, end, title, description, attendees }) => {
       try {
         return ok(
           await client.confirmHold({
@@ -37,6 +41,7 @@ export function registerConfirmHold(server: McpServer, client: OpenavailClient):
             start,
             end,
             title,
+            ...(description !== undefined && { description }),
             ...(attendees !== undefined && { attendees }),
           }),
         );
