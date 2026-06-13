@@ -18,6 +18,7 @@ export function registerCheckAvailability(
       "Slots are a sliding window stepped by the owner's slot interval (default 15 min) — e.g. 10:00–11:00, 10:15–11:15, 10:30–11:30. They overlap intentionally; pick one slot and pass it to confirm-hold, do not treat the list as discrete non-overlapping blocks.",
       'After calling this tool, call confirm-hold with the holdId and a chosen slot to commit the booking.',
       'If no slots are available, throws NoSlotsError. The error carries reason_code (DAILY_HOURS_LIMIT or NO_FREE_SLOTS) and an optional nextAvailable: {start, end} hint pointing at the nearest free slot — use it to suggest an alternative window without a new search.',
+      'calendar_type hint: if the requested type (e.g. "work") has no connected calendar, the request silently falls back to the primary calendar — resolvedCalendarType in the response tells you which type was actually used. Call list-calendars first to see which types are available.',
       defaultOwnerEmail
         ? `Default owner: ${defaultOwnerEmail} (set via OPENAVAIL_OWNER_EMAIL — override by passing owner_email explicitly).`
         : 'owner_email is required.',
