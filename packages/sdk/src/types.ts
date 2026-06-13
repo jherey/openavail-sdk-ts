@@ -11,7 +11,11 @@ export type AvailabilityWarning = {
   message: string;
 };
 
-export type Slot = { start: string; end: string };
+export type Slot = {
+  start: string;
+  end: string;
+  preemptable?: { occupying_class: string; occupying_priority: number };
+};
 
 export type AlternativeSlot = {
   start: string;
