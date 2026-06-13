@@ -47,6 +47,12 @@ const BOOKING_RESULT: BookingResult = {
   correlationId: 'b1ffcd88-8d0c-5fg9-cc7e-7ccace491b22',
   displacedCount: 0,
   pendingNotifications: NO_NOTIFICATIONS,
+  start: '2026-07-01T09:00:00.000Z',
+  end: '2026-07-01T10:00:00.000Z',
+  title: 'Test meeting',
+  description: null,
+  calendarType: 'work',
+  status: 'committed',
 };
 
 const BOOKING: Booking = {
@@ -71,7 +77,7 @@ const LIST_RESULT: ListBookingsResult = {
   pendingNotifications: NO_NOTIFICATIONS,
 };
 
-const CALENDARS: OwnerCalendar[] = [{ calendar_type: 'work', is_primary: true }];
+const CALENDARS: OwnerCalendar[] = [{ calendar_type: 'work', is_primary: true, timezone: 'Europe/Berlin' }];
 
 const AVAILABILITY_RESULT: CheckAvailabilityResult = {
   holdId: 'c2ffde77-7e1d-4eh8-dd8f-8ddbdf582c33',
