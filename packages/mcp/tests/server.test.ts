@@ -221,8 +221,12 @@ describe('MCP server tools', () => {
       });
       expect(res.isError).toBeFalsy();
       const content = res.content as { type: string; text: string }[];
-      const body = JSON.parse(content[0]?.text ?? '[]') as OwnerCalendar[];
-      expect(body[0]?.is_primary).toBe(true);
+      const body = JSON.parse(content[0]?.text ?? '{}') as {
+        calendars: OwnerCalendar[];
+        unavailable_calendar_types: string[];
+      };
+      expect(body.calendars[0]?.is_primary).toBe(true);
+      expect(Array.isArray(body.unavailable_calendar_types)).toBe(true);
     });
   });
 
