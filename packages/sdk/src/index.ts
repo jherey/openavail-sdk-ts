@@ -30,6 +30,7 @@ export type {
   CheckAvailabilityResult,
   ConfirmHoldOptions,
   CreateBookingOptions,
+  DisplacedBookingInfo,
   GetScheduleRulesOptions,
   ListBookingsOptions,
   ListBookingsResult,

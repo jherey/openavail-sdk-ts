@@ -27,6 +27,26 @@ const RAW_BOOKING_BASE = {
 };
 
 describe('getBooking', () => {
+  it('maps status from raw response', async () => {
+    mockFetch(200, {
+      booking: { ...RAW_BOOKING_BASE, status: 'needs_reschedule' },
+      pending_notifications: [],
+    });
+
+    const booking = await client.getBooking(BOOKING_ID);
+    expect(booking.status).toBe('needs_reschedule');
+  });
+
+  it('maps committed status', async () => {
+    mockFetch(200, {
+      booking: { ...RAW_BOOKING_BASE, status: 'committed' },
+      pending_notifications: [],
+    });
+
+    const booking = await client.getBooking(BOOKING_ID);
+    expect(booking.status).toBe('committed');
+  });
+
   it('maps description from raw response', async () => {
     mockFetch(200, {
       booking: { ...RAW_BOOKING_BASE, description: 'Dial-in: +1 555 0100' },
