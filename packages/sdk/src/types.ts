@@ -45,6 +45,8 @@ export type Booking = {
   meetingClass: string | null;
   calendarType: string | null;
   createdAt: string;
+  /** 'committed' for active bookings; 'needs_reschedule' when displaced by a higher-priority event. */
+  status?: string;
   title?: string | undefined;
   description?: string | null | undefined;
   attendees?: Attendee[] | undefined;
@@ -120,10 +122,20 @@ export type CheckAvailabilityResult = {
   warnings: AvailabilityWarning[];
 };
 
+export type DisplacedBookingInfo = {
+  bookingId: string;
+  title: string | null;
+  start: string;
+  end: string;
+  meetingClass: string | null;
+};
+
 export type BookingResult = {
   bookingId: string;
   correlationId: string;
   displacedCount: number;
+  /** Details of bookings displaced by this preemption. Owner has been notified by email. */
+  displacedBookings: DisplacedBookingInfo[];
   pendingNotifications: PendingNotification[];
   start: string;
   end: string;

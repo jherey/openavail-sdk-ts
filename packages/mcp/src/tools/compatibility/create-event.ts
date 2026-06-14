@@ -21,8 +21,10 @@ export function registerCreateEvent(
       'owner_email replaces calendarId — Openavail identifies owners by email, not calendar ID.',
       'meeting_class is required (e.g. "internal_sync", "customer_call") — no Google Calendar equivalent.',
       "start/end must be ISO 8601 UTC; Openavail stores all times in UTC — call list-calendars first to get the owner's timezone (returned as the timezone field), then convert before calling.",
+      'All timestamps in responses are UTC-formatted ISO 8601 strings.',
       'NOT supported in v1: location, timeZone, recurrence, calendarId.',
       'calendar_type hint: if the requested type has no connected calendar, the booking silently lands on the primary calendar — check list-calendars first to confirm the type exists.',
+      'Preemption: if this booking displaces a lower-priority existing booking, the response includes displaced_bookings with title/start/end/meeting_class, and the calendar owner is automatically notified by email. To preview preemptable slots before committing, use check-availability first — it surfaces slot.preemptable metadata so you can warn the user before calling create-event.',
     ].join('\n'),
     {
       owner_email: z

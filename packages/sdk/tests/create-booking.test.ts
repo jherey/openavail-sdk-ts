@@ -66,6 +66,36 @@ describe('createBooking', () => {
     expect(result.description).toBe('Agenda: discuss roadmap');
   });
 
+  it('maps displaced_bookings when preemption occurs', async () => {
+    mockFetch(200, {
+      ...OK_RESPONSE,
+      displaced_count: 1,
+      displaced_bookings: [
+        {
+          booking_id: 'c2ffdd99-1a2b-3c4d-5e6f-7g8h9i0j1k2l',
+          title: 'Weekly Sync',
+          start: '2026-07-01T09:00:00Z',
+          end: '2026-07-01T10:00:00Z',
+          meeting_class: 'internal_sync',
+        },
+      ],
+    });
+
+    const result = await client.createBooking(BASE_OPTS);
+    expect(result.displacedCount).toBe(1);
+    expect(result.displacedBookings).toHaveLength(1);
+    expect(result.displacedBookings[0]?.bookingId).toBe('c2ffdd99-1a2b-3c4d-5e6f-7g8h9i0j1k2l');
+    expect(result.displacedBookings[0]?.title).toBe('Weekly Sync');
+    expect(result.displacedBookings[0]?.meetingClass).toBe('internal_sync');
+  });
+
+  it('returns empty displacedBookings when no preemption', async () => {
+    mockFetch(200, OK_RESPONSE);
+
+    const result = await client.createBooking(BASE_OPTS);
+    expect(result.displacedBookings).toEqual([]);
+  });
+
   it('throws ArbitrationRejectedError on 409 with alternatives', async () => {
     const alternatives = [
       { start: '2026-07-02T09:00:00Z', end: '2026-07-02T10:00:00Z', reason_code: 'NEXT' },
