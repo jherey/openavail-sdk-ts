@@ -20,6 +20,7 @@ export {
   WorkingHoursNotConfiguredError,
 } from './errors.js';
 export type {
+  AckNotificationsResult,
   AlternativeSlot,
   Attendee,
   AvailabilityWarning,
