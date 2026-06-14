@@ -14,9 +14,9 @@ export function registerUpdateEvent(server: McpServer, client: OpenavailClient):
     'update-event',
     [
       'Update booking metadata (title, description, and/or attendees). Equivalent to Google Calendar update-event.',
-      'IMPORTANT: Only metadata updates are supported. To change the meeting time, cancel and rebook instead.',
+      'IMPORTANT: Rescheduling (changing start/end) is NOT supported. To reschedule: call delete-event, then either create-event (if the new slot is already agreed) or check-availability + confirm-hold (to let the user pick from available slots).',
       'At least one of title, description, or attendees must be provided.',
-      'NOT supported in v1: location, timeZone, recurrence.',
+      'NOT supported in v1: start/end changes, location, timeZone, recurrence.',
     ].join('\n'),
     {
       eventId: z.string().uuid().describe('The booking ID to update.'),
