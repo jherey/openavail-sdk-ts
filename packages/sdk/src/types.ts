@@ -27,6 +27,7 @@ export type Attendee = { email: string; displayName?: string | undefined };
 
 export type MeetingClass = {
   name: string;
+  description: string | null;
   priority: number;
   preemptPolicy: 'strict' | 'soft' | 'hard';
 };

@@ -242,6 +242,7 @@ export class OpenavailClient {
     type Raw = {
       meeting_classes: {
         name: string;
+        description: string | null;
         priority: number;
         preempt_policy: 'strict' | 'soft' | 'hard';
       }[];
@@ -252,6 +253,7 @@ export class OpenavailClient {
     });
     return raw.meeting_classes.map((c) => ({
       name: c.name,
+      description: c.description,
       priority: c.priority,
       preemptPolicy: c.preempt_policy,
     }));

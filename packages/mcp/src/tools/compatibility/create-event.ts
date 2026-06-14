@@ -17,13 +17,13 @@ export function registerCreateEvent(
   server.tool(
     'create-event',
     [
-      'Create a booking (calendar event) for a calendar owner. Equivalent to Google Calendar create-event.',
+      'Create a booking (calendar event) directly. Equivalent to Google Calendar create-event.',
+      'PREFER check-availability + confirm-hold when: you need to show slot options to a user, you want a preemption preview, or you are not certain the slot is free. Use create-event only for direct writes where the slot is already known and confirmed by the user.',
       'owner_email replaces calendarId — Openavail identifies owners by email, not calendar ID.',
-      'meeting_class is required (e.g. "internal_sync", "customer_call") — no Google Calendar equivalent.',
-      "start/end must be ISO 8601 UTC; Openavail stores all times in UTC — call list-calendars first to get the owner's timezone (returned as the timezone field), then convert before calling.",
-      'All timestamps in responses are UTC-formatted ISO 8601 strings.',
+      'meeting_class is required — call list-meeting-classes first to see valid names, priorities, and descriptions.',
+      'TIMEZONE: start/end must be ISO 8601 UTC. Call list-calendars first to get the owner\'s IANA timezone (e.g. "Europe/Berlin"), convert the user\'s local times to UTC, then pass them here. All timestamps in responses are also UTC.',
       'NOT supported in v1: location, timeZone, recurrence, calendarId.',
-      'calendar_type hint: if the requested type has no connected calendar, the booking silently lands on the primary calendar — check list-calendars first to confirm the type exists.',
+      'calendar_type fallback: if the requested type (e.g. "work") has no connected calendar, the booking silently lands on the primary calendar. The response always includes calendar_type showing which type was actually used — compare it to what you requested to detect a fallback.',
       'Preemption: if this booking displaces a lower-priority existing booking, the response includes displaced_bookings with title/start/end/meeting_class, and the calendar owner is automatically notified by email. To preview preemptable slots before committing, use check-availability first — it surfaces slot.preemptable metadata so you can warn the user before calling create-event.',
     ].join('\n'),
     {
