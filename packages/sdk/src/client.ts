@@ -75,7 +75,13 @@ export class OpenavailClient {
       booking_id: string;
       correlation_id: string;
       displaced_count?: number;
-      displaced_bookings?: { booking_id: string; title: string | null; start: string; end: string; meeting_class: string | null }[];
+      displaced_bookings?: {
+        booking_id: string;
+        title: string | null;
+        start: string;
+        end: string;
+        meeting_class: string | null;
+      }[];
       pending_notifications: PendingNotification[];
       start: string;
       end: string;
@@ -101,13 +107,15 @@ export class OpenavailClient {
       bookingId: raw.booking_id,
       correlationId: raw.correlation_id,
       displacedCount: raw.displaced_count ?? 0,
-      displacedBookings: (raw.displaced_bookings ?? []).map((d): DisplacedBookingInfo => ({
-        bookingId: d.booking_id,
-        title: d.title,
-        start: d.start,
-        end: d.end,
-        meetingClass: d.meeting_class,
-      })),
+      displacedBookings: (raw.displaced_bookings ?? []).map(
+        (d): DisplacedBookingInfo => ({
+          bookingId: d.booking_id,
+          title: d.title,
+          start: d.start,
+          end: d.end,
+          meetingClass: d.meeting_class,
+        }),
+      ),
       pendingNotifications: raw.pending_notifications,
       start: raw.start,
       end: raw.end,
@@ -123,7 +131,13 @@ export class OpenavailClient {
       booking_id: string;
       correlation_id: string;
       displaced_count?: number;
-      displaced_bookings?: { booking_id: string; title: string | null; start: string; end: string; meeting_class: string | null }[];
+      displaced_bookings?: {
+        booking_id: string;
+        title: string | null;
+        start: string;
+        end: string;
+        meeting_class: string | null;
+      }[];
       pending_notifications: PendingNotification[];
       start: string;
       end: string;
@@ -152,13 +166,15 @@ export class OpenavailClient {
       bookingId: raw.booking_id,
       correlationId: raw.correlation_id,
       displacedCount: raw.displaced_count ?? 0,
-      displacedBookings: (raw.displaced_bookings ?? []).map((d): DisplacedBookingInfo => ({
-        bookingId: d.booking_id,
-        title: d.title,
-        start: d.start,
-        end: d.end,
-        meetingClass: d.meeting_class,
-      })),
+      displacedBookings: (raw.displaced_bookings ?? []).map(
+        (d): DisplacedBookingInfo => ({
+          bookingId: d.booking_id,
+          title: d.title,
+          start: d.start,
+          end: d.end,
+          meetingClass: d.meeting_class,
+        }),
+      ),
       pendingNotifications: raw.pending_notifications,
       start: raw.start,
       end: raw.end,
