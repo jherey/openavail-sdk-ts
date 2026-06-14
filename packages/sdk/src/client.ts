@@ -1,5 +1,6 @@
 import { HttpClient } from './http.js';
 import type {
+  AckNotificationsResult,
   Booking,
   BookingResult,
   CancelBookingResult,
@@ -220,6 +221,16 @@ export class OpenavailClient {
     };
     const raw = await this.#http.request<Raw>({ method: 'GET', path: '/notifications/pending' });
     return raw.notifications;
+  }
+
+  async ackNotifications(ids: string[]): Promise<AckNotificationsResult> {
+    type Raw = { acked_count: number };
+    const raw = await this.#http.request<Raw>({
+      method: 'POST',
+      path: '/notifications/ack',
+      body: { ids },
+    });
+    return { ackedCount: raw.acked_count };
   }
 
   async listCalendars(ownerEmail: string): Promise<OwnerCalendar[]> {

@@ -7,6 +7,7 @@ import { registerListCalendars } from './tools/compatibility/list-calendars.js';
 import { registerListEvents } from './tools/compatibility/list-events.js';
 import { registerSearchEvents } from './tools/compatibility/search-events.js';
 import { registerUpdateEvent } from './tools/compatibility/update-event.js';
+import { registerAckNotifications } from './tools/native/ack-notifications.js';
 import { registerCheckAvailability } from './tools/native/check-availability.js';
 import { registerConfirmHold } from './tools/native/confirm-hold.js';
 import { registerGetPendingNotifications } from './tools/native/get-pending-notifications.js';
@@ -34,6 +35,7 @@ export function buildServer(
   registerConfirmHold(server, client);
   registerSimulate(server, client, defaultOwnerEmail);
   registerGetPendingNotifications(server, client);
+  registerAckNotifications(server, client);
   registerGetScheduleRules(server, client, defaultOwnerEmail);
 
   return server;

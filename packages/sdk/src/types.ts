@@ -152,6 +152,10 @@ export type CancelBookingResult = {
   pendingNotifications: PendingNotification[];
 };
 
+export type AckNotificationsResult = {
+  ackedCount: number;
+};
+
 export type ListBookingsResult = {
   bookings: Booking[];
   nextCursor: string | null;
