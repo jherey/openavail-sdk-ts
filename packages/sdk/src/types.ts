@@ -5,11 +5,9 @@ export type PendingNotification = {
   createdAt: string;
 };
 
-export type AvailabilityWarning = {
-  code: 'CALENDAR_BUSY_STALE';
-  calendar_type: string | null;
-  message: string;
-};
+export type AvailabilityWarning =
+  | { code: 'CALENDAR_BUSY_STALE'; calendar_type: string | null; message: string }
+  | { code: 'CALENDAR_TYPE_FALLBACK'; requested: string; resolved: string | null; message: string };
 
 export type Slot = {
   start: string;
@@ -51,6 +49,17 @@ export type Booking = {
   title?: string | undefined;
   description?: string | null | undefined;
   attendees?: Attendee[] | undefined;
+};
+
+export type OwnerContext = {
+  calendars: OwnerCalendar[];
+  scheduleRules: {
+    workingHours: { days: number[]; startTime: string; endTime: string; timezone: string }[];
+    slotIntervalMinutes: number;
+    maxDailyMeetingHours: number | null;
+  };
+  meetingClasses: MeetingClass[];
+  pendingNotifications: PendingNotification[];
 };
 
 // ── Request option types ──────────────────────────────────────────────────────

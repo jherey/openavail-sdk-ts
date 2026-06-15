@@ -37,6 +37,7 @@ export type {
   ListBookingsResult,
   MeetingClass,
   OwnerCalendar,
+  OwnerContext,
   PendingNotification,
   ScheduleRules,
   SimulateOptions,

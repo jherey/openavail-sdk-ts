@@ -14,7 +14,8 @@ export function registerCheckAvailability(
     [
       'Find available time slots for a calendar owner and reserve a short-lived hold, then call confirm-hold to commit the booking.',
       'PREFER THIS PATH over create-event when: you need to show options to a user, the slot is not known in advance, or you want conflict-safe arbitration with preemption preview.',
-      'TIMEZONE: all times must be ISO 8601 UTC. Call list-calendars first to get the owner\'s IANA timezone (e.g. "Europe/Berlin"), convert the user\'s local times to UTC, then pass them here.',
+      "SETUP: call get-owner-context first — it returns the owner's timezone, working hours, and valid meeting_class names in one call.",
+      'TIMEZONE: all times must be ISO 8601 UTC. Use the timezone from get-owner-context to convert user-supplied local times to UTC before passing them here.',
       'Coming soon: user-configurable hold TTL — the 5-minute default suits fully autonomous agents; longer TTLs for human-in-the-loop slot selection are on the roadmap.',
       'Returns: holdId, expiresAt (UTC ISO string), expiresInSeconds (use this for TTL checks — avoids timezone comparison errors), slots (start/end pairs), resolvedCalendarType, and pendingNotifications.',
       'IMPORTANT: use expiresInSeconds to check if the hold is still live. Do NOT compare expiresAt against local date strings — timezone-naive comparisons will produce wrong results.',
@@ -42,7 +43,7 @@ export function registerCheckAvailability(
       window_end: z
         .string()
         .describe(
-          'End of the search window (ISO 8601 UTC). This is the latest a meeting may END (not start) — e.g. window_end 13:30 + 60-min meeting → last possible slot starts at 12:30.',
+          'End of the search window (ISO 8601 UTC). This is the latest a meeting may END (not start). Example: for a 60-min meeting starting at 2pm Berlin (12:00 UTC), set window_start: "12:00:00Z" and window_end: "13:00:00Z" — the full meeting must fit within the window, not just the start time.',
         ),
       meeting_class: z.string().describe('Meeting class name (e.g. "internal_sync").'),
       calendar_type: z

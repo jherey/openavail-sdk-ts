@@ -14,6 +14,7 @@ import type {
   ListBookingsResult,
   MeetingClass,
   OwnerCalendar,
+  OwnerContext,
   PendingNotification,
   ScheduleRules,
   SimulateOptions,
@@ -249,6 +250,52 @@ export class OpenavailClient {
       path: `/calendar-owners/${encodeURIComponent(ownerEmail)}/calendars`,
     });
     return raw.calendars;
+  }
+
+  async getOwnerContext(ownerEmail: string): Promise<OwnerContext> {
+    type Raw = {
+      calendars: {
+        calendar_type: 'work' | 'personal' | 'other' | null;
+        is_primary: boolean;
+        timezone: string | null;
+      }[];
+      schedule_rules: {
+        working_hours: { days: number[]; start_time: string; end_time: string; timezone: string }[];
+        slot_interval_minutes: number;
+        max_daily_meeting_hours: number | null;
+      };
+      meeting_classes: {
+        name: string;
+        description: string | null;
+        priority: number;
+        preempt_policy: 'strict' | 'soft' | 'hard';
+      }[];
+      pending_notifications: PendingNotification[];
+    };
+    const raw = await this.#http.request<Raw>({
+      method: 'GET',
+      path: `/owner-context?owner_email=${encodeURIComponent(ownerEmail)}`,
+    });
+    return {
+      calendars: raw.calendars,
+      scheduleRules: {
+        workingHours: raw.schedule_rules.working_hours.map((wh) => ({
+          days: wh.days,
+          startTime: wh.start_time,
+          endTime: wh.end_time,
+          timezone: wh.timezone,
+        })),
+        slotIntervalMinutes: raw.schedule_rules.slot_interval_minutes,
+        maxDailyMeetingHours: raw.schedule_rules.max_daily_meeting_hours,
+      },
+      meetingClasses: raw.meeting_classes.map((c) => ({
+        name: c.name,
+        description: c.description,
+        priority: c.priority,
+        preemptPolicy: c.preempt_policy,
+      })),
+      pendingNotifications: raw.pending_notifications,
+    };
   }
 
   async listMeetingClasses(): Promise<MeetingClass[]> {
