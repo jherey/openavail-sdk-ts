@@ -14,9 +14,14 @@ export function registerUpdateEvent(server: McpServer, client: OpenavailClient):
     'update-event',
     [
       'Update booking metadata (title, description, and/or attendees). Equivalent to Google Calendar update-event.',
-      'IMPORTANT: Rescheduling (changing start/end) is NOT supported. To reschedule: call delete-event, then either create-event (if the new slot is already agreed) or check-availability + confirm-hold (to let the user pick from available slots).',
       'At least one of title, description, or attendees must be provided.',
-      'NOT supported in v1: start/end changes, location, timeZone, recurrence.',
+      'NOT supported: start/end changes, location, timeZone, recurrence. To change the time, follow the reschedule flow below.',
+      'RESCHEDULE FLOW (changing start/end time):',
+      '  1. check-availability — find slots in the new window and secure a hold.',
+      '  2. delete-event — cancel the old booking.',
+      '  3. confirm-hold — commit the new slot.',
+      'Order matters: always check-availability FIRST, delete SECOND. If you delete first and confirm-hold then fails (slot taken by another booking between steps), the user ends up with no booking. Holding the new slot before deleting minimises that window to near-zero.',
+      'ROLLBACK WARNING: there is no atomic guarantee. If confirm-hold fails after delete-event has already run, the old booking is gone. Inform the user and retry with a fresh check-availability.',
     ].join('\n'),
     {
       eventId: z.string().uuid().describe('The booking ID to update.'),
