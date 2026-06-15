@@ -25,6 +25,7 @@ export function registerCreateEvent(
       'NOT supported in v1: location, timeZone, recurrence, calendarId.',
       'calendar_type fallback: if the requested type (e.g. "work") has no connected calendar, the booking silently lands on the primary calendar. The response always includes calendar_type showing which type was actually used — compare it to what you requested to detect a fallback.',
       'Preemption: if this booking displaces a lower-priority existing booking, the response includes displaced_bookings with title/start/end/meeting_class, and the calendar owner is automatically notified by email. To preview preemptable slots before committing, use check-availability first — it surfaces slot.preemptable metadata so you can warn the user before calling create-event.',
+      'REJECTION alternatives: when a booking is rejected, alternatives[] contains contextually close slots (same day remaining, or same hour-of-day on the next business day). If the requested time has no comparable slot (e.g. 22:00 when working hours end at 17:00), alternatives[] is empty. Check next_available in the error for the absolute nearest opening.',
       'PAST_TIME: start must be in the future. If start is in the past, the API returns 422 with code PAST_TIME — do not retry with the same past time.',
     ].join('\n'),
     {
