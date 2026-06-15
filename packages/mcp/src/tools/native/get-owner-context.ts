@@ -31,12 +31,12 @@ export function registerGetOwnerContext(
         .describe(
           defaultOwnerEmail
             ? `Email of the calendar owner. Defaults to ${defaultOwnerEmail}.`
-            : 'Email of the calendar owner.',
+            : "Email of the calendar owner. Optional for user-scoped API keys — omit to use the key's built-in owner.",
         ),
     },
     async ({ owner_email }) => {
+      // Pass email if provided; omit to let the server resolve from the key's owner scope.
       const email = owner_email ?? defaultOwnerEmail;
-      if (!email) return missingOwnerEmail();
       try {
         return ok(await client.getOwnerContext(email));
       } catch (err) {

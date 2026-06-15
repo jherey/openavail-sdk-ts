@@ -37,11 +37,10 @@ export function registerSimulate(
     },
     async ({ owner_email, start, end, meeting_class, calendar_type }) => {
       const email = owner_email ?? defaultOwnerEmail;
-      if (!email) return missingOwnerEmail();
       try {
         return ok(
           await client.simulate({
-            ownerEmail: email,
+            ...(email !== undefined && { ownerEmail: email }),
             start,
             end,
             meetingClass: meeting_class,

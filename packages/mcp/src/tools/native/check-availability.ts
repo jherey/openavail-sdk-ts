@@ -36,7 +36,7 @@ export function registerCheckAvailability(
         .describe(
           defaultOwnerEmail
             ? `Email of the calendar owner. Defaults to ${defaultOwnerEmail}.`
-            : 'Email of the calendar owner.',
+            : "Email of the calendar owner. Optional for user-scoped API keys — omit to use the key's built-in owner.",
         ),
       duration_minutes: z.number().int().min(5).max(480).describe('Meeting duration in minutes.'),
       window_start: z.string().describe('Start of the search window (ISO 8601 UTC).'),
@@ -70,11 +70,10 @@ export function registerCheckAvailability(
       next_available_lookahead_hours,
     }) => {
       const email = owner_email ?? defaultOwnerEmail;
-      if (!email) return missingOwnerEmail();
       try {
         return ok(
           await client.checkAvailability({
-            ownerEmail: email,
+            ...(email !== undefined && { ownerEmail: email }),
             durationMinutes: duration_minutes,
             window: { start: window_start, end: window_end },
             meetingClass: meeting_class,

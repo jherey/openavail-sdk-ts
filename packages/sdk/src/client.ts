@@ -51,7 +51,7 @@ export class OpenavailClient {
       method: 'POST',
       path: '/availability',
       body: {
-        owner_email: options.ownerEmail,
+        ...(options.ownerEmail !== undefined && { owner_email: options.ownerEmail }),
         duration_minutes: options.durationMinutes,
         window: options.window,
         meeting_class: options.meetingClass,
@@ -154,7 +154,7 @@ export class OpenavailClient {
       method: 'POST',
       path: '/bookings',
       body: {
-        owner_email: options.ownerEmail,
+        ...(options.ownerEmail !== undefined && { owner_email: options.ownerEmail }),
         start: options.start,
         end: options.end,
         meeting_class: options.meetingClass,
@@ -201,7 +201,7 @@ export class OpenavailClient {
       method: 'POST',
       path: '/simulate',
       body: {
-        owner_email: options.ownerEmail,
+        ...(options.ownerEmail !== undefined && { owner_email: options.ownerEmail }),
         start: options.start,
         end: options.end,
         meeting_class: options.meetingClass,
@@ -252,7 +252,7 @@ export class OpenavailClient {
     return raw.calendars;
   }
 
-  async getOwnerContext(ownerEmail: string): Promise<OwnerContext> {
+  async getOwnerContext(ownerEmail?: string): Promise<OwnerContext> {
     type Raw = {
       calendars: {
         calendar_type: 'work' | 'personal' | 'other' | null;
@@ -274,7 +274,7 @@ export class OpenavailClient {
     };
     const raw = await this.#http.request<Raw>({
       method: 'GET',
-      path: `/owner-context?owner_email=${encodeURIComponent(ownerEmail)}`,
+      path: `/owner-context${ownerEmail !== undefined ? `?owner_email=${encodeURIComponent(ownerEmail)}` : ''}`,
     });
     return {
       calendars: raw.calendars,
@@ -341,7 +341,7 @@ export class OpenavailClient {
       method: 'GET',
       path: '/bookings',
       query: {
-        owner_email: options.ownerEmail,
+        ...(options.ownerEmail !== undefined && { owner_email: options.ownerEmail }),
         ...(options.start !== undefined && { start: options.start }),
         ...(options.end !== undefined && { end: options.end }),
         ...(options.calendarType !== undefined && { calendar_type: options.calendarType }),
@@ -472,7 +472,7 @@ export class OpenavailClient {
     const raw = await this.#http.request<Raw>({
       method: 'GET',
       path: '/schedule-rules',
-      query: { owner_email: options.ownerEmail },
+      query: { ...(options.ownerEmail !== undefined && { owner_email: options.ownerEmail }) },
     });
     return {
       workingHours: raw.working_hours.map((wh) => ({
