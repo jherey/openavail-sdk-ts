@@ -17,6 +17,7 @@ export function registerConfirmHold(server: McpServer, client: OpenavailClient):
       'The chosen start/end slot must fall within the hold window. The hold expires after a short TTL (currently 5 minutes) — call this promptly after check-availability. Configurable TTL is coming soon.',
       'Returns: bookingId, correlationId, displacedCount (bookings preempted by higher priority), pendingNotifications (last 60 minutes only — call get-pending-notifications for the full backlog).',
       'If arbitration rejects the slot, ArbitrationRejectedError is returned with alternative slots when available. Alternatives are always within working hours and point to future times — never past slots.',
+      'PAST_TIME: the chosen start must be in the future at the time of this call. If the hold was created for a future slot that has since passed (e.g. a long user pause), the API returns 422 with code PAST_TIME. Re-run check-availability with a fresh window.',
     ].join('\n'),
     {
       hold_id: z.string().uuid().describe('The holdId from a check-availability response.'),
