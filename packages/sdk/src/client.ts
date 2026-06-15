@@ -36,6 +36,7 @@ export class OpenavailClient {
     type Raw = {
       hold_id: string;
       expires_at: string;
+      expires_in_seconds: number;
       slots: {
         start: string;
         end: string;
@@ -64,6 +65,7 @@ export class OpenavailClient {
     return {
       holdId: raw.hold_id,
       expiresAt: raw.expires_at,
+      expiresInSeconds: raw.expires_in_seconds,
       slots: raw.slots,
       pendingNotifications: raw.pending_notifications,
       resolvedCalendarType: raw.resolved_calendar_type,

@@ -10,8 +10,8 @@ export function registerGetPendingNotifications(server: McpServer, client: Opena
       'Fetch all unacknowledged notifications for this agent.',
       'Notifications are generated when a booking is displaced (booking.displaced) or cancelled by another agent (booking.cancelled).',
       'Notifications persist for 7 days. Calling this tool does NOT consume them — they will reappear until you call ack-notifications with their IDs.',
-      'Most booking responses also include pendingNotifications inline as a convenience hint, but those are also not consumed — you still need to ack them here.',
-      'Workflow: call this tool → process each notification → call ack-notifications with the IDs you have handled.',
+      'Booking responses include pendingNotifications inline, but ONLY for notifications created in the last 60 minutes. Call this tool at session start to retrieve any older unacked notifications from previous sessions.',
+      'Workflow: call this tool at session start → process each notification → call ack-notifications with the IDs you have handled.',
     ].join('\n'),
     {},
     async () => {

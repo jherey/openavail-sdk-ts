@@ -117,6 +117,8 @@ export type UpdateBookingOptions = {
 export type CheckAvailabilityResult = {
   holdId: string;
   expiresAt: string;
+  /** Seconds until the hold expires. Use this for TTL checks instead of comparing expiresAt against local time. */
+  expiresInSeconds: number;
   slots: Slot[];
   pendingNotifications: PendingNotification[];
   resolvedCalendarType: string | null;

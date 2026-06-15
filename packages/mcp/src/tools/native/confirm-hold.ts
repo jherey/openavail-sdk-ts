@@ -15,8 +15,8 @@ export function registerConfirmHold(server: McpServer, client: OpenavailClient):
     [
       'Confirm a hold created by check-availability, promoting it to a committed booking.',
       'The chosen start/end slot must fall within the hold window. The hold expires after a short TTL (currently 5 minutes) — call this promptly after check-availability. Configurable TTL is coming soon.',
-      'Returns: bookingId, correlationId, displacedCount (bookings preempted by higher priority), pendingNotifications.',
-      'If arbitration rejects the slot, ArbitrationRejectedError is returned with alternative slots when available.',
+      'Returns: bookingId, correlationId, displacedCount (bookings preempted by higher priority), pendingNotifications (last 60 minutes only — call get-pending-notifications for the full backlog).',
+      'If arbitration rejects the slot, ArbitrationRejectedError is returned with alternative slots when available. Alternatives are always within working hours and point to future times — never past slots.',
     ].join('\n'),
     {
       hold_id: z.string().uuid().describe('The holdId from a check-availability response.'),
