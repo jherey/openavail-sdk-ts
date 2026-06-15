@@ -46,6 +46,7 @@ const BOOKING_RESULT: BookingResult = {
   bookingId: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
   correlationId: 'b1ffcd88-8d0c-5fg9-cc7e-7ccace491b22',
   displacedCount: 0,
+  displacedBookings: [],
   pendingNotifications: NO_NOTIFICATIONS,
   start: '2026-07-01T09:00:00.000Z',
   end: '2026-07-01T10:00:00.000Z',
@@ -84,6 +85,7 @@ const CALENDARS: OwnerCalendar[] = [
 const AVAILABILITY_RESULT: CheckAvailabilityResult = {
   holdId: 'c2ffde77-7e1d-4eh8-dd8f-8ddbdf582c33',
   expiresAt: '2026-07-01T09:05:00.000Z',
+  expiresInSeconds: 300,
   slots: [{ start: '2026-07-01T09:00:00.000Z', end: '2026-07-01T10:00:00.000Z' }],
   pendingNotifications: NO_NOTIFICATIONS,
   resolvedCalendarType: 'work',

@@ -5,11 +5,9 @@ export type PendingNotification = {
   createdAt: string;
 };
 
-export type AvailabilityWarning = {
-  code: 'CALENDAR_BUSY_STALE';
-  calendar_type: string | null;
-  message: string;
-};
+export type AvailabilityWarning =
+  | { code: 'CALENDAR_BUSY_STALE'; calendar_type: string | null; message: string }
+  | { code: 'CALENDAR_TYPE_FALLBACK'; requested: string; resolved: string | null; message: string };
 
 export type Slot = {
   start: string;
@@ -53,10 +51,22 @@ export type Booking = {
   attendees?: Attendee[] | undefined;
 };
 
+export type OwnerContext = {
+  calendars: OwnerCalendar[];
+  scheduleRules: {
+    workingHours: { days: number[]; startTime: string; endTime: string; timezone: string }[];
+    slotIntervalMinutes: number;
+    maxDailyMeetingHours: number | null;
+  };
+  meetingClasses: MeetingClass[];
+  pendingNotifications: PendingNotification[];
+};
+
 // ── Request option types ──────────────────────────────────────────────────────
 
 export type CheckAvailabilityOptions = {
-  ownerEmail: string;
+  /** Optional for user-scoped keys — resolved server-side from the API key's owner scope. */
+  ownerEmail?: string;
   durationMinutes: number;
   window: { start: string; end: string };
   meetingClass: string;
@@ -76,7 +86,8 @@ export type ConfirmHoldOptions = {
 };
 
 export type CreateBookingOptions = {
-  ownerEmail: string;
+  /** Optional for user-scoped keys — resolved server-side from the API key's owner scope. */
+  ownerEmail?: string;
   start: string;
   end: string;
   meetingClass: string;
@@ -88,7 +99,8 @@ export type CreateBookingOptions = {
 };
 
 export type SimulateOptions = {
-  ownerEmail: string;
+  /** Optional for user-scoped keys — resolved server-side from the API key's owner scope. */
+  ownerEmail?: string;
   start: string;
   end: string;
   meetingClass: string;
@@ -96,7 +108,8 @@ export type SimulateOptions = {
 };
 
 export type ListBookingsOptions = {
-  ownerEmail: string;
+  /** Optional for user-scoped keys — resolved server-side from the API key's owner scope. */
+  ownerEmail?: string;
   start?: string;
   end?: string;
   calendarType?: 'work' | 'personal' | 'other';
@@ -117,6 +130,8 @@ export type UpdateBookingOptions = {
 export type CheckAvailabilityResult = {
   holdId: string;
   expiresAt: string;
+  /** Seconds until the hold expires. Use this for TTL checks instead of comparing expiresAt against local time. */
+  expiresInSeconds: number;
   slots: Slot[];
   pendingNotifications: PendingNotification[];
   resolvedCalendarType: string | null;
@@ -184,5 +199,6 @@ export type ScheduleRules = {
 };
 
 export type GetScheduleRulesOptions = {
-  ownerEmail: string;
+  /** Optional for user-scoped keys — resolved server-side from the API key's owner scope. */
+  ownerEmail?: string;
 };

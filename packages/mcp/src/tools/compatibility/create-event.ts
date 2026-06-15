@@ -2,7 +2,7 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { OpenavailClient } from '@openavail/sdk';
 import { OpenavailError } from '@openavail/sdk';
 import { z } from 'zod';
-import { missingOwnerEmail, ok, toolError } from '../error.js';
+import { ok, toolError } from '../error.js';
 
 const AttendeeSchema = z.object({
   email: z.string().email(),
@@ -66,11 +66,10 @@ export function registerCreateEvent(
       attendees,
     }) => {
       const email = owner_email ?? defaultOwnerEmail;
-      if (!email) return missingOwnerEmail();
       try {
         return ok(
           await client.createBooking({
-            ownerEmail: email,
+            ...(email !== undefined && { ownerEmail: email }),
             meetingClass: meeting_class,
             start,
             end,

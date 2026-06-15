@@ -14,6 +14,7 @@ import type {
   ListBookingsResult,
   MeetingClass,
   OwnerCalendar,
+  OwnerContext,
   PendingNotification,
   ScheduleRules,
   SimulateOptions,
@@ -36,6 +37,7 @@ export class OpenavailClient {
     type Raw = {
       hold_id: string;
       expires_at: string;
+      expires_in_seconds: number;
       slots: {
         start: string;
         end: string;
@@ -49,7 +51,7 @@ export class OpenavailClient {
       method: 'POST',
       path: '/availability',
       body: {
-        owner_email: options.ownerEmail,
+        ...(options.ownerEmail !== undefined && { owner_email: options.ownerEmail }),
         duration_minutes: options.durationMinutes,
         window: options.window,
         meeting_class: options.meetingClass,
@@ -64,6 +66,7 @@ export class OpenavailClient {
     return {
       holdId: raw.hold_id,
       expiresAt: raw.expires_at,
+      expiresInSeconds: raw.expires_in_seconds,
       slots: raw.slots,
       pendingNotifications: raw.pending_notifications,
       resolvedCalendarType: raw.resolved_calendar_type,
@@ -151,7 +154,7 @@ export class OpenavailClient {
       method: 'POST',
       path: '/bookings',
       body: {
-        owner_email: options.ownerEmail,
+        ...(options.ownerEmail !== undefined && { owner_email: options.ownerEmail }),
         start: options.start,
         end: options.end,
         meeting_class: options.meetingClass,
@@ -198,7 +201,7 @@ export class OpenavailClient {
       method: 'POST',
       path: '/simulate',
       body: {
-        owner_email: options.ownerEmail,
+        ...(options.ownerEmail !== undefined && { owner_email: options.ownerEmail }),
         start: options.start,
         end: options.end,
         meeting_class: options.meetingClass,
@@ -249,6 +252,52 @@ export class OpenavailClient {
     return raw.calendars;
   }
 
+  async getOwnerContext(ownerEmail?: string): Promise<OwnerContext> {
+    type Raw = {
+      calendars: {
+        calendar_type: 'work' | 'personal' | 'other' | null;
+        is_primary: boolean;
+        timezone: string | null;
+      }[];
+      schedule_rules: {
+        working_hours: { days: number[]; start_time: string; end_time: string; timezone: string }[];
+        slot_interval_minutes: number;
+        max_daily_meeting_hours: number | null;
+      };
+      meeting_classes: {
+        name: string;
+        description: string | null;
+        priority: number;
+        preempt_policy: 'strict' | 'soft' | 'hard';
+      }[];
+      pending_notifications: PendingNotification[];
+    };
+    const raw = await this.#http.request<Raw>({
+      method: 'GET',
+      path: `/owner-context${ownerEmail !== undefined ? `?owner_email=${encodeURIComponent(ownerEmail)}` : ''}`,
+    });
+    return {
+      calendars: raw.calendars,
+      scheduleRules: {
+        workingHours: raw.schedule_rules.working_hours.map((wh) => ({
+          days: wh.days,
+          startTime: wh.start_time,
+          endTime: wh.end_time,
+          timezone: wh.timezone,
+        })),
+        slotIntervalMinutes: raw.schedule_rules.slot_interval_minutes,
+        maxDailyMeetingHours: raw.schedule_rules.max_daily_meeting_hours,
+      },
+      meetingClasses: raw.meeting_classes.map((c) => ({
+        name: c.name,
+        description: c.description,
+        priority: c.priority,
+        preemptPolicy: c.preempt_policy,
+      })),
+      pendingNotifications: raw.pending_notifications,
+    };
+  }
+
   async listMeetingClasses(): Promise<MeetingClass[]> {
     type Raw = {
       meeting_classes: {
@@ -292,7 +341,7 @@ export class OpenavailClient {
       method: 'GET',
       path: '/bookings',
       query: {
-        owner_email: options.ownerEmail,
+        ...(options.ownerEmail !== undefined && { owner_email: options.ownerEmail }),
         ...(options.start !== undefined && { start: options.start }),
         ...(options.end !== undefined && { end: options.end }),
         ...(options.calendarType !== undefined && { calendar_type: options.calendarType }),
@@ -423,7 +472,7 @@ export class OpenavailClient {
     const raw = await this.#http.request<Raw>({
       method: 'GET',
       path: '/schedule-rules',
-      query: { owner_email: options.ownerEmail },
+      query: { ...(options.ownerEmail !== undefined && { owner_email: options.ownerEmail }) },
     });
     return {
       workingHours: raw.working_hours.map((wh) => ({
