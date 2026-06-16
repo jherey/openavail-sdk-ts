@@ -1,0 +1,56 @@
+name: publish
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (no actual publish)'
+        type: boolean
+        default: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+          registry-url: 'https://registry.npmjs.org'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
+      - name: Publish @openavail/sdk
+        if: ${{ !inputs.dry_run }}
+        run: pnpm publish --no-git-checks
+        working-directory: packages/sdk
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Publish @openavail/mcp
+        if: ${{ !inputs.dry_run }}
+        run: pnpm publish --no-git-checks
+        working-directory: packages/mcp
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Dry run @openavail/sdk
+        if: ${{ inputs.dry_run }}
+        run: pnpm publish --dry-run --no-git-checks
+        working-directory: packages/sdk
+        env:
+          NODE_AUTH_TOKEN: placeholder
+      - name: Dry run @openavail/mcp
+        if: ${{ inputs.dry_run }}
+        run: pnpm publish --dry-run --no-git-checks
+        working-directory: packages/mcp
+        env:
+          NODE_AUTH_TOKEN: placeholder

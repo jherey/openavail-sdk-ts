@@ -8,8 +8,11 @@
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
-    "build": "tsup src/bin.ts --format esm --clean && chmod +x dist/bin.js",
+    "build": "tsup && chmod +x dist/bin.js",
     "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
