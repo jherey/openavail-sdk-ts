@@ -1,6 +1,6 @@
 # @openavail/mcp
 
-MCP server for Openavail — gives AI agents the ability to check availability, create bookings, and manage calendar events on behalf of calendar owners. Works with any MCP-compatible client: Claude Desktop, Claude Code, Codex, Cursor, and others.
+MCP server for Openavail - gives AI agents the ability to check availability, create bookings, and manage calendar events on behalf of calendar owners. Works with any MCP-compatible client: Claude Desktop, Claude Code, Codex, Cursor, and others.
 
 ## Quickstart
 
