@@ -55,6 +55,17 @@ claude mcp add openavail npx -- -y @openavail/mcp
 
 Then set env vars in `~/.claude.json` under the `openavail` entry as shown above.
 
+### Codex CLI
+
+Add to `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.openavail]
+command = "npx"
+args = ["-y", "@openavail/mcp"]
+env = { OPENAVAIL_API_KEY = "sk_live_...", OPENAVAIL_OWNER_EMAIL = "owner@example.com" }
+```
+
 ## Environment variables
 
 | Variable | Required | Description |
