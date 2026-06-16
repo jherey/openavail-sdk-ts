@@ -76,8 +76,9 @@ env = { OPENAVAIL_API_KEY = "sk_live_...", OPENAVAIL_OWNER_EMAIL = "owner@exampl
 ## Getting an API key
 
 1. Log in to the Openavail dashboard.
-2. Go to **Settings → API Keys → Create key**.
-3. Copy the key immediately — it is not shown again.
+2. Go to **Agents → Register agent** and create an agent.
+3. Click **Create API key** under the agent.
+4. Copy the key immediately — it is not shown again.
 
 ## Available tools
 
