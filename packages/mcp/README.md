@@ -1,6 +1,6 @@
 # @openavail/mcp
 
-MCP server for Openavail — gives Claude agents the ability to check availability, create bookings, and manage calendar events on behalf of calendar owners.
+MCP server for Openavail — gives AI agents the ability to check availability, create bookings, and manage calendar events on behalf of calendar owners. Works with any MCP-compatible client: Claude Desktop, Claude Code, Codex, Cursor, and others.
 
 ## Quickstart
 
@@ -61,7 +61,6 @@ Then set env vars in `~/.claude.json` under the `openavail` entry as shown above
 |---|---|---|
 | `OPENAVAIL_API_KEY` | Yes | API key from the Openavail dashboard (Settings → API Keys) |
 | `OPENAVAIL_OWNER_EMAIL` | No | Default calendar owner email. When set, all tools omit the `owner_email` parameter. Override per-call by passing `owner_email` explicitly. |
-| `OPENAVAIL_BASE_URL` | No | Override the API base URL (self-hosted deployments only). |
 
 ## Getting an API key
 
