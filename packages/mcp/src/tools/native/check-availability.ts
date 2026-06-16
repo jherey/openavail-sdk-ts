@@ -25,6 +25,7 @@ export function registerCheckAvailability(
       'If no slots are available, throws NoSlotsError. The error carries reason_code (DAILY_HOURS_LIMIT or NO_FREE_SLOTS) and an optional nextAvailable: {start, end} hint pointing at the nearest free slot — use it to suggest an alternative window without a new search.',
       'PAST_TIME: if window_start is in the past, the API returns 422 with code PAST_TIME. Always pass a future window_start. Do not retry with a past time — always advance the window.',
       'calendar_type fallback: if the requested type (e.g. "work") has no connected calendar, the request silently falls back to the primary calendar. Check resolvedCalendarType in the response — if it differs from what you requested, a fallback occurred. Call list-calendars first to avoid surprises.',
+      'RATE LIMIT: 300 calls/min per API key. If you receive a 429 response, stop retrying immediately and wait for the number of seconds in the Retry-After header before calling again.',
       defaultOwnerEmail
         ? `Default owner: ${defaultOwnerEmail} (set via OPENAVAIL_OWNER_EMAIL — override by passing owner_email explicitly).`
         : 'owner_email is required.',

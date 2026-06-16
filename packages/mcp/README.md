@@ -93,3 +93,12 @@ Then set env vars in `~/.claude.json` under the `openavail` entry as shown above
 **Hold TTL**: `check-availability` creates a 5-minute hold. For human-in-the-loop flows where a user picks a slot, confirm promptly or the hold will expire. Configurable TTL is on the roadmap.
 
 **All times are UTC**: Pass `start`/`end` in ISO 8601 UTC format. The `timezone` field returned by `list-calendars` tells you the owner's local timezone — use it to convert before calling.
+
+**Rate limits**: Limits are per API key, independent of other keys. On a 429 response, read the `Retry-After` header and wait that many seconds before retrying.
+
+| Tool | Limit |
+|---|---|
+| `check-availability` | 300 req/min |
+| `confirm-hold` | 120 req/min |
+| `create-event` | 120 req/min |
+| All other tools | 600 req/min (shared per server IP) |
