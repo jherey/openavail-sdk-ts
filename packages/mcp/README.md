@@ -95,7 +95,8 @@ env = { OPENAVAIL_API_KEY = "sk_live_...", OPENAVAIL_OWNER_EMAIL = "owner@exampl
 | `confirm-hold` | Confirm a hold, committing the booking. |
 | `simulate` | Preview arbitration without creating anything (Pro plan). |
 | `list-meeting-classes` | List valid meeting class names and their priority/preempt policy. |
-| `get-pending-notifications` | Flush and return pending agent notifications. |
+| `get-pending-notifications` | Fetch unread agent notifications (last 7 days). |
+| `ack-notifications` | Acknowledge notifications by ID to mark them as read. |
 
 ## Notes
 
