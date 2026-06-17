@@ -231,7 +231,8 @@ All errors extend `OpenavailError` and carry:
 
 | Class | When thrown |
 |---|---|
-| `NoSlotsError` | No available slots in the requested window |
+| `NoSlotsError` | No available slots. `.reasonCode` is `NoSlotsReasonCode`: `NO_FREE_SLOTS` (busy), `DAILY_HOURS_LIMIT` (daily cap), `OFF_DAY` (non-working day), `WORKING_HOURS` (outside working hours), `HARD_BLOCK` (recurring blocked period). `.nextAvailable` points to the nearest opening when `nextAvailableLookaheadHours` is set. |
+| `WindowTooNarrowError` | Window is shorter than the meeting duration. `.windowDurationMinutes` and `.requiredDurationMinutes` tell you by how much to widen it. |
 | `WorkingHoursNotConfiguredError` | Owner has no working hours set |
 | `CalendarNotFoundError` | No calendar found for the owner |
 | `LookaheadExceedsMaximumError` | `nextAvailableLookaheadHours` > 72 |

@@ -1,12 +1,3 @@
 {
-  "mcpServers": {
-    "openavail": {
-      "command": "node",
-      "args": ["packages/mcp/dist/bin.js"],
-      "env": {
-        "OPENAVAIL_API_KEY": "your-api-key-here",
-        "OPENAVAIL_OWNER_EMAIL": "owner@example.com"
-      }
-    }
-  }
+  "mcpServers": {}
 }
