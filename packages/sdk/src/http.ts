@@ -17,7 +17,13 @@ import {
   UnknownApiKeyError,
   WorkingHoursNotConfiguredError,
 } from './errors.js';
-import type { AlternativeSlot, AvailabilityWarning, PendingNotification, Slot } from './types.js';
+import type {
+  AlternativeSlot,
+  AvailabilityWarning,
+  PendingNotification,
+  RejectionReason,
+  Slot,
+} from './types.js';
 
 type ApiErrorBody = {
   error: { code: string; message: string; reason?: string };
@@ -51,7 +57,7 @@ function throwFromErrorBody(body: ApiErrorBody, httpStatus: number): never {
       throw new ArbitrationRejectedError(
         message,
         pn,
-        reason ?? 'UNKNOWN',
+        (reason ?? 'NO_CAPACITY') as RejectionReason,
         body.alternatives ?? [],
         body.next_available,
       );

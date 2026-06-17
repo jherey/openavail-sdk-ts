@@ -18,16 +18,15 @@ export function registerCreateEvent(
     'create-event',
     [
       'Create a booking (calendar event) directly. Equivalent to Google Calendar create-event.',
+      'REJECTION: if the slot is unavailable, ArbitrationRejectedError is thrown. Possible reasons: NO_CAPACITY (slot taken), WORKING_HOURS (outside working hours), OFF_DAY (non-working day), SACRED_MEETING (immovable protected booking), MAX_DAILY_HOURS (daily limit reached), PERMISSION_DENIED_PREEMPT (no preemption permission). alternatives[] contains contextually close slots (same day or same hour-of-day on next business day); if no comparable slot exists, alternatives[] is empty — use next_available for the absolute nearest opening.',
       'PREFER check-availability + confirm-hold when: you need to show slot options to a user, you want a preemption preview, or you are not certain the slot is free. Use create-event only for direct writes where the slot is already known and confirmed by the user.',
       'owner_email replaces calendarId — Openavail identifies owners by email, not calendar ID.',
       'meeting_class is required — call list-meeting-classes first to see valid names, priorities, and descriptions.',
       'TIMEZONE: start/end must be ISO 8601 UTC. Call list-calendars first to get the owner\'s IANA timezone (e.g. "Europe/Berlin"), convert the user\'s local times to UTC, then pass them here. All timestamps in responses are also UTC.',
-      'NOT supported in v1: location, timeZone, recurrence, calendarId.',
-      'calendar_type fallback: if the requested type (e.g. "work") has no connected calendar, the booking silently lands on the primary calendar. The response always includes calendar_type showing which type was actually used — compare it to what you requested to detect a fallback.',
-      'Preemption: if this booking displaces a lower-priority existing booking, the response includes displaced_bookings with title/start/end/meeting_class, and the calendar owner is automatically notified by email. To preview preemptable slots before committing, use check-availability first — it surfaces slot.preemptable metadata so you can warn the user before calling create-event.',
-      'REJECTION alternatives: when a booking is rejected, alternatives[] contains contextually close slots (same day remaining, or same hour-of-day on the next business day). If the requested time has no comparable slot (e.g. 22:00 when working hours end at 17:00), alternatives[] is empty. Check next_available in the error for the absolute nearest opening.',
+      'Preemption: if this booking displaces a lower-priority existing booking, the response includes displaced_bookings with title/start/end/meeting_class, and the calendar owner is automatically notified by email.',
+      'calendar_type fallback: if the requested type (e.g. "work") has no connected calendar, the booking silently lands on the primary calendar. The response always includes calendar_type showing which type was actually used.',
       'PAST_TIME: start must be in the future. If start is in the past, the API returns 422 with code PAST_TIME — do not retry with the same past time.',
-      'RATE LIMIT: 120 calls/min per API key. If you receive a 429 response, stop retrying immediately and wait for the number of seconds in the Retry-After header before calling again.',
+      'RATE LIMIT: 120 calls/min per API key. If you receive a 429 response, wait for the number of seconds in the Retry-After header before calling again.',
     ].join('\n'),
     {
       owner_email: z

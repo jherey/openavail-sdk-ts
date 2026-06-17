@@ -1,6 +1,7 @@
 import { HttpClient } from './http.js';
 import type {
   AckNotificationsResult,
+  AlternativeSlot,
   Booking,
   BookingResult,
   CancelBookingResult,
@@ -16,6 +17,7 @@ import type {
   OwnerCalendar,
   OwnerContext,
   PendingNotification,
+  RejectionReason,
   ScheduleRules,
   SimulateOptions,
   SimulateResult,
@@ -210,8 +212,8 @@ export class OpenavailClient {
     });
     return {
       decision: raw.decision,
-      reason: raw.reason,
-      alternatives: raw.alternatives,
+      reason: raw.reason as RejectionReason | undefined,
+      alternatives: raw.alternatives as AlternativeSlot[] | undefined,
       engineTrace: raw.engine_trace,
       pendingNotifications: raw.pending_notifications,
     };
