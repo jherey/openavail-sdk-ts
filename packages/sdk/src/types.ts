@@ -15,10 +15,19 @@ export type Slot = {
   preemptable?: { occupying_class: string; occupying_priority: number };
 };
 
+export type RejectionReason =
+  | 'NO_CAPACITY'
+  | 'WORKING_HOURS'
+  | 'OFF_DAY'
+  | 'SACRED_MEETING'
+  | 'MAX_DAILY_HOURS'
+  | 'PERMISSION_DENIED_PREEMPT'
+  | 'COUNTER_PROPOSED';
+
 export type AlternativeSlot = {
   start: string;
   end: string;
-  reason_code: string;
+  reason_code: 'suggested_alternative';
 };
 
 export type Attendee = { email: string; displayName?: string | undefined };
@@ -179,7 +188,7 @@ export type ListBookingsResult = {
 
 export type SimulateResult = {
   decision: 'Accept' | 'Reject' | 'Preempt' | 'CounterPropose';
-  reason?: string | undefined;
+  reason?: RejectionReason | undefined;
   alternatives?: AlternativeSlot[] | undefined;
   engineTrace: unknown;
   pendingNotifications: PendingNotification[];

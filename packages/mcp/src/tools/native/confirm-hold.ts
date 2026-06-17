@@ -14,11 +14,11 @@ export function registerConfirmHold(server: McpServer, client: OpenavailClient):
     'confirm-hold',
     [
       'Confirm a hold created by check-availability, promoting it to a committed booking.',
-      'The chosen start/end slot must fall within the hold window. The hold expires after a short TTL (currently 5 minutes) — call this promptly after check-availability. Configurable TTL is coming soon.',
+      'REJECTION: if arbitration rejects the slot, ArbitrationRejectedError is thrown. Possible reasons: NO_CAPACITY (slot taken), WORKING_HOURS (outside working hours), OFF_DAY (non-working day), SACRED_MEETING (immovable protected booking), MAX_DAILY_HOURS (daily limit reached), PERMISSION_DENIED_PREEMPT (no preemption permission). alternatives[] contains contextually close slots; next_available points to the absolute nearest free slot.',
       'Returns: bookingId, correlationId, displacedCount (bookings preempted by higher priority), pendingNotifications (last 60 minutes only — call get-pending-notifications for the full backlog).',
-      'If arbitration rejects the slot, ArbitrationRejectedError is returned. alternatives[] contains contextually close slots (same day or same hour-of-day on the next business day). If no comparable slot exists (e.g. 22:00 request when working hours end at 17:00), alternatives[] is empty — use next_available from the error for the absolute nearest opening instead.',
+      'The chosen start/end slot must fall within the hold window. The hold expires after a short TTL (currently 5 minutes) — call this promptly after check-availability.',
       'PAST_TIME: the chosen start must be in the future at the time of this call. If the hold was created for a future slot that has since passed (e.g. a long user pause), the API returns 422 with code PAST_TIME. Re-run check-availability with a fresh window.',
-      'RATE LIMIT: 120 calls/min per API key. If you receive a 429 response, stop retrying immediately and wait for the number of seconds in the Retry-After header before calling again.',
+      'RATE LIMIT: 120 calls/min per API key. If you receive a 429 response, wait for the number of seconds in the Retry-After header before calling again.',
     ].join('\n'),
     {
       hold_id: z.string().uuid().describe('The holdId from a check-availability response.'),

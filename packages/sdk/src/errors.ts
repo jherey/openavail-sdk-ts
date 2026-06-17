@@ -1,4 +1,10 @@
-import type { AlternativeSlot, AvailabilityWarning, PendingNotification, Slot } from './types.js';
+import type {
+  AlternativeSlot,
+  AvailabilityWarning,
+  PendingNotification,
+  RejectionReason,
+  Slot,
+} from './types.js';
 
 export class OpenavailError extends Error {
   readonly code: string;
@@ -65,14 +71,14 @@ export class LookaheadExceedsMaximumError extends OpenavailError {
 // ── Booking errors ────────────────────────────────────────────────────────────
 
 export class ArbitrationRejectedError extends OpenavailError {
-  readonly reason: string;
+  readonly reason: RejectionReason;
   readonly alternatives: AlternativeSlot[];
   readonly nextAvailable: Slot | undefined;
 
   constructor(
     message: string,
     pendingNotifications: PendingNotification[],
-    reason: string,
+    reason: RejectionReason,
     alternatives: AlternativeSlot[],
     nextAvailable?: Slot,
   ) {

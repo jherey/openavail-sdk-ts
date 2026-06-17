@@ -39,6 +39,7 @@ export type {
   OwnerCalendar,
   OwnerContext,
   PendingNotification,
+  RejectionReason,
   ScheduleRules,
   SimulateOptions,
   SimulateResult,
