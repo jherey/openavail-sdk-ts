@@ -24,6 +24,23 @@ export type RejectionReason =
   | 'PERMISSION_DENIED_PREEMPT'
   | 'COUNTER_PROPOSED';
 
+/**
+ * Why check-availability returned no slots.
+ * Returned as reason_code on the NoSlotsError thrown by checkAvailability().
+ *
+ * - NO_FREE_SLOTS   — working day, right time of day, but the calendar is genuinely busy
+ * - DAILY_HOURS_LIMIT — owner has hit their daily meeting cap
+ * - OFF_DAY         — the window falls on a non-working day (e.g. Saturday)
+ * - WORKING_HOURS   — working day but the window is outside the owner's configured hours
+ * - HARD_BLOCK      — the window overlaps a recurring hard block (e.g. lunch break)
+ */
+export type NoSlotsReasonCode =
+  | 'NO_FREE_SLOTS'
+  | 'DAILY_HOURS_LIMIT'
+  | 'OFF_DAY'
+  | 'WORKING_HOURS'
+  | 'HARD_BLOCK';
+
 export type AlternativeSlot = {
   start: string;
   end: string;

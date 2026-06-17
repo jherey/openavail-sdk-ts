@@ -1,6 +1,7 @@
 import type {
   AlternativeSlot,
   AvailabilityWarning,
+  NoSlotsReasonCode,
   PendingNotification,
   RejectionReason,
   Slot,
@@ -28,6 +29,7 @@ export class OpenavailError extends Error {
 // ── Availability errors ───────────────────────────────────────────────────────
 
 export class NoSlotsError extends OpenavailError {
+  readonly reasonCode: NoSlotsReasonCode;
   readonly nextAvailable: Slot | undefined;
   readonly resolvedCalendarType: string | null;
   readonly warnings: AvailabilityWarning[];
@@ -38,12 +40,26 @@ export class NoSlotsError extends OpenavailError {
     resolvedCalendarType: string | null,
     warnings: AvailabilityWarning[],
     nextAvailable?: Slot,
+    reasonCode: NoSlotsReasonCode = 'NO_FREE_SLOTS',
   ) {
     super(message, 'NO_SLOTS_AVAILABLE', 409, pendingNotifications);
     this.name = 'NoSlotsError';
+    this.reasonCode = reasonCode;
     this.nextAvailable = nextAvailable;
     this.resolvedCalendarType = resolvedCalendarType;
     this.warnings = warnings;
+  }
+}
+
+export class WindowTooNarrowError extends OpenavailError {
+  readonly windowDurationMinutes: number;
+  readonly requiredDurationMinutes: number;
+
+  constructor(message: string, windowDurationMinutes: number, requiredDurationMinutes: number) {
+    super(message, 'WINDOW_TOO_NARROW', 422, []);
+    this.name = 'WindowTooNarrowError';
+    this.windowDurationMinutes = windowDurationMinutes;
+    this.requiredDurationMinutes = requiredDurationMinutes;
   }
 }
 

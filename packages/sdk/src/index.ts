@@ -17,6 +17,7 @@ export {
   PermissionDeniedError,
   SlotOutsideHoldError,
   UnknownApiKeyError,
+  WindowTooNarrowError,
   WorkingHoursNotConfiguredError,
 } from './errors.js';
 export type {
@@ -36,6 +37,7 @@ export type {
   ListBookingsOptions,
   ListBookingsResult,
   MeetingClass,
+  NoSlotsReasonCode,
   OwnerCalendar,
   OwnerContext,
   PendingNotification,

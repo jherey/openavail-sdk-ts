@@ -13,7 +13,7 @@ export function registerCheckAvailability(
     'check-availability',
     [
       'Find available time slots for a calendar owner and reserve a short-lived hold, then call confirm-hold to commit the booking.',
-      'NO SLOTS: if no slots are available, throws NoSlotsError with reason_code (DAILY_HOURS_LIMIT or NO_FREE_SLOTS) and an optional nextAvailable: {start, end} hint — pass next_available_lookahead_hours (default 24h, max 72h) to enable the hint and know when to retry.',
+      'NO SLOTS: if no slots are available, throws NoSlotsError with reason_code (NO_FREE_SLOTS | DAILY_HOURS_LIMIT | OFF_DAY | WORKING_HOURS | HARD_BLOCK) and an optional nextAvailable: {start, end} hint — pass next_available_lookahead_hours (default 24h, max 72h) to enable the hint and know when to retry. WINDOW_TOO_NARROW (422) is thrown when the window is shorter than the requested duration — widen the window.',
       'WINDOW END IS A DEADLINE, NOT A START BOUNDARY: window_end is the latest time the meeting may END. For a 60-min meeting you want to start at 2pm, set window_end to 3pm (not 2pm).',
       'Returns: holdId, expiresAt (UTC ISO string), expiresInSeconds (use this for TTL checks — avoids timezone comparison errors), slots (start/end pairs), resolvedCalendarType, and pendingNotifications.',
       'IMPORTANT: use expiresInSeconds to check if the hold is still live. Do NOT compare expiresAt against local date strings — timezone-naive comparisons will produce wrong results.',

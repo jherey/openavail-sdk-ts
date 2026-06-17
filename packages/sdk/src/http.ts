@@ -15,11 +15,13 @@ import {
   PermissionDeniedError,
   SlotOutsideHoldError,
   UnknownApiKeyError,
+  WindowTooNarrowError,
   WorkingHoursNotConfiguredError,
 } from './errors.js';
 import type {
   AlternativeSlot,
   AvailabilityWarning,
+  NoSlotsReasonCode,
   PendingNotification,
   RejectionReason,
   Slot,
@@ -32,6 +34,9 @@ type ApiErrorBody = {
   resolved_calendar_type?: string | null;
   warnings?: AvailabilityWarning[];
   alternatives?: AlternativeSlot[];
+  reason_code?: string;
+  window_duration_minutes?: number;
+  required_duration_minutes?: number;
 };
 
 function throwFromErrorBody(body: ApiErrorBody, httpStatus: number): never {
@@ -46,6 +51,13 @@ function throwFromErrorBody(body: ApiErrorBody, httpStatus: number): never {
         body.resolved_calendar_type ?? null,
         body.warnings ?? [],
         body.next_available,
+        (body.reason_code as NoSlotsReasonCode | undefined) ?? 'NO_FREE_SLOTS',
+      );
+    case 'WINDOW_TOO_NARROW':
+      throw new WindowTooNarrowError(
+        message,
+        body.window_duration_minutes ?? 0,
+        body.required_duration_minutes ?? 0,
       );
     case 'WORKING_HOURS_NOT_CONFIGURED':
       throw new WorkingHoursNotConfiguredError(message, pn);
