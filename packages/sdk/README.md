@@ -49,6 +49,8 @@ console.log('Booked:', booking.bookingId);
 3. Click **Create API key** under the agent.
 4. Copy the key immediately — it is not shown again. Keys are prefixed `ak_`.
 
+> **Using the SDK alongside the MCP server?** The MCP server reads `OPENAVAIL_API_KEY` from its own process environment (configured via your MCP client, e.g. `~/.claude.json`). That key is not automatically available in your shell session. Set `OPENAVAIL_API_KEY` in your shell profile separately if you also want to use the SDK directly.
+
 ## Client
 
 ```typescript
