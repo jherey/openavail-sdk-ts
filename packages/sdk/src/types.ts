@@ -184,6 +184,7 @@ export type BookingResult = {
   title: string | null;
   description: string | null;
   calendarType: string | null;
+  attendees?: Attendee[];
   status: 'committed';
 };
 

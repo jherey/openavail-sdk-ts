@@ -31,6 +31,7 @@ export class OpenavailError extends Error {
 export class NoSlotsError extends OpenavailError {
   readonly reasonCode: NoSlotsReasonCode;
   readonly nextAvailable: Slot | undefined;
+  readonly nextAvailableExceedsLookahead: boolean;
   readonly resolvedCalendarType: string | null;
   readonly warnings: AvailabilityWarning[];
 
@@ -41,11 +42,13 @@ export class NoSlotsError extends OpenavailError {
     warnings: AvailabilityWarning[],
     nextAvailable?: Slot,
     reasonCode: NoSlotsReasonCode = 'NO_FREE_SLOTS',
+    nextAvailableExceedsLookahead?: boolean,
   ) {
     super(message, 'NO_SLOTS_AVAILABLE', 409, pendingNotifications);
     this.name = 'NoSlotsError';
     this.reasonCode = reasonCode;
     this.nextAvailable = nextAvailable;
+    this.nextAvailableExceedsLookahead = nextAvailableExceedsLookahead ?? false;
     this.resolvedCalendarType = resolvedCalendarType;
     this.warnings = warnings;
   }

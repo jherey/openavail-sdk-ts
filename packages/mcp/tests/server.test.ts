@@ -8,7 +8,9 @@ import {
   type CancelBookingResult,
   type CheckAvailabilityResult,
   type ListBookingsResult,
+  NoSlotsError,
   type OwnerCalendar,
+  type OwnerContext,
   type PendingNotification,
   type ScheduleRules,
 } from '@openavail/sdk';
@@ -28,6 +30,8 @@ function mockClient(overrides: Partial<OpenavailClient> = {}): OpenavailClient {
     cancelBooking: vi.fn(),
     updateBooking: vi.fn(),
     getScheduleRules: vi.fn(),
+    getOwnerContext: vi.fn(),
+    listMeetingClasses: vi.fn(),
     ...overrides,
   } as unknown as OpenavailClient;
 }
@@ -371,6 +375,114 @@ describe('MCP server tools', () => {
       expect(vi.mocked(client.listBookings)).toHaveBeenCalledWith(
         expect.objectContaining({ attendeeEmail: 'attendee@example.com' }),
       );
+    });
+  });
+
+  // ── get-agent-context ─────────────────────────────────────────────────────────
+
+  describe('get-agent-context', () => {
+    it('is registered as get-agent-context (not get-owner-context)', async () => {
+      const OWNER_CONTEXT: OwnerContext = {
+        calendars: [{ calendar_type: 'work', is_primary: true, timezone: 'Europe/Berlin' }],
+        scheduleRules: {
+          workingHours: [
+            {
+              days: [1, 2, 3, 4, 5],
+              startTime: '09:00',
+              endTime: '17:00',
+              timezone: 'Europe/Berlin',
+            },
+          ],
+          slotIntervalMinutes: 15,
+          maxDailyMeetingHours: null,
+        },
+        meetingClasses: [
+          { name: 'internal_sync', description: null, priority: 30, preemptPolicy: 'soft' },
+        ],
+        pendingNotifications: [],
+      };
+      vi.mocked(client.getOwnerContext).mockResolvedValue(OWNER_CONTEXT);
+
+      const res = await mcpClient.callTool({
+        name: 'get-agent-context',
+        arguments: { owner_email: 'owner@example.com' },
+      });
+
+      expect(res.isError).toBeFalsy();
+      expect(vi.mocked(client.getOwnerContext)).toHaveBeenCalledWith('owner@example.com');
+    });
+  });
+
+  // ── toolError field forwarding ────────────────────────────────────────────────
+
+  describe('toolError field forwarding', () => {
+    it('forwards reasonCode from NoSlotsError in check-availability error', async () => {
+      vi.mocked(client.checkAvailability).mockRejectedValue(
+        new NoSlotsError('No slots', [], null, [], undefined, 'OFF_DAY'),
+      );
+
+      const res = await mcpClient.callTool({
+        name: 'check-availability',
+        arguments: {
+          owner_email: 'owner@example.com',
+          duration_minutes: 60,
+          window_start: '2026-07-01T08:00:00Z',
+          window_end: '2026-07-01T18:00:00Z',
+          meeting_class: 'internal_sync',
+        },
+      });
+
+      expect(res.isError).toBe(true);
+      const content = res.content as { type: string; text: string }[];
+      const body = JSON.parse(content[0]?.text ?? '{}') as { reasonCode: string };
+      expect(body.reasonCode).toBe('OFF_DAY');
+    });
+
+    it('forwards nextAvailableExceedsLookahead from NoSlotsError', async () => {
+      vi.mocked(client.checkAvailability).mockRejectedValue(
+        new NoSlotsError('No slots', [], null, [], undefined, 'WORKING_HOURS', true),
+      );
+
+      const res = await mcpClient.callTool({
+        name: 'check-availability',
+        arguments: {
+          owner_email: 'owner@example.com',
+          duration_minutes: 60,
+          window_start: '2026-07-01T08:00:00Z',
+          window_end: '2026-07-01T18:00:00Z',
+          meeting_class: 'internal_sync',
+        },
+      });
+
+      expect(res.isError).toBe(true);
+      const content = res.content as { type: string; text: string }[];
+      const body = JSON.parse(content[0]?.text ?? '{}') as {
+        nextAvailableExceedsLookahead: boolean;
+      };
+      expect(body.nextAvailableExceedsLookahead).toBe(true);
+    });
+
+    it('forwards nextAvailable from ArbitrationRejectedError', async () => {
+      const nextAvailable = { start: '2026-07-02T09:00:00Z', end: '2026-07-02T10:00:00Z' };
+      vi.mocked(client.createBooking).mockRejectedValue(
+        new ArbitrationRejectedError('Rejected', [], 'WORKING_HOURS', [], nextAvailable),
+      );
+
+      const res = await mcpClient.callTool({
+        name: 'create-event',
+        arguments: {
+          owner_email: 'owner@example.com',
+          meeting_class: 'internal_sync',
+          start: '2026-07-01T21:00:00Z',
+          end: '2026-07-01T22:00:00Z',
+          title: 'Late night',
+        },
+      });
+
+      expect(res.isError).toBe(true);
+      const content = res.content as { type: string; text: string }[];
+      const body = JSON.parse(content[0]?.text ?? '{}') as { nextAvailable: typeof nextAvailable };
+      expect(body.nextAvailable).toEqual(nextAvailable);
     });
   });
 });

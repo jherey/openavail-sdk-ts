@@ -104,6 +104,60 @@ describe('checkAvailability', () => {
     });
   });
 
+  it('NoSlotsError carries reasonCode from API reason_code', async () => {
+    mockFetch(409, {
+      error: { code: 'NO_SLOTS_AVAILABLE', message: 'No slots' },
+      pending_notifications: [],
+      resolved_calendar_type: null,
+      warnings: [],
+      reason_code: 'OFF_DAY',
+    });
+
+    const err = (await client.checkAvailability(BASE_OPTS).catch((e) => e)) as NoSlotsError;
+    expect(err).toBeInstanceOf(NoSlotsError);
+    expect(err.reasonCode).toBe('OFF_DAY');
+  });
+
+  it('NoSlotsError.reasonCode defaults to NO_FREE_SLOTS when reason_code absent', async () => {
+    mockFetch(409, {
+      error: { code: 'NO_SLOTS_AVAILABLE', message: 'No slots' },
+      pending_notifications: [],
+      resolved_calendar_type: null,
+      warnings: [],
+    });
+
+    const err = (await client.checkAvailability(BASE_OPTS).catch((e) => e)) as NoSlotsError;
+    expect(err).toBeInstanceOf(NoSlotsError);
+    expect(err.reasonCode).toBe('NO_FREE_SLOTS');
+  });
+
+  it('NoSlotsError carries nextAvailableExceedsLookahead when API sets the flag', async () => {
+    mockFetch(409, {
+      error: { code: 'NO_SLOTS_AVAILABLE', message: 'No slots' },
+      pending_notifications: [],
+      resolved_calendar_type: null,
+      warnings: [],
+      next_available_exceeds_lookahead: true,
+    });
+
+    const err = (await client.checkAvailability(BASE_OPTS).catch((e) => e)) as NoSlotsError;
+    expect(err).toBeInstanceOf(NoSlotsError);
+    expect(err.nextAvailableExceedsLookahead).toBe(true);
+  });
+
+  it('NoSlotsError.nextAvailableExceedsLookahead defaults to false when flag absent', async () => {
+    mockFetch(409, {
+      error: { code: 'NO_SLOTS_AVAILABLE', message: 'No slots' },
+      pending_notifications: [],
+      resolved_calendar_type: null,
+      warnings: [],
+    });
+
+    const err = (await client.checkAvailability(BASE_OPTS).catch((e) => e)) as NoSlotsError;
+    expect(err).toBeInstanceOf(NoSlotsError);
+    expect(err.nextAvailableExceedsLookahead).toBe(false);
+  });
+
   it('throws CalendarNotFoundError on CALENDAR_NOT_FOUND', async () => {
     mockFetch(404, {
       error: { code: 'CALENDAR_NOT_FOUND', message: 'Not found' },

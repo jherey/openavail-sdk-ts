@@ -94,6 +94,7 @@ export class OpenavailClient {
       title: string | null;
       description?: string | null;
       calendar_type: string | null;
+      attendees?: { email: string; displayName?: string }[];
       status: 'committed';
     };
     const raw = await this.#http.request<Raw>({
@@ -128,6 +129,7 @@ export class OpenavailClient {
       title: raw.title,
       description: raw.description ?? null,
       calendarType: raw.calendar_type,
+      attendees: raw.attendees ?? [],
       status: raw.status,
     };
   }
@@ -150,6 +152,7 @@ export class OpenavailClient {
       title: string | null;
       description?: string | null;
       calendar_type: string | null;
+      attendees?: { email: string; displayName?: string }[];
       status: 'committed';
     };
     const raw = await this.#http.request<Raw>({
@@ -187,6 +190,7 @@ export class OpenavailClient {
       title: raw.title,
       description: raw.description ?? null,
       calendarType: raw.calendar_type,
+      attendees: raw.attendees ?? [],
       status: raw.status,
     };
   }
