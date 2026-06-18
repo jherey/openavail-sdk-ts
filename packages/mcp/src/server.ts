@@ -10,7 +10,7 @@ import { registerUpdateEvent } from './tools/compatibility/update-event.js';
 import { registerAckNotifications } from './tools/native/ack-notifications.js';
 import { registerCheckAvailability } from './tools/native/check-availability.js';
 import { registerConfirmHold } from './tools/native/confirm-hold.js';
-import { registerGetOwnerContext } from './tools/native/get-owner-context.js';
+import { registerGetAgentContext } from './tools/native/get-agent-context.js';
 import { registerGetPendingNotifications } from './tools/native/get-pending-notifications.js';
 import { registerGetScheduleRules } from './tools/native/get-schedule-rules.js';
 import { registerListMeetingClasses } from './tools/native/list-meeting-classes.js';
@@ -31,7 +31,7 @@ export function buildServer(
   registerDeleteEvent(server, client);
   registerSearchEvents(server, client, defaultOwnerEmail);
 
-  registerGetOwnerContext(server, client, defaultOwnerEmail);
+  registerGetAgentContext(server, client, defaultOwnerEmail);
   registerListMeetingClasses(server, client);
   registerCheckAvailability(server, client, defaultOwnerEmail);
   registerConfirmHold(server, client);

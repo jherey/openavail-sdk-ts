@@ -35,6 +35,7 @@ type ApiErrorBody = {
   warnings?: AvailabilityWarning[];
   alternatives?: AlternativeSlot[];
   reason_code?: string;
+  next_available_exceeds_lookahead?: boolean;
   window_duration_minutes?: number;
   required_duration_minutes?: number;
 };
@@ -52,6 +53,7 @@ function throwFromErrorBody(body: ApiErrorBody, httpStatus: number): never {
         body.warnings ?? [],
         body.next_available,
         (body.reason_code as NoSlotsReasonCode | undefined) ?? 'NO_FREE_SLOTS',
+        body.next_available_exceeds_lookahead,
       );
     case 'WINDOW_TOO_NARROW':
       throw new WindowTooNarrowError(

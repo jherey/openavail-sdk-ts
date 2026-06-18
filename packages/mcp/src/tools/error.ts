@@ -17,12 +17,15 @@ export function toolError(err: OpenavailError) {
   if (err instanceof ArbitrationRejectedError) {
     body.reason = err.reason;
     body.alternatives = err.alternatives;
+    if (err.nextAvailable !== undefined) body.nextAvailable = err.nextAvailable;
   }
 
   if (err instanceof NoSlotsError) {
+    body.reasonCode = err.reasonCode;
     body.resolvedCalendarType = err.resolvedCalendarType;
     body.warnings = err.warnings;
     if (err.nextAvailable !== undefined) body.nextAvailable = err.nextAvailable;
+    if (err.nextAvailableExceedsLookahead) body.nextAvailableExceedsLookahead = true;
   }
 
   return {
