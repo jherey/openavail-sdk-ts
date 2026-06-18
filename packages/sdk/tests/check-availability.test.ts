@@ -26,7 +26,8 @@ afterEach(() => vi.unstubAllGlobals());
 const BASE_OPTS = {
   ownerEmail: 'alex@acme.com',
   durationMinutes: 60,
-  window: { start: '2026-07-01T09:00:00Z', end: '2026-07-01T17:00:00Z' },
+  earliestStart: '2026-07-01T09:00:00Z',
+  latestEnd: '2026-07-01T17:00:00Z',
   meetingClass: 'internal_sync',
 };
 
@@ -52,7 +53,8 @@ describe('checkAvailability', () => {
     expect(body.owner_email).toBe('alex@acme.com');
     expect(body.duration_minutes).toBe(60);
     expect(body.meeting_class).toBe('internal_sync');
-    expect(body.window).toEqual({ start: '2026-07-01T09:00:00Z', end: '2026-07-01T17:00:00Z' });
+    expect(body.earliest_start).toBe('2026-07-01T09:00:00Z');
+    expect(body.latest_end).toBe('2026-07-01T17:00:00Z');
   });
 
   it('auto-injects Idempotency-Key header when not provided', async () => {

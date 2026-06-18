@@ -55,7 +55,8 @@ export class OpenavailClient {
       body: {
         ...(options.ownerEmail !== undefined && { owner_email: options.ownerEmail }),
         duration_minutes: options.durationMinutes,
-        window: options.window,
+        earliest_start: options.earliestStart,
+        latest_end: options.latestEnd,
         meeting_class: options.meetingClass,
         ...(options.calendarType !== undefined && { calendar_type: options.calendarType }),
         ...(options.nextAvailableLookaheadHours !== undefined && {

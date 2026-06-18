@@ -264,8 +264,8 @@ describe('MCP server tools', () => {
         arguments: {
           owner_email: 'owner@example.com',
           duration_minutes: 60,
-          window_start: '2026-07-01T08:00:00Z',
-          window_end: '2026-07-01T18:00:00Z',
+          earliest_start: '2026-07-01T08:00:00Z',
+          latest_end: '2026-07-01T18:00:00Z',
           meeting_class: 'internal_sync',
         },
       });
@@ -274,7 +274,8 @@ describe('MCP server tools', () => {
         expect.objectContaining({
           ownerEmail: 'owner@example.com',
           durationMinutes: 60,
-          window: { start: '2026-07-01T08:00:00Z', end: '2026-07-01T18:00:00Z' },
+          earliestStart: '2026-07-01T08:00:00Z',
+          latestEnd: '2026-07-01T18:00:00Z',
           meetingClass: 'internal_sync',
         }),
       );
@@ -426,8 +427,8 @@ describe('MCP server tools', () => {
         arguments: {
           owner_email: 'owner@example.com',
           duration_minutes: 60,
-          window_start: '2026-07-01T08:00:00Z',
-          window_end: '2026-07-01T18:00:00Z',
+          earliest_start: '2026-07-01T08:00:00Z',
+          latest_end: '2026-07-01T18:00:00Z',
           meeting_class: 'internal_sync',
         },
       });
@@ -448,8 +449,8 @@ describe('MCP server tools', () => {
         arguments: {
           owner_email: 'owner@example.com',
           duration_minutes: 60,
-          window_start: '2026-07-01T08:00:00Z',
-          window_end: '2026-07-01T18:00:00Z',
+          earliest_start: '2026-07-01T08:00:00Z',
+          latest_end: '2026-07-01T18:00:00Z',
           meeting_class: 'internal_sync',
         },
       });
