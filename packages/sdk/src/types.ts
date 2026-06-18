@@ -96,7 +96,7 @@ export type CheckAvailabilityOptions = {
   durationMinutes: number;
   /** Earliest time the meeting may start (ISO 8601 UTC). */
   earliestStart: string;
-  /** Latest time the meeting may END — not start (ISO 8601 UTC). For a 60-min meeting starting at 2pm, set latestEnd to 3pm. */
+  /** Latest time the meeting may END — not start (ISO 8601 UTC). For a 60-min meeting starting at 2pm, set latestEnd to at least 3pm. */
   latestEnd: string;
   meetingClass: string;
   calendarType?: 'work' | 'personal' | 'other';
