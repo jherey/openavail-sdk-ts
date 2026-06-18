@@ -3,12 +3,12 @@ import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import type { OpenavailClient } from '@openavail/sdk';
 import {
   ArbitrationRejectedError,
-  NoSlotsError,
   type Booking,
   type BookingResult,
   type CancelBookingResult,
   type CheckAvailabilityResult,
   type ListBookingsResult,
+  NoSlotsError,
   type OwnerCalendar,
   type OwnerContext,
   type PendingNotification,
@@ -385,11 +385,20 @@ describe('MCP server tools', () => {
       const OWNER_CONTEXT: OwnerContext = {
         calendars: [{ calendar_type: 'work', is_primary: true, timezone: 'Europe/Berlin' }],
         scheduleRules: {
-          workingHours: [{ days: [1, 2, 3, 4, 5], startTime: '09:00', endTime: '17:00', timezone: 'Europe/Berlin' }],
+          workingHours: [
+            {
+              days: [1, 2, 3, 4, 5],
+              startTime: '09:00',
+              endTime: '17:00',
+              timezone: 'Europe/Berlin',
+            },
+          ],
           slotIntervalMinutes: 15,
           maxDailyMeetingHours: null,
         },
-        meetingClasses: [{ name: 'internal_sync', description: null, priority: 30, preemptPolicy: 'soft' }],
+        meetingClasses: [
+          { name: 'internal_sync', description: null, priority: 30, preemptPolicy: 'soft' },
+        ],
         pendingNotifications: [],
       };
       vi.mocked(client.getOwnerContext).mockResolvedValue(OWNER_CONTEXT);
@@ -447,7 +456,9 @@ describe('MCP server tools', () => {
 
       expect(res.isError).toBe(true);
       const content = res.content as { type: string; text: string }[];
-      const body = JSON.parse(content[0]?.text ?? '{}') as { nextAvailableExceedsLookahead: boolean };
+      const body = JSON.parse(content[0]?.text ?? '{}') as {
+        nextAvailableExceedsLookahead: boolean;
+      };
       expect(body.nextAvailableExceedsLookahead).toBe(true);
     });
 
