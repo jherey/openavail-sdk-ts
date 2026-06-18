@@ -1,6 +1,6 @@
 # @openavail/mcp
 
-MCP server for Openavail - gives AI agents the ability to check availability, create bookings, and manage calendar events on behalf of calendar owners. Works with any MCP-compatible client: Claude Desktop, Claude Code, Codex, Cursor, and others.
+MCP server for [Openavail](https://openavail.com) — gives AI agents the ability to check availability, create bookings, and manage calendar events on behalf of calendar owners. Works with any MCP-compatible client: Claude Desktop, Claude Code, Cursor, Windsurf, and others.
 
 ## Quickstart
 
@@ -18,7 +18,7 @@ Add to your Claude Desktop config file:
       "command": "npx",
       "args": ["-y", "@openavail/mcp"],
       "env": {
-        "OPENAVAIL_API_KEY": "sk_live_...",
+        "OPENAVAIL_API_KEY": "ak_01HX7QQM…",
         "OPENAVAIL_OWNER_EMAIL": "owner@example.com"
       }
     }
@@ -30,47 +30,27 @@ Restart Claude Desktop after saving.
 
 ### Claude Code (CLI)
 
-Add to `~/.claude.json` under the top-level `mcpServers` key (create the file if it doesn't exist):
-
-```json
-{
-  "mcpServers": {
-    "openavail": {
-      "command": "npx",
-      "args": ["-y", "@openavail/mcp"],
-      "env": {
-        "OPENAVAIL_API_KEY": "sk_live_...",
-        "OPENAVAIL_OWNER_EMAIL": "owner@example.com"
-      }
-    }
-  }
-}
-```
-
-Or register it from the terminal:
-
 ```bash
-claude mcp add openavail npx -- -y @openavail/mcp
+claude mcp add --transport stdio openavail \
+  --env OPENAVAIL_API_KEY=ak_01HX7QQM… \
+  --env OPENAVAIL_OWNER_EMAIL=owner@example.com \
+  -- npx -y @openavail/mcp
 ```
 
-Then set env vars in `~/.claude.json` under the `openavail` entry as shown above.
+### Cursor / Windsurf / other clients
 
-### Codex CLI
+Add the same JSON block to your client's MCP config file. Config file locations:
 
-Add to `~/.codex/config.toml`:
-
-```toml
-[mcp_servers.openavail]
-command = "npx"
-args = ["-y", "@openavail/mcp"]
-env = { OPENAVAIL_API_KEY = "sk_live_...", OPENAVAIL_OWNER_EMAIL = "owner@example.com" }
-```
+| Client | Config file |
+|---|---|
+| Cursor | `.cursor/mcp.json` (project) or `~/.cursor/mcp.json` (global) |
+| Windsurf | `.codeium/windsurf/mcp_config.json` |
 
 ## Environment variables
 
 | Variable | Required | Description |
 |---|---|---|
-| `OPENAVAIL_API_KEY` | Yes | API key from the Openavail dashboard (Settings → API Keys) |
+| `OPENAVAIL_API_KEY` | Yes | API key from the Openavail dashboard. Go to **Agents → Register agent**, create an agent, then click **Create API key**. Keys are prefixed `ak_`. |
 | `OPENAVAIL_OWNER_EMAIL` | No | Default calendar owner email. When set, all tools omit the `owner_email` parameter. Override per-call by passing `owner_email` explicitly. |
 
 ## Getting an API key
@@ -82,35 +62,56 @@ env = { OPENAVAIL_API_KEY = "sk_live_...", OPENAVAIL_OWNER_EMAIL = "owner@exampl
 
 ## Available tools
 
+### Start here
+
 | Tool | Description |
 |---|---|
-| `list-calendars` | List connected calendars and which types (work/personal/other) are unavailable. |
-| `list-events` | List committed bookings for a calendar owner. |
+| `get-agent-context` | **Call this first.** Returns the owner's timezone, working hours, slot interval, and all valid meeting class names in one call. Everything you need to make a valid booking request. |
+
+### Native tools (Openavail-specific)
+
+| Tool | Description |
+|---|---|
+| `check-availability` | Find available slots and create a short-lived hold. Pass `earliest_start` and `latest_end` — `latest_end` is when the meeting must **end**, not start. |
+| `confirm-hold` | Confirm a hold, committing the booking to the calendar. |
+| `simulate` | Preview the arbitration decision without creating anything (Pro plan). |
+| `get-schedule-rules` | Get working hours and slot interval for an owner. |
+| `list-meeting-classes` | List valid meeting class names and their priority/preempt policy. |
+| `get-pending-notifications` | Fetch unread agent notifications (last 7 days). |
+| `ack-notifications` | Acknowledge notifications by ID to mark them as read. |
+
+### Compatibility tools (Google Calendar MCP-compatible names)
+
+These use the same tool names as `google-calendar-mcp` so agents targeting that server work without prompt changes.
+
+| Tool | Description |
+|---|---|
+| `list-calendars` | List connected calendars for an owner. |
+| `list-events` | List committed bookings in a time window. |
 | `get-event` | Fetch a single booking by ID. |
 | `create-event` | Create a booking directly (no prior hold). |
 | `update-event` | Update a booking's title, description, or attendees. |
 | `delete-event` | Cancel a booking. |
 | `search-events` | Search bookings by title keyword. |
-| `check-availability` | Find available slots and create a hold. |
-| `confirm-hold` | Confirm a hold, committing the booking. |
-| `simulate` | Preview arbitration without creating anything (Pro plan). |
-| `list-meeting-classes` | List valid meeting class names and their priority/preempt policy. |
-| `get-pending-notifications` | Fetch unread agent notifications (last 7 days). |
-| `ack-notifications` | Acknowledge notifications by ID to mark them as read. |
 
 ## Notes
 
-**Calendar types**: Openavail supports `work`, `personal`, and `other` calendar types per owner. If a user has only connected a personal calendar and you pass `calendar_type: "work"`, the request silently falls back to the primary calendar. Always call `list-calendars` first — it returns both connected calendars and an `unavailable_calendar_types` array so you know which types to avoid. If the primary calendar is also missing or disabled, the fallback fails with `CALENDAR_NOT_FOUND` — there is no further fallback to other connected calendars.
+**Always call `get-agent-context` first.** It returns the owner's IANA timezone, working hours, and all valid meeting class names in one call. Use the timezone to convert local times to UTC before any booking call.
 
-**Hold TTL**: `check-availability` creates a 5-minute hold. For human-in-the-loop flows where a user picks a slot, confirm promptly or the hold will expire. Configurable TTL is on the roadmap.
+**`latest_end` is a deadline, not a start boundary.** `latest_end` is the latest a meeting may **end**, not start. For a 60-min meeting at 2 pm, set `latest_end` to at least 3 pm.
 
-**All times are UTC**: Pass `start`/`end` in ISO 8601 UTC format. The `timezone` field returned by `list-calendars` tells you the owner's local timezone — use it to convert before calling.
+**Use `expiresInSeconds` for TTL checks.** The `check-availability` response includes both `expiresAt` (UTC ISO string) and `expiresInSeconds` (relative). Use `expiresInSeconds` — comparing `expiresAt` against a local time string produces wrong results in non-UTC timezones.
 
-**Rate limits**: Limits are per API key, independent of other keys. On a 429 response, read the `Retry-After` header and wait that many seconds before retrying.
+**Calendar types**: Openavail supports `work`, `personal`, and `other` calendar types per owner. If a user has only connected a personal calendar and you pass `calendar_type: "work"`, the request silently falls back to the primary calendar. Call `list-calendars` first to know which types are connected.
+
+**Hold TTL**: `check-availability` creates a 5-minute hold. Confirm promptly for human-in-the-loop flows, or the hold will expire.
+
+**All times are UTC**: Pass `start`/`end` in ISO 8601 UTC format (`2026-07-01T14:00:00Z`). The timezone from `get-agent-context` tells you the owner's local timezone for conversion.
+
+**Rate limits**: Per API key, independent of other keys. On a 429 response, read the `Retry-After` header and wait that many seconds.
 
 | Tool | Limit |
 |---|---|
 | `check-availability` | 300 req/min |
-| `confirm-hold` | 120 req/min |
-| `create-event` | 120 req/min |
+| `confirm-hold`, `create-event` | 120 req/min each |
 | All other tools | 600 req/min (shared per server IP) |

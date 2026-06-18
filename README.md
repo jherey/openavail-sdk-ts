@@ -1,13 +1,71 @@
-# availsync-sdk-ts
+# openavail-sdk-ts
 
-TypeScript SDK for the Availsync API. **Placeholder repo until v1.1** — v1 ships REST + OpenAPI spec only, per ADR D-003.
+TypeScript packages for the [Openavail](https://openavail.com) API.
 
-When v1.1 begins:
+| Package | Description | npm |
+|---|---|---|
+| [`@openavail/sdk`](./packages/sdk) | TypeScript client — zero dependencies, Node 18+ | [![npm](https://img.shields.io/npm/v/@openavail/sdk)](https://www.npmjs.com/package/@openavail/sdk) |
+| [`@openavail/mcp`](./packages/mcp) | MCP stdio server — works with Claude, Cursor, Windsurf, and any MCP-compatible client | [![npm](https://img.shields.io/npm/v/@openavail/mcp)](https://www.npmjs.com/package/@openavail/mcp) |
+
+## Quick start
+
+### SDK
 
 ```bash
-cp ../availsync-api/openapi.json ./openapi.json
-pnpm generate    # → src/api-types.ts
-# layer a thin client wrapper on top
+npm i @openavail/sdk
 ```
 
-See `../docs/PRD/availsync-v1.md` (v1 scope) and `../docs/decisions.md` (D-003, D-021) for context.
+```typescript
+import { OpenavailClient } from '@openavail/sdk';
+
+const client = new OpenavailClient({ apiKey: process.env.OPENAVAIL_API_KEY });
+
+const { holdId, slots } = await client.checkAvailability({
+  ownerEmail:    'alex@acme.com',
+  durationMinutes: 60,
+  meetingClass:  'external_customer_call',
+  earliestStart: '2026-07-01T09:00:00Z',
+  latestEnd:     '2026-07-01T17:00:00Z',
+});
+
+await client.confirmHold({
+  holdId,
+  start: slots[0].start,
+  end:   slots[0].end,
+  title: 'Strategy call',
+});
+```
+
+### MCP
+
+```bash
+npx @openavail/mcp
+```
+
+Add to your MCP client config (Claude Desktop, Claude Code, Cursor, etc.):
+
+```json
+{
+  "mcpServers": {
+    "openavail": {
+      "command": "npx",
+      "args": ["-y", "@openavail/mcp"],
+      "env": {
+        "OPENAVAIL_API_KEY": "ak_01HX7QQM…",
+        "OPENAVAIL_OWNER_EMAIL": "owner@example.com"
+      }
+    }
+  }
+}
+```
+
+## Development
+
+```bash
+pnpm install
+pnpm -r build      # build all packages
+pnpm -r test       # run all test suites
+pnpm -r typecheck  # type-check all packages
+```
+
+Each package has its own README with full API documentation.
