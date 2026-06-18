@@ -15,22 +15,24 @@ import { OpenavailClient } from '@openavail/sdk';
 
 const client = new OpenavailClient({ apiKey: process.env.OPENAVAIL_API_KEY });
 
-// 1. Find available slots and reserve a hold
+// 1. Call getOwnerContext first — timezone, working hours, and valid meeting class names in one call
+const ctx = await client.getOwnerContext('alex@acme.com');
+const tz  = ctx.calendars.find(c => c.is_primary)?.timezone ?? 'UTC';
+
+// 2. Find available slots and reserve a hold
 const { holdId, slots } = await client.checkAvailability({
-  ownerEmail: 'alex@acme.com',
+  ownerEmail:    'alex@acme.com',
   durationMinutes: 60,
-  meetingClass: 'external_customer_call',
-  window: {
-    start: '2026-07-01T09:00:00Z',
-    end: '2026-07-01T17:00:00Z',
-  },
+  meetingClass:  'external_customer_call',
+  earliestStart: '2026-07-01T09:00:00Z', // earliest the meeting may begin (UTC)
+  latestEnd:     '2026-07-01T17:00:00Z', // latest the meeting may END, not start (UTC)
 });
 
-// 2. Confirm the hold → committed booking
+// 3. Confirm the hold → committed booking
 const booking = await client.confirmHold({
   holdId,
   start: slots[0].start,
-  end: slots[0].end,
+  end:   slots[0].end,
   title: 'Strategy call',
   attendees: [{ email: 'alex@acme.com' }],
 });
@@ -38,12 +40,14 @@ const booking = await client.confirmHold({
 console.log('Booked:', booking.bookingId);
 ```
 
+**`latestEnd` is a deadline, not a start boundary.** For a 60-min meeting starting at 2 pm, set `latestEnd` to at least 3 pm — the meeting must fully end within it.
+
 ## Getting an API key
 
 1. Log in to the Openavail dashboard.
 2. Go to **Agents → Register agent** and create an agent.
 3. Click **Create API key** under the agent.
-4. Copy the key immediately — it is not shown again.
+4. Copy the key immediately — it is not shown again. Keys are prefixed `ak_`.
 
 ## Client
 
@@ -64,16 +68,19 @@ Find available slots and reserve a hold. All times are ISO 8601 UTC.
 
 ```typescript
 const result = await client.checkAvailability({
-  ownerEmail: 'alex@acme.com',       // required unless user-scoped key
-  durationMinutes: 60,
-  meetingClass: 'external_customer_call',
-  window: { start: '...', end: '...' },
-  calendarType?: 'work' | 'personal' | 'other',
-  nextAvailableLookaheadHours?: number,  // up to 72; enables nextAvailable hint on NoSlotsError
-  idempotencyKey?: string,               // auto-generated if omitted
+  ownerEmail?:                string,   // required unless user-scoped key
+  durationMinutes:            number,
+  meetingClass:               string,
+  earliestStart:              string,   // earliest the meeting may begin
+  latestEnd:                  string,   // latest the meeting may END (not start)
+  calendarType?:              'work' | 'personal' | 'other',
+  nextAvailableLookaheadHours?: number, // default 72h, max 72h
+  idempotencyKey?:            string,   // auto-generated if omitted
 });
 // → { holdId, expiresAt, expiresInSeconds, slots, resolvedCalendarType, warnings, pendingNotifications }
 ```
+
+Use `expiresInSeconds` (not `expiresAt`) to check if a hold is still live. `expiresAt` is a UTC ISO string that appears wrong when compared against a local timezone string.
 
 #### `confirmHold(options)`
 
@@ -81,15 +88,16 @@ Commit a hold to the calendar.
 
 ```typescript
 const result = await client.confirmHold({
-  holdId: '...',
-  start: '2026-07-01T14:00:00Z',
-  end: '2026-07-01T15:00:00Z',
-  title: 'Strategy call',
-  description?: string,
-  attendees?: [{ email: string, displayName?: string }],
+  holdId:          string,
+  start:           string,   // must fall within the hold window
+  end:             string,
+  title:           string,
+  description?:    string,
+  attendees?:      { email: string; displayName?: string }[],
   idempotencyKey?: string,
 });
-// → { bookingId, correlationId, displacedCount, displacedBookings, pendingNotifications, start, end, title, calendarType, status }
+// → { bookingId, correlationId, start, end, title, description, calendarType, attendees,
+//     displacedCount, displacedBookings, status, pendingNotifications }
 ```
 
 #### `simulate(options)`
@@ -98,10 +106,10 @@ Preview the arbitration decision without creating a hold. Pro plan only.
 
 ```typescript
 const result = await client.simulate({
-  ownerEmail?: string,
-  start: '...',
-  end: '...',
-  meetingClass: '...',
+  ownerEmail?:  string,
+  start:        string,
+  end:          string,
+  meetingClass: string,
   calendarType?: 'work' | 'personal' | 'other',
 });
 // → { decision, reason, alternatives, engineTrace, pendingNotifications }
@@ -115,14 +123,14 @@ Skip the hold when you already know the exact slot.
 
 ```typescript
 const result = await client.createBooking({
-  ownerEmail?: string,
-  start: '...',
-  end: '...',
-  meetingClass: '...',
-  title: '...',
-  description?: string,
+  ownerEmail?:   string,
+  start:         string,
+  end:           string,
+  meetingClass:  string,
+  title:         string,
+  description?:  string,
   calendarType?: 'work' | 'personal' | 'other',
-  attendees?: [{ email: string, displayName?: string }],
+  attendees?:    { email: string; displayName?: string }[],
   idempotencyKey?: string,
 });
 // → BookingResult (same shape as confirmHold)
@@ -136,14 +144,14 @@ List committed bookings with cursor pagination.
 
 ```typescript
 const result = await client.listBookings({
-  ownerEmail?: string,
-  start?: string,          // default: now
-  end?: string,            // default: now + 3 days
-  calendarType?: string,
-  query?: string,          // title text search
+  ownerEmail?:    string,
+  start?:         string,  // default: now
+  end?:           string,  // default: now + 3 days
+  calendarType?:  string,
+  query?:         string,  // title text search
   attendeeEmail?: string,
-  limit?: number,          // max 100, default 50
-  cursor?: string,
+  limit?:         number,  // max 100, default 50
+  cursor?:        string,
 });
 // → { bookings, nextCursor, pendingNotifications }
 ```
@@ -163,25 +171,25 @@ await client.cancelBooking(bookingId, { idempotencyKey?: string });
 
 #### `updateBooking(bookingId, options)`
 
-Update a booking's metadata. Metadata only — to change the time, cancel and rebook.
+Update a booking's metadata. To change the time, cancel and rebook.
 
 ```typescript
 await client.updateBooking(bookingId, {
-  title?: string,
+  title?:       string,
   description?: string,
-  attendees?: [{ email: string, displayName?: string }],
+  attendees?:   { email: string; displayName?: string }[],
 });
 ```
 
 ### Calendar & configuration
 
+#### `getOwnerContext(ownerEmail?)`
+
+Calendars, working hours, and meeting classes in one call. **Call this first** — it gives you the owner's timezone for UTC conversion, valid meeting class names, and working hours.
+
 #### `listCalendars(ownerEmail)`
 
 List connected calendars for an owner, primary first.
-
-#### `getOwnerContext(ownerEmail?)`
-
-Calendars, working hours, and meeting classes in one call. Use this at session start.
 
 #### `listMeetingClasses()`
 
@@ -206,18 +214,26 @@ Acknowledge notifications by ID. Up to 100 IDs per call.
 The SDK throws typed errors — catch by class, not status code.
 
 ```typescript
-import {
-  ArbitrationRejectedError,
-  NoSlotsError,
-  BookingNotFoundError,
-} from '@openavail/sdk';
+import { ArbitrationRejectedError, NoSlotsError } from '@openavail/sdk';
 
 try {
   await client.confirmHold({ holdId, start, end, title });
 } catch (err) {
   if (err instanceof ArbitrationRejectedError) {
-    // err.alternatives — counter-proposed slots (may be empty)
-    // err.reason — human-readable reason
+    // err.reason      — why it was rejected
+    // err.alternatives — counter-proposed slots (confirm with the same holdId)
+    // err.nextAvailable — nearest free slot (use when alternatives is empty)
+  }
+}
+
+try {
+  await client.checkAvailability({ ... });
+} catch (err) {
+  if (err instanceof NoSlotsError) {
+    // err.reasonCode — 'NO_FREE_SLOTS' | 'DAILY_HOURS_LIMIT' | 'OFF_DAY' | 'WORKING_HOURS' | 'HARD_BLOCK'
+    // err.nextAvailable — nearest free slot within the lookahead window (undefined if none found)
+    // err.nextAvailableExceedsLookahead — true when slots exist but fall beyond the lookahead window;
+    //   retry with a larger nextAvailableLookaheadHours (max 72h)
   }
 }
 ```
@@ -231,12 +247,12 @@ All errors extend `OpenavailError` and carry:
 
 | Class | When thrown |
 |---|---|
-| `NoSlotsError` | No available slots. `.reasonCode` is `NoSlotsReasonCode`: `NO_FREE_SLOTS` (busy), `DAILY_HOURS_LIMIT` (daily cap), `OFF_DAY` (non-working day), `WORKING_HOURS` (outside working hours), `HARD_BLOCK` (recurring blocked period). `.nextAvailable` points to the nearest opening when `nextAvailableLookaheadHours` is set. |
-| `WindowTooNarrowError` | Window is shorter than the meeting duration. `.windowDurationMinutes` and `.requiredDurationMinutes` tell you by how much to widen it. |
+| `NoSlotsError` | No available slots in the window. `.reasonCode` names why; `.nextAvailable` points to the nearest opening; `.nextAvailableExceedsLookahead` signals slots exist beyond the search window. |
+| `WindowTooNarrowError` | Window is shorter than the meeting duration. `.windowDurationMinutes` and `.requiredDurationMinutes` show the gap. |
 | `WorkingHoursNotConfiguredError` | Owner has no working hours set |
 | `CalendarNotFoundError` | No calendar found for the owner |
 | `LookaheadExceedsMaximumError` | `nextAvailableLookaheadHours` > 72 |
-| `ArbitrationRejectedError` | Booking rejected by arbitration engine (carries `alternatives`) |
+| `ArbitrationRejectedError` | Booking rejected by arbitration engine. Carries `alternatives`, `reason`, and `nextAvailable`. |
 | `HoldExpiredError` | Hold TTL elapsed before confirm |
 | `HoldNotFoundError` | Hold ID not found |
 | `HoldAlreadyPromotedError` | Hold was already confirmed |
