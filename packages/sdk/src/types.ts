@@ -12,6 +12,9 @@ export type AvailabilityWarning =
 export const PRIORITY_TIERS = ['critical', 'high', 'normal', 'low'] as const;
 export type PriorityTier = (typeof PRIORITY_TIERS)[number];
 
+export const PREEMPT_POLICIES = ['protected', 'reschedulable', 'replaceable'] as const;
+export type PreemptPolicy = (typeof PREEMPT_POLICIES)[number];
+
 export type Slot = {
   start: string;
   end: string;
@@ -56,7 +59,7 @@ export type MeetingClass = {
   name: string;
   description: string | null;
   priorityTier: PriorityTier;
-  preemptPolicy: 'strict' | 'soft' | 'hard';
+  preemptPolicy: PreemptPolicy;
 };
 
 export type OwnerCalendar = {
