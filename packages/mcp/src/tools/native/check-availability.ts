@@ -47,7 +47,7 @@ export function registerCheckAvailability(
         .describe(
           'Latest time the meeting may END — not start (ISO 8601 UTC). Example: for a 60-min meeting starting at 2pm Berlin (12:00 UTC), set earliest_start: "12:00:00Z" and latest_end: "13:00:00Z" — the full meeting must fit within this boundary, not just the start time.',
         ),
-      meeting_class: z.string().describe('Meeting class name (e.g. "internal_sync").'),
+      meeting_class: z.string().describe('Meeting class name (e.g. "Regular").'),
       calendar_type: z
         .enum(['work', 'personal', 'other'])
         .optional()

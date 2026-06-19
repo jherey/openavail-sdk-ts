@@ -23,7 +23,7 @@ const tz  = ctx.calendars.find(c => c.is_primary)?.timezone ?? 'UTC';
 const { holdId, slots } = await client.checkAvailability({
   ownerEmail:    'alex@acme.com',
   durationMinutes: 60,
-  meetingClass:  'external_customer_call',
+  meetingClass:  'Critical',
   earliestStart: '2026-07-01T09:00:00Z', // earliest the meeting may begin (UTC)
   latestEnd:     '2026-07-01T17:00:00Z', // latest the meeting may END, not start (UTC)
 });

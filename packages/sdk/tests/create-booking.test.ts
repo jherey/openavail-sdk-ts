@@ -24,7 +24,7 @@ const BASE_OPTS = {
   ownerEmail: 'alex@acme.com',
   start: '2026-07-01T09:00:00Z',
   end: '2026-07-01T10:00:00Z',
-  meetingClass: 'internal_sync',
+  meetingClass: 'Regular',
   title: 'Deep work',
 };
 
@@ -45,7 +45,7 @@ describe('createBooking', () => {
 
     const body = JSON.parse(spy.mock.calls[0]?.[1]?.body as string) as Record<string, unknown>;
     expect(body.owner_email).toBe('alex@acme.com');
-    expect(body.meeting_class).toBe('internal_sync');
+    expect(body.meeting_class).toBe('Regular');
     expect(body.title).toBe('Deep work');
   });
 
@@ -76,7 +76,7 @@ describe('createBooking', () => {
           title: 'Weekly Sync',
           start: '2026-07-01T09:00:00Z',
           end: '2026-07-01T10:00:00Z',
-          meeting_class: 'internal_sync',
+          meeting_class: 'Regular',
         },
       ],
     });
@@ -86,7 +86,7 @@ describe('createBooking', () => {
     expect(result.displacedBookings).toHaveLength(1);
     expect(result.displacedBookings[0]?.bookingId).toBe('c2ffdd99-1a2b-3c4d-5e6f-7g8h9i0j1k2l');
     expect(result.displacedBookings[0]?.title).toBe('Weekly Sync');
-    expect(result.displacedBookings[0]?.meetingClass).toBe('internal_sync');
+    expect(result.displacedBookings[0]?.meetingClass).toBe('Regular');
   });
 
   it('returns empty displacedBookings when no preemption', async () => {
