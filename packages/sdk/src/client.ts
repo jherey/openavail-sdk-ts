@@ -43,7 +43,10 @@ export class OpenavailClient {
       slots: {
         start: string;
         end: string;
-        preemptable?: { occupying_class: string; occupying_priority: number };
+        preemptable?: {
+          occupying_class: string;
+          occupying_priority_tier: 'critical' | 'high' | 'normal' | 'low';
+        };
       }[];
       pending_notifications: PendingNotification[];
       resolved_calendar_type: string | null;
@@ -274,7 +277,7 @@ export class OpenavailClient {
       meeting_classes: {
         name: string;
         description: string | null;
-        priority: number;
+        priority_tier: 'critical' | 'high' | 'normal' | 'low';
         preempt_policy: 'strict' | 'soft' | 'hard';
       }[];
       pending_notifications: PendingNotification[];
@@ -298,7 +301,7 @@ export class OpenavailClient {
       meetingClasses: raw.meeting_classes.map((c) => ({
         name: c.name,
         description: c.description,
-        priority: c.priority,
+        priorityTier: c.priority_tier,
         preemptPolicy: c.preempt_policy,
       })),
       pendingNotifications: raw.pending_notifications,
@@ -310,7 +313,7 @@ export class OpenavailClient {
       meeting_classes: {
         name: string;
         description: string | null;
-        priority: number;
+        priority_tier: 'critical' | 'high' | 'normal' | 'low';
         preempt_policy: 'strict' | 'soft' | 'hard';
       }[];
     };
@@ -321,7 +324,7 @@ export class OpenavailClient {
     return raw.meeting_classes.map((c) => ({
       name: c.name,
       description: c.description,
-      priority: c.priority,
+      priorityTier: c.priority_tier,
       preemptPolicy: c.preempt_policy,
     }));
   }
