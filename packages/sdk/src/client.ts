@@ -17,6 +17,7 @@ import type {
   OwnerCalendar,
   OwnerContext,
   PendingNotification,
+  PreemptPolicy,
   PriorityTier,
   RejectionReason,
   ScheduleRules,
@@ -279,7 +280,7 @@ export class OpenavailClient {
         name: string;
         description: string | null;
         priority_tier: PriorityTier;
-        preempt_policy: 'protected' | 'reschedulable' | 'replaceable';
+        preempt_policy: PreemptPolicy;
       }[];
       pending_notifications: PendingNotification[];
     };
@@ -315,7 +316,7 @@ export class OpenavailClient {
         name: string;
         description: string | null;
         priority_tier: PriorityTier;
-        preempt_policy: 'protected' | 'reschedulable' | 'replaceable';
+        preempt_policy: PreemptPolicy;
       }[];
     };
     const raw = await this.#http.request<Raw>({
