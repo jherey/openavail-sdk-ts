@@ -17,6 +17,7 @@ import type {
   OwnerCalendar,
   OwnerContext,
   PendingNotification,
+  PriorityTier,
   RejectionReason,
   ScheduleRules,
   SimulateOptions,
@@ -45,7 +46,7 @@ export class OpenavailClient {
         end: string;
         preemptable?: {
           occupying_class: string;
-          occupying_priority_tier: 'critical' | 'high' | 'normal' | 'low';
+          occupying_priority_tier: PriorityTier;
         };
       }[];
       pending_notifications: PendingNotification[];
@@ -277,7 +278,7 @@ export class OpenavailClient {
       meeting_classes: {
         name: string;
         description: string | null;
-        priority_tier: 'critical' | 'high' | 'normal' | 'low';
+        priority_tier: PriorityTier;
         preempt_policy: 'strict' | 'soft' | 'hard';
       }[];
       pending_notifications: PendingNotification[];
@@ -313,7 +314,7 @@ export class OpenavailClient {
       meeting_classes: {
         name: string;
         description: string | null;
-        priority_tier: 'critical' | 'high' | 'normal' | 'low';
+        priority_tier: PriorityTier;
         preempt_policy: 'strict' | 'soft' | 'hard';
       }[];
     };

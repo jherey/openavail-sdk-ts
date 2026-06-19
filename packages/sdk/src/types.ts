@@ -9,7 +9,8 @@ export type AvailabilityWarning =
   | { code: 'CALENDAR_BUSY_STALE'; calendar_type: string | null; message: string }
   | { code: 'CALENDAR_TYPE_FALLBACK'; requested: string; resolved: string | null; message: string };
 
-export type PriorityTier = 'critical' | 'high' | 'normal' | 'low';
+export const PRIORITY_TIERS = ['critical', 'high', 'normal', 'low'] as const;
+export type PriorityTier = (typeof PRIORITY_TIERS)[number];
 
 export type Slot = {
   start: string;
