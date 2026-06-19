@@ -195,7 +195,9 @@ List connected calendars for an owner, primary first.
 
 #### `listMeetingClasses()`
 
-List valid meeting class names and their priority/preempt policy.
+List valid meeting class names and their priority tier and preempt policy. At least one active
+meeting class must exist at all times — agents cannot book without one, and the API rejects
+attempts to delete the last class.
 
 #### `getScheduleRules(options)`
 

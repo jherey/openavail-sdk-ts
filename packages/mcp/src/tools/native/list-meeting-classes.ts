@@ -23,6 +23,7 @@ export function registerListMeetingClasses(server: McpServer, client: OpenavailC
       '    hard   — displaced and the displaced agent is notified, but no reschedule is attempted automatically.',
       '    soft   — displaced silently; the displaced agent receives a booking.displaced notification to reschedule.',
       "To pick a class: match the user's intent against the name and description. Do not ask the user to choose. If ambiguous, use the lowest tier that fits the situation.",
+      'IMPORTANT: at least one active meeting class must always exist. Agents cannot book without one. If this list is empty, no bookings are possible until the owner creates a class in the dashboard.',
     ].join('\n'),
     {},
     async () => {
