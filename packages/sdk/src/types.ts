@@ -9,10 +9,13 @@ export type AvailabilityWarning =
   | { code: 'CALENDAR_BUSY_STALE'; calendar_type: string | null; message: string }
   | { code: 'CALENDAR_TYPE_FALLBACK'; requested: string; resolved: string | null; message: string };
 
+export const PRIORITY_TIERS = ['critical', 'high', 'normal', 'low'] as const;
+export type PriorityTier = (typeof PRIORITY_TIERS)[number];
+
 export type Slot = {
   start: string;
   end: string;
-  preemptable?: { occupying_class: string; occupying_priority: number };
+  preemptable?: { occupying_class: string; occupying_priority_tier: PriorityTier };
 };
 
 export type RejectionReason =
@@ -52,7 +55,7 @@ export type Attendee = { email: string; displayName?: string | undefined };
 export type MeetingClass = {
   name: string;
   description: string | null;
-  priority: number;
+  priorityTier: PriorityTier;
   preemptPolicy: 'strict' | 'soft' | 'hard';
 };
 

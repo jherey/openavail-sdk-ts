@@ -40,7 +40,7 @@ export function registerCreateEvent(
         ),
       meeting_class: z
         .string()
-        .describe('Meeting class name (e.g. "internal_sync"). Must be configured in Openavail.'),
+        .describe('Meeting class name (e.g. "Regular"). Must be configured in Openavail.'),
       start: z.string().describe('Event start time — ISO 8601 UTC (e.g. 2026-07-01T09:00:00Z).'),
       end: z.string().describe('Event end time — ISO 8601 UTC.'),
       title: z.string().min(1).describe('Event title.'),

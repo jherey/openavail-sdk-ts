@@ -16,10 +16,10 @@ export function registerGetAgentContext(
       'Returns everything you need to make a valid booking in a single call:',
       '  - calendars: connected calendars with their type (work/personal/other) and IANA timezone',
       '  - schedule_rules: working hours, slot interval, and daily meeting limit',
-      '  - meeting_classes: valid meeting class names with descriptions and priorities',
+      '  - meeting_classes: valid meeting class names with descriptions, priorityTier (critical|high|normal|low), and preemptPolicy',
       'Use the timezone from the primary calendar to convert user-supplied local times to UTC for all subsequent calls.',
       'Use a meeting_class name from meeting_classes — passing an unlisted name to check-availability or create-event will return INVALID_MEETING_CLASS.',
-      "To pick a meeting class, match the user's intent against the name and description fields using your own judgment. Do not ask the user to choose from the list — infer from context. If genuinely ambiguous, default to the lowest-priority class that fits.",
+      "To pick a meeting class: match the user's intent against the name and description. Do not ask the user to choose. If ambiguous, use the lowest priorityTier that fits the situation.",
       defaultOwnerEmail
         ? `Default owner: ${defaultOwnerEmail} (set via OPENAVAIL_OWNER_EMAIL — override by passing owner_email explicitly).`
         : 'owner_email is required.',

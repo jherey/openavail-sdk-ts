@@ -23,7 +23,7 @@ const tz  = ctx.calendars.find(c => c.is_primary)?.timezone ?? 'UTC';
 const { holdId, slots } = await client.checkAvailability({
   ownerEmail:    'alex@acme.com',
   durationMinutes: 60,
-  meetingClass:  'external_customer_call',
+  meetingClass:  'Critical',
   earliestStart: '2026-07-01T09:00:00Z', // earliest the meeting may begin (UTC)
   latestEnd:     '2026-07-01T17:00:00Z', // latest the meeting may END, not start (UTC)
 });
@@ -195,7 +195,9 @@ List connected calendars for an owner, primary first.
 
 #### `listMeetingClasses()`
 
-List valid meeting class names and their priority/preempt policy.
+List valid meeting class names and their priority tier and preempt policy. At least one active
+meeting class must exist at all times — agents cannot book without one, and the API rejects
+attempts to delete the last class.
 
 #### `getScheduleRules(options)`
 

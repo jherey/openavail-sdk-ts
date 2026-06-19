@@ -65,7 +65,7 @@ const BOOKING: Booking = {
   correlationId: 'b1ffcd88-8d0c-5fg9-cc7e-7ccace491b22',
   start: '2026-07-01T09:00:00.000Z',
   end: '2026-07-01T10:00:00.000Z',
-  meetingClass: 'internal_sync',
+  meetingClass: 'Regular',
   calendarType: 'work',
   createdAt: '2026-06-01T12:00:00.000Z',
 };
@@ -136,7 +136,7 @@ describe('MCP server tools', () => {
         name: 'create-event',
         arguments: {
           owner_email: 'owner@example.com',
-          meeting_class: 'internal_sync',
+          meeting_class: 'Regular',
           start: '2026-07-01T09:00:00Z',
           end: '2026-07-01T10:00:00Z',
           title: 'Sprint planning',
@@ -146,7 +146,7 @@ describe('MCP server tools', () => {
       expect(vi.mocked(client.createBooking)).toHaveBeenCalledWith(
         expect.objectContaining({
           ownerEmail: 'owner@example.com',
-          meetingClass: 'internal_sync',
+          meetingClass: 'Regular',
           title: 'Sprint planning',
           start: '2026-07-01T09:00:00Z',
           end: '2026-07-01T10:00:00Z',
@@ -222,7 +222,7 @@ describe('MCP server tools', () => {
         name: 'create-event',
         arguments: {
           owner_email: 'owner@example.com',
-          meeting_class: 'internal_sync',
+          meeting_class: 'Regular',
           start: '2026-07-01T09:00:00Z',
           end: '2026-07-01T10:00:00Z',
           title: 'Sprint planning',
@@ -266,7 +266,7 @@ describe('MCP server tools', () => {
           duration_minutes: 60,
           earliest_start: '2026-07-01T08:00:00Z',
           latest_end: '2026-07-01T18:00:00Z',
-          meeting_class: 'internal_sync',
+          meeting_class: 'Regular',
         },
       });
 
@@ -276,7 +276,7 @@ describe('MCP server tools', () => {
           durationMinutes: 60,
           earliestStart: '2026-07-01T08:00:00Z',
           latestEnd: '2026-07-01T18:00:00Z',
-          meetingClass: 'internal_sync',
+          meetingClass: 'Regular',
         }),
       );
       expect(res.isError).toBeFalsy();
@@ -398,7 +398,7 @@ describe('MCP server tools', () => {
           maxDailyMeetingHours: null,
         },
         meetingClasses: [
-          { name: 'internal_sync', description: null, priority: 30, preemptPolicy: 'soft' },
+          { name: 'Regular', description: null, priority_tier: 'normal', preemptPolicy: 'soft' },
         ],
         pendingNotifications: [],
       };
@@ -429,7 +429,7 @@ describe('MCP server tools', () => {
           duration_minutes: 60,
           earliest_start: '2026-07-01T08:00:00Z',
           latest_end: '2026-07-01T18:00:00Z',
-          meeting_class: 'internal_sync',
+          meeting_class: 'Regular',
         },
       });
 
@@ -451,7 +451,7 @@ describe('MCP server tools', () => {
           duration_minutes: 60,
           earliest_start: '2026-07-01T08:00:00Z',
           latest_end: '2026-07-01T18:00:00Z',
-          meeting_class: 'internal_sync',
+          meeting_class: 'Regular',
         },
       });
 
@@ -473,7 +473,7 @@ describe('MCP server tools', () => {
         name: 'create-event',
         arguments: {
           owner_email: 'owner@example.com',
-          meeting_class: 'internal_sync',
+          meeting_class: 'Regular',
           start: '2026-07-01T21:00:00Z',
           end: '2026-07-01T22:00:00Z',
           title: 'Late night',
