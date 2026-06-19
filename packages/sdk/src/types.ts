@@ -56,7 +56,7 @@ export type MeetingClass = {
   name: string;
   description: string | null;
   priorityTier: PriorityTier;
-  preemptPolicy: 'strict' | 'soft' | 'hard';
+  preemptPolicy: 'protected' | 'reschedulable' | 'replaceable';
 };
 
 export type OwnerCalendar = {

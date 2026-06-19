@@ -279,7 +279,7 @@ export class OpenavailClient {
         name: string;
         description: string | null;
         priority_tier: PriorityTier;
-        preempt_policy: 'strict' | 'soft' | 'hard';
+        preempt_policy: 'protected' | 'reschedulable' | 'replaceable';
       }[];
       pending_notifications: PendingNotification[];
     };
@@ -315,7 +315,7 @@ export class OpenavailClient {
         name: string;
         description: string | null;
         priority_tier: PriorityTier;
-        preempt_policy: 'strict' | 'soft' | 'hard';
+        preempt_policy: 'protected' | 'reschedulable' | 'replaceable';
       }[];
     };
     const raw = await this.#http.request<Raw>({

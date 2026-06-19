@@ -398,7 +398,12 @@ describe('MCP server tools', () => {
           maxDailyMeetingHours: null,
         },
         meetingClasses: [
-          { name: 'Regular', description: null, priority_tier: 'normal', preemptPolicy: 'soft' },
+          {
+            name: 'Regular',
+            description: null,
+            priority_tier: 'normal',
+            preemptPolicy: 'reschedulable',
+          },
         ],
         pendingNotifications: [],
       };
