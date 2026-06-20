@@ -254,7 +254,6 @@ All errors extend `OpenavailError` and carry:
 |---|---|
 | `NoSlotsError` | No available slots in the window. `.reasonCode` names why; `.nextAvailable` points to the nearest opening; `.nextAvailableExceedsLookahead` signals slots exist beyond the search window. |
 | `WindowTooNarrowError` | Window is shorter than the meeting duration. `.windowDurationMinutes` and `.requiredDurationMinutes` show the gap. |
-| `WorkingHoursNotConfiguredError` | Owner has no working hours set |
 | `CalendarNotFoundError` | No calendar found for the owner |
 | `LookaheadExceedsMaximumError` | `nextAvailableLookaheadHours` > 72 |
 | `ArbitrationRejectedError` | Booking rejected by arbitration engine. Carries `alternatives`, `reason`, and `nextAvailable`. |
