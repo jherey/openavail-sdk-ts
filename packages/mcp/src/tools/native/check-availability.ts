@@ -13,10 +13,10 @@ export function registerCheckAvailability(
     'check-availability',
     [
       'Find available time slots for a calendar owner and reserve a short-lived hold, then call confirm-hold to commit the booking.',
-      "SETUP: call get-agent-context first if you haven't this session — it returns the owner's timezone, working hours, and valid meeting_class names in one call. Skipping it risks timezone errors and invalid meeting class names.",
+      "SETUP: call get-agent-context first if you haven't this session — it returns the owner's timezone, working hours, setup warnings, unavailable features, and valid meeting_class names in one call. Skipping it risks timezone errors and invalid meeting class names.",
       'NO SLOTS: if no slots are available, throws NoSlotsError with reasonCode (NO_FREE_SLOTS | DAILY_HOURS_LIMIT | OFF_DAY | WORKING_HOURS | HARD_BLOCK). When nextAvailable is present, retry there. When nextAvailableExceedsLookahead is true, slots exist beyond the lookahead window — retry with a larger next_available_lookahead_hours. WINDOW_TOO_NARROW (422) is thrown when the window is shorter than the requested duration — widen the window.',
       'latest_end IS A DEADLINE, NOT A START BOUNDARY: latest_end is the latest time the meeting may END. For a 60-min meeting you want to start at 2pm, set latest_end to 3pm (not 2pm).',
-      'Returns: holdId, expiresInSeconds (use this for TTL checks — it is relative and timezone-safe), slots (start/end pairs), resolvedCalendarType, and pendingNotifications. Ignore expiresAt — it is a UTC ISO string that will appear incorrect in non-UTC timezones.',
+      'Returns: holdId, expiresInSeconds (use this for TTL checks), expiresAt (absolute UTC timestamp for logging/display), slots (start/end pairs), resolvedCalendarType, warnings, and pendingNotifications.',
       'PREFER THIS PATH over create-event when: you need to show options to a user, the slot is not known in advance, or you want conflict-safe arbitration with preemption preview.',
       'TIMEZONE: all times must be ISO 8601 UTC. Use the timezone from get-agent-context to convert user-supplied local times to UTC before passing them here.',
       "Slots are a sliding window stepped by the owner's slot interval (default 15 min) — e.g. 10:00–11:00, 10:15–11:15, 10:30–11:30. They overlap intentionally; pick one slot and pass it to confirm-hold, do not treat the list as discrete non-overlapping blocks.",

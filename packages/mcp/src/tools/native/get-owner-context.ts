@@ -17,7 +17,10 @@ export function registerGetOwnerContext(
       '  - calendars: list of connected calendars with their type (work/personal/other) and IANA timezone',
       '  - schedule_rules: working hours, slot interval, and daily meeting limit',
       '  - meeting_classes: valid meeting class names with descriptions and priorities',
+      '  - setup_warnings: non-blocking setup issues such as WORKING_HOURS_NOT_CONFIGURED',
+      '  - unavailable_features: plan-gated features this account should not call',
       'Use the timezone from the primary calendar to convert user-supplied local times to UTC for all subsequent calls.',
+      'If setup_warnings includes WORKING_HOURS_NOT_CONFIGURED, bookings are still allowed but Openavail is not enforcing preferred working windows. Confirm before booking evenings, weekends, or unusual local times.',
       'Use a meeting_class name from meeting_classes — passing an unlisted name to check-availability or create-event will return INVALID_MEETING_CLASS.',
       defaultOwnerEmail
         ? `Default owner: ${defaultOwnerEmail} (set via OPENAVAIL_OWNER_EMAIL — override by passing owner_email explicitly).`

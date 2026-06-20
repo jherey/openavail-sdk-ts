@@ -15,9 +15,10 @@ import { OpenavailClient } from '@openavail/sdk';
 
 const client = new OpenavailClient({ apiKey: process.env.OPENAVAIL_API_KEY });
 
-// 1. Call getOwnerContext first — timezone, working hours, and valid meeting class names in one call
+// 1. Call getOwnerContext first — timezone, setup warnings, unavailable features, and valid classes
 const ctx = await client.getOwnerContext('alex@acme.com');
 const tz  = ctx.calendars.find(c => c.is_primary)?.timezone ?? 'UTC';
+const missingHours = ctx.setupWarnings.some(w => w.code === 'WORKING_HOURS_NOT_CONFIGURED');
 
 // 2. Find available slots and reserve a hold
 const { holdId, slots } = await client.checkAvailability({
@@ -44,8 +45,8 @@ console.log('Booked:', booking.bookingId);
 
 ## Getting an API key
 
-1. Log in to the Openavail dashboard.
-2. Go to **Agents → Register agent** and create an agent.
+1. Log in to the Openavail dashboard as the calendar owner or org admin.
+2. Go to **Agents → Register agent** and create an agent with the permissions and owner scope it needs.
 3. Click **Create API key** under the agent.
 4. Copy the key immediately — it is not shown again. Keys are prefixed `ak_`.
 
@@ -82,7 +83,7 @@ const result = await client.checkAvailability({
 // → { holdId, expiresAt, expiresInSeconds, slots, resolvedCalendarType, warnings, pendingNotifications }
 ```
 
-Use `expiresInSeconds` (not `expiresAt`) to check if a hold is still live. `expiresAt` is a UTC ISO string that appears wrong when compared against a local timezone string.
+Use `expiresInSeconds` for hold freshness and retry decisions. `expiresAt` is an absolute UTC timestamp for logging, display, and correlation.
 
 #### `confirmHold(options)`
 
