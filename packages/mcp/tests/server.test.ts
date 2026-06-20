@@ -57,6 +57,7 @@ const BOOKING_RESULT: BookingResult = {
   title: 'Test meeting',
   description: null,
   calendarType: 'work',
+  warnings: [],
   status: 'committed',
 };
 
@@ -153,6 +154,33 @@ describe('MCP server tools', () => {
         }),
       );
       expect(res.isError).toBeFalsy();
+    });
+  });
+
+  describe('tool registration', () => {
+    it('lists all Openavail tools immediately after startup', async () => {
+      const listed = await mcpClient.listTools();
+      const names = listed.tools.map((tool) => tool.name).sort();
+
+      expect(names).toEqual(
+        [
+          'ack-notifications',
+          'check-availability',
+          'confirm-hold',
+          'create-event',
+          'delete-event',
+          'get-agent-context',
+          'get-event',
+          'get-pending-notifications',
+          'get-schedule-rules',
+          'list-calendars',
+          'list-events',
+          'list-meeting-classes',
+          'search-events',
+          'simulate',
+          'update-event',
+        ].sort(),
+      );
     });
   });
 
@@ -401,10 +429,12 @@ describe('MCP server tools', () => {
           {
             name: 'Regular',
             description: null,
-            priority_tier: 'normal',
+            priorityTier: 'normal',
             preemptPolicy: 'reschedulable',
           },
         ],
+        setupWarnings: [],
+        unavailableFeatures: [],
         pendingNotifications: [],
       };
       vi.mocked(client.getOwnerContext).mockResolvedValue(OWNER_CONTEXT);

@@ -66,13 +66,6 @@ export class WindowTooNarrowError extends OpenavailError {
   }
 }
 
-export class WorkingHoursNotConfiguredError extends OpenavailError {
-  constructor(message: string, pendingNotifications: PendingNotification[]) {
-    super(message, 'WORKING_HOURS_NOT_CONFIGURED', 409, pendingNotifications);
-    this.name = 'WorkingHoursNotConfiguredError';
-  }
-}
-
 export class CalendarNotFoundError extends OpenavailError {
   constructor(message: string, pendingNotifications: PendingNotification[]) {
     super(message, 'CALENDAR_NOT_FOUND', 404, pendingNotifications);
