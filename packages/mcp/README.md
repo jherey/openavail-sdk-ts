@@ -60,6 +60,11 @@ Add the same JSON block to your client's MCP config file. Config file locations:
 3. Click **Create API key** under the agent.
 4. Copy the key immediately — it is not shown again.
 
+For a standard booking agent using this MCP server, grant `read_freebusy`, `create_holds`, and
+`create_bookings`. Grant `read_events` only when the agent should see booking titles,
+descriptions, and attendees in Openavail responses. Grant `preempt` only to trusted agents that may
+displace lower-priority bookings when rules allow it.
+
 ## Available tools
 
 ### Start here

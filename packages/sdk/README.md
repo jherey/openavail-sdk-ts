@@ -50,6 +50,11 @@ console.log('Booked:', booking.bookingId);
 3. Click **Create API key** under the agent.
 4. Copy the key immediately — it is not shown again. Keys are prefixed `ak_`.
 
+For a standard booking agent, grant `read_freebusy`, `create_holds`, and `create_bookings`.
+Grant `read_events` only when the agent should see booking titles, descriptions, and attendees in
+Openavail responses. Grant `preempt` only to trusted agents that may displace lower-priority
+bookings when rules allow it.
+
 > **Using the SDK alongside the MCP server?** The MCP server reads `OPENAVAIL_API_KEY` from its own process environment (configured via your MCP client, e.g. `~/.claude.json`). That key is not automatically available in your shell session. Set `OPENAVAIL_API_KEY` in your shell profile separately if you also want to use the SDK directly.
 
 ## Client
