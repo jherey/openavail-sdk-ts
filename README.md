@@ -20,7 +20,7 @@ import { OpenavailClient } from '@openavail/sdk';
 
 const client = new OpenavailClient({ apiKey: process.env.OPENAVAIL_API_KEY });
 
-const { holdId, slots } = await client.checkAvailability({
+const { candidates } = await client.searchAvailability({
   ownerEmail:    'alex@acme.com',
   durationMinutes: 60,
   meetingClass:  'external_customer_call',
@@ -28,10 +28,17 @@ const { holdId, slots } = await client.checkAvailability({
   latestEnd:     '2026-07-01T17:00:00Z',
 });
 
+const hold = await client.createHold({
+  ownerEmail: 'alex@acme.com',
+  meetingClass: 'external_customer_call',
+  holdScope: 'candidate',
+  candidate: candidates[0],
+});
+
 await client.confirmHold({
-  holdId,
-  start: slots[0].start,
-  end:   slots[0].end,
+  holdId: hold.holdId,
+  start: hold.heldWindow.start,
+  end:   hold.heldWindow.end,
   title: 'Strategy call',
 });
 ```

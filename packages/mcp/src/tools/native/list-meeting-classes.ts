@@ -9,7 +9,7 @@ export function registerListMeetingClasses(server: McpServer, client: OpenavailC
     [
       'List all active meeting classes configured for this account.',
       'Returns: name, description, priorityTier, and preemptPolicy for each class.',
-      'Call this first to discover valid meeting_class values before calling check-availability, create-event, or simulate.',
+      'Call this first to discover valid meeting_class values before calling search-availability, create-hold, create-event, or simulate.',
       'meeting_class is a required parameter on those tools — passing an unknown name returns INVALID_MEETING_CLASS.',
       'Field meanings:',
       "  description — human-readable explanation of the class purpose. Use this to infer which class fits the user's intent.",

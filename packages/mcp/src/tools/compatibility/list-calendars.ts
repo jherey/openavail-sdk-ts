@@ -14,7 +14,7 @@ export function registerListCalendars(
     [
       'List the calendars connected to a calendar owner and show which types (work, personal, other) are unavailable.',
       'Returns: calendars (connected entries with calendar_type, is_primary, timezone) and unavailable_calendar_types (types with no connected calendar).',
-      'Check unavailable_calendar_types before passing calendar_type to check-availability or create-event — requesting an unavailable type silently falls back to the primary calendar.',
+      'Check unavailable_calendar_types before passing calendar_type to search-availability, create-hold, or create-event — requesting an unavailable type silently falls back to the primary calendar.',
       'If the primary calendar is also missing or disabled, the fallback fails with CALENDAR_NOT_FOUND — there is no further fallback to other connected calendars.',
       'Use owner_email to identify the owner — there is no calendarId concept in Openavail.',
     ].join('\n'),

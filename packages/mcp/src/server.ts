@@ -8,12 +8,13 @@ import { registerListEvents } from './tools/compatibility/list-events.js';
 import { registerSearchEvents } from './tools/compatibility/search-events.js';
 import { registerUpdateEvent } from './tools/compatibility/update-event.js';
 import { registerAckNotifications } from './tools/native/ack-notifications.js';
-import { registerCheckAvailability } from './tools/native/check-availability.js';
 import { registerConfirmHold } from './tools/native/confirm-hold.js';
+import { registerCreateHold } from './tools/native/create-hold.js';
 import { registerGetAgentContext } from './tools/native/get-agent-context.js';
 import { registerGetPendingNotifications } from './tools/native/get-pending-notifications.js';
 import { registerGetScheduleRules } from './tools/native/get-schedule-rules.js';
 import { registerListMeetingClasses } from './tools/native/list-meeting-classes.js';
+import { registerSearchAvailability } from './tools/native/search-availability.js';
 import { registerSimulate } from './tools/native/simulate.js';
 
 export function buildServer(
@@ -33,7 +34,8 @@ export function buildServer(
 
   registerGetAgentContext(server, client, defaultOwnerEmail);
   registerListMeetingClasses(server, client);
-  registerCheckAvailability(server, client, defaultOwnerEmail);
+  registerSearchAvailability(server, client, defaultOwnerEmail);
+  registerCreateHold(server, client, defaultOwnerEmail);
   registerConfirmHold(server, client);
   registerSimulate(server, client, defaultOwnerEmail);
   registerGetPendingNotifications(server, client);
