@@ -7,7 +7,20 @@ export type PendingNotification = {
 
 export type AvailabilityWarning =
   | { code: 'CALENDAR_BUSY_STALE'; calendar_type: string | null; message: string }
-  | { code: 'CALENDAR_TYPE_FALLBACK'; requested: string; resolved: string | null; message: string };
+  | { code: 'CALENDAR_TYPE_FALLBACK'; requested: string; resolved: string | null; message: string }
+  | {
+      code: 'WORKING_HOURS_NOT_CONFIGURED';
+      severity: 'warning';
+      message: string;
+      agent_guidance: string;
+    };
+
+export type UnavailableFeature = {
+  code: string;
+  feature: string;
+  requiredPlan: string;
+  message: string;
+};
 
 export const PRIORITY_TIERS = ['critical', 'high', 'normal', 'low'] as const;
 export type PriorityTier = (typeof PRIORITY_TIERS)[number];
@@ -91,6 +104,8 @@ export type OwnerContext = {
     maxDailyMeetingHours: number | null;
   };
   meetingClasses: MeetingClass[];
+  setupWarnings: AvailabilityWarning[];
+  unavailableFeatures: UnavailableFeature[];
   pendingNotifications: PendingNotification[];
 };
 
@@ -194,6 +209,7 @@ export type BookingResult = {
   description: string | null;
   calendarType: string | null;
   attendees?: Attendee[];
+  warnings: AvailabilityWarning[];
   status: 'committed';
 };
 

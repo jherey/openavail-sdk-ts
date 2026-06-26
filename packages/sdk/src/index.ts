@@ -18,7 +18,6 @@ export {
   SlotOutsideHoldError,
   UnknownApiKeyError,
   WindowTooNarrowError,
-  WorkingHoursNotConfiguredError,
 } from './errors.js';
 export type {
   AckNotificationsResult,

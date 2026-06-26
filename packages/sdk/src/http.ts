@@ -16,7 +16,6 @@ import {
   SlotOutsideHoldError,
   UnknownApiKeyError,
   WindowTooNarrowError,
-  WorkingHoursNotConfiguredError,
 } from './errors.js';
 import type {
   AlternativeSlot,
@@ -61,8 +60,6 @@ function throwFromErrorBody(body: ApiErrorBody, httpStatus: number): never {
         body.window_duration_minutes ?? 0,
         body.required_duration_minutes ?? 0,
       );
-    case 'WORKING_HOURS_NOT_CONFIGURED':
-      throw new WorkingHoursNotConfiguredError(message, pn);
     case 'CALENDAR_NOT_FOUND':
       throw new CalendarNotFoundError(message, pn);
     case 'LOOKAHEAD_EXCEEDS_MAXIMUM':

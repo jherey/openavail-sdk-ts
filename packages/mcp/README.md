@@ -60,6 +60,11 @@ Add the same JSON block to your client's MCP config file. Config file locations:
 3. Click **Create API key** under the agent.
 4. Copy the key immediately — it is not shown again.
 
+For a standard booking agent using this MCP server, grant `read_freebusy`, `create_holds`, and
+`create_bookings`. Grant `read_events` only when the agent should see booking titles,
+descriptions, and attendees in Openavail responses. Grant `preempt` only to trusted agents that may
+displace lower-priority bookings when rules allow it.
+
 ## Available tools
 
 ### Start here
@@ -96,11 +101,11 @@ These use the same tool names as `google-calendar-mcp` so agents targeting that 
 
 ## Notes
 
-**Always call `get-agent-context` first.** It returns the owner's IANA timezone, working hours, and all valid meeting class names in one call. Use the timezone to convert local times to UTC before any booking call.
+**Always call `get-agent-context` first.** It returns the owner's IANA timezone, working hours, setup warnings, unavailable features, and all valid meeting class names in one call. Use the timezone to convert local times to UTC before any booking call.
 
 **`latest_end` is a deadline, not a start boundary.** `latest_end` is the latest a meeting may **end**, not start. For a 60-min meeting at 2 pm, set `latest_end` to at least 3 pm.
 
-**Use `expiresInSeconds` for TTL checks.** The `check-availability` response includes both `expiresAt` (UTC ISO string) and `expiresInSeconds` (relative). Use `expiresInSeconds` — comparing `expiresAt` against a local time string produces wrong results in non-UTC timezones.
+**Use `expiresInSeconds` for TTL checks.** The `check-availability` response includes both `expiresAt` (absolute UTC timestamp) and `expiresInSeconds` (relative). Use `expiresInSeconds` for hold freshness and retry decisions; use `expiresAt` for logging, display, and correlation.
 
 **Calendar types**: Openavail supports `work`, `personal`, and `other` calendar types per owner. If a user has only connected a personal calendar and you pass `calendar_type: "work"`, the request silently falls back to the primary calendar. Call `list-calendars` first to know which types are connected.
 

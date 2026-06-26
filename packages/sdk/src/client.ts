@@ -2,6 +2,7 @@ import { HttpClient } from './http.js';
 import type {
   AckNotificationsResult,
   AlternativeSlot,
+  AvailabilityWarning,
   Booking,
   BookingResult,
   CancelBookingResult,
@@ -101,6 +102,7 @@ export class OpenavailClient {
       description?: string | null;
       calendar_type: string | null;
       attendees?: { email: string; displayName?: string }[];
+      warnings?: AvailabilityWarning[];
       status: 'committed';
     };
     const raw = await this.#http.request<Raw>({
@@ -136,6 +138,7 @@ export class OpenavailClient {
       description: raw.description ?? null,
       calendarType: raw.calendar_type,
       attendees: raw.attendees ?? [],
+      warnings: raw.warnings ?? [],
       status: raw.status,
     };
   }
@@ -159,6 +162,7 @@ export class OpenavailClient {
       description?: string | null;
       calendar_type: string | null;
       attendees?: { email: string; displayName?: string }[];
+      warnings?: AvailabilityWarning[];
       status: 'committed';
     };
     const raw = await this.#http.request<Raw>({
@@ -197,6 +201,7 @@ export class OpenavailClient {
       description: raw.description ?? null,
       calendarType: raw.calendar_type,
       attendees: raw.attendees ?? [],
+      warnings: raw.warnings ?? [],
       status: raw.status,
     };
   }
@@ -282,6 +287,13 @@ export class OpenavailClient {
         priority_tier: PriorityTier;
         preempt_policy: PreemptPolicy;
       }[];
+      setup_warnings?: AvailabilityWarning[];
+      unavailable_features?: {
+        code: string;
+        feature: string;
+        required_plan: string;
+        message: string;
+      }[];
       pending_notifications: PendingNotification[];
     };
     const raw = await this.#http.request<Raw>({
@@ -305,6 +317,13 @@ export class OpenavailClient {
         description: c.description,
         priorityTier: c.priority_tier,
         preemptPolicy: c.preempt_policy,
+      })),
+      setupWarnings: raw.setup_warnings ?? [],
+      unavailableFeatures: (raw.unavailable_features ?? []).map((f) => ({
+        code: f.code,
+        feature: f.feature,
+        requiredPlan: f.required_plan,
+        message: f.message,
       })),
       pendingNotifications: raw.pending_notifications,
     };
@@ -470,6 +489,7 @@ export class OpenavailClient {
       title: raw.title,
       description: raw.description ?? null,
       calendarType: raw.calendar_type,
+      warnings: [],
       status: raw.status,
     };
   }
