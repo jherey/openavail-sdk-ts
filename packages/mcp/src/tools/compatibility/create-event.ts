@@ -19,7 +19,7 @@ export function registerCreateEvent(
     [
       'Create a booking (calendar event) directly. Equivalent to Google Calendar create-event.',
       'REJECTION: if the slot is unavailable, ArbitrationRejectedError is thrown. Possible reasons: NO_CAPACITY (slot taken), WORKING_HOURS (outside working hours), OFF_DAY (non-working day), SACRED_MEETING (immovable protected booking), MAX_DAILY_HOURS (daily limit reached), PERMISSION_DENIED_PREEMPT (no preemption permission). alternatives[] contains contextually close slots (same day or same hour-of-day on next business day); if no comparable slot exists, alternatives[] is empty — use next_available for the absolute nearest opening.',
-      'PREFER check-availability + confirm-hold when: you need to show slot options to a user, you want a preemption preview, or you are not certain the slot is free. Use create-event only for direct writes where the slot is already known and confirmed by the user.',
+      'PREFER search-availability + create-hold + confirm-hold when: you need to show slot options to a user, you want a preemption preview, or you are not certain the slot is free. Use create-event only for direct writes where the slot is already known and confirmed by the user.',
       'owner_email replaces calendarId — Openavail identifies owners by email, not calendar ID.',
       'meeting_class is required — call list-meeting-classes first to see valid names, priorities, and descriptions.',
       'TIMEZONE: start/end must be ISO 8601 UTC. Call list-calendars first to get the owner\'s IANA timezone (e.g. "Europe/Berlin"), convert the user\'s local times to UTC, then pass them here. All timestamps in responses are also UTC.',

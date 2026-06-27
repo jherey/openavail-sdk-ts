@@ -77,7 +77,8 @@ displace lower-priority bookings when rules allow it.
 
 | Tool | Description |
 |---|---|
-| `check-availability` | Find available slots and create a short-lived hold. Pass `earliest_start` and `latest_end` — `latest_end` is when the meeting must **end**, not start. |
+| `search-availability` | Find candidate slots without creating a hold. Pass `earliest_start` and `latest_end` — `latest_end` is when the meeting must **end**, not start. |
+| `create-hold` | Reserve a selected candidate or short negotiation window. |
 | `confirm-hold` | Confirm a hold, committing the booking to the calendar. |
 | `simulate` | Preview the arbitration decision without creating anything (Pro plan). |
 | `get-schedule-rules` | Get working hours and slot interval for an owner. |
@@ -105,11 +106,11 @@ These use the same tool names as `google-calendar-mcp` so agents targeting that 
 
 **`latest_end` is a deadline, not a start boundary.** `latest_end` is the latest a meeting may **end**, not start. For a 60-min meeting at 2 pm, set `latest_end` to at least 3 pm.
 
-**Use `expiresInSeconds` for TTL checks.** The `check-availability` response includes both `expiresAt` (absolute UTC timestamp) and `expiresInSeconds` (relative). Use `expiresInSeconds` for hold freshness and retry decisions; use `expiresAt` for logging, display, and correlation.
+**Use `expiresInSeconds` for TTL checks.** The `create-hold` response includes both `expiresAt` (absolute UTC timestamp) and `expiresInSeconds` (relative). Use `expiresInSeconds` for hold freshness and retry decisions; use `expiresAt` for logging, display, and correlation.
 
 **Calendar types**: Openavail supports `work`, `personal`, and `other` calendar types per owner. If a user has only connected a personal calendar and you pass `calendar_type: "work"`, the request silently falls back to the primary calendar. Call `list-calendars` first to know which types are connected.
 
-**Hold TTL**: `check-availability` creates a 5-minute hold. Confirm promptly for human-in-the-loop flows, or the hold will expire.
+**Hold TTL**: `create-hold` creates a 5-minute hold. Confirm promptly for human-in-the-loop flows, or the hold will expire.
 
 **All times are UTC**: Pass `start`/`end` in ISO 8601 UTC format (`2026-07-01T14:00:00Z`). The timezone from `get-agent-context` tells you the owner's local timezone for conversion.
 
@@ -117,6 +118,6 @@ These use the same tool names as `google-calendar-mcp` so agents targeting that 
 
 | Tool | Limit |
 |---|---|
-| `check-availability` | 300 req/min |
-| `confirm-hold`, `create-event` | 120 req/min each |
+| `search-availability` | 300 req/min |
+| `create-hold`, `confirm-hold`, `create-event` | 120 req/min each |
 | All other tools | 600 req/min (shared per server IP) |

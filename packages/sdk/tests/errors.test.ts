@@ -50,7 +50,7 @@ describe('pending_notifications surfaced on thrown errors', () => {
     });
 
     const err = await client
-      .checkAvailability({
+      .searchAvailability({
         ownerEmail: 'alex@acme.com',
         durationMinutes: 30,
         window: { start: '2026-07-01T09:00:00Z', end: '2026-07-01T17:00:00Z' },
@@ -115,7 +115,7 @@ describe('pending_notifications surfaced on thrown errors', () => {
     });
 
     const err = await client
-      .checkAvailability({
+      .searchAvailability({
         ownerEmail: 'nobody@acme.com',
         durationMinutes: 30,
         window: { start: '2026-07-01T09:00:00Z', end: '2026-07-01T17:00:00Z' },

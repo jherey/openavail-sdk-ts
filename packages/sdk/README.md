@@ -20,8 +20,8 @@ const ctx = await client.getOwnerContext('alex@acme.com');
 const tz  = ctx.calendars.find(c => c.is_primary)?.timezone ?? 'UTC';
 const missingHours = ctx.setupWarnings.some(w => w.code === 'WORKING_HOURS_NOT_CONFIGURED');
 
-// 2. Find available slots and reserve a hold
-const { holdId, slots } = await client.checkAvailability({
+// 2. Find candidate slots without reserving time
+const { candidates } = await client.searchAvailability({
   ownerEmail:    'alex@acme.com',
   durationMinutes: 60,
   meetingClass:  'Critical',
@@ -29,11 +29,19 @@ const { holdId, slots } = await client.checkAvailability({
   latestEnd:     '2026-07-01T17:00:00Z', // latest the meeting may END, not start (UTC)
 });
 
-// 3. Confirm the hold → committed booking
+// 3. Reserve the selected candidate
+const hold = await client.createHold({
+  ownerEmail: 'alex@acme.com',
+  meetingClass: 'Critical',
+  holdScope: 'candidate',
+  candidate: candidates[0],
+});
+
+// 4. Confirm the hold → committed booking
 const booking = await client.confirmHold({
-  holdId,
-  start: slots[0].start,
-  end:   slots[0].end,
+  holdId: hold.holdId,
+  start: hold.heldWindow.start,
+  end:   hold.heldWindow.end,
   title: 'Strategy call',
   attendees: [{ email: 'alex@acme.com' }],
 });
@@ -70,12 +78,12 @@ const client = new OpenavailClient({
 
 ### Availability
 
-#### `checkAvailability(options)`
+#### `searchAvailability(options)`
 
-Find available slots and reserve a hold. All times are ISO 8601 UTC.
+Find candidate slots without reserving time. All times are ISO 8601 UTC.
 
 ```typescript
-const result = await client.checkAvailability({
+const result = await client.searchAvailability({
   ownerEmail?:                string,   // required unless user-scoped key
   durationMinutes:            number,
   meetingClass:               string,
@@ -85,7 +93,22 @@ const result = await client.checkAvailability({
   nextAvailableLookaheadHours?: number, // default 72h, max 72h
   idempotencyKey?:            string,   // auto-generated if omitted
 });
-// → { holdId, expiresAt, expiresInSeconds, slots, resolvedCalendarType, warnings, pendingNotifications }
+// → { requestedWindow, candidates, resolvedCalendarType, warnings, pendingNotifications }
+```
+
+#### `createHold(options)`
+
+Reserve Openavail capacity for one exact candidate or a short negotiation window.
+
+```typescript
+const hold = await client.createHold({
+  ownerEmail?: string,
+  meetingClass: string,
+  holdScope: 'candidate',
+  candidate: { start: string, end: string },
+  idempotencyKey?: string,
+});
+// → { holdId, holdScope, heldWindow, expiresAt, expiresInSeconds, resolvedCalendarType }
 ```
 
 Use `expiresInSeconds` for hold freshness and retry decisions. `expiresAt` is an absolute UTC timestamp for logging, display, and correlation.
@@ -237,7 +260,7 @@ try {
 }
 
 try {
-  await client.checkAvailability({ ... });
+  await client.searchAvailability({ ... });
 } catch (err) {
   if (err instanceof NoSlotsError) {
     // err.reasonCode — 'NO_FREE_SLOTS' | 'DAILY_HOURS_LIMIT' | 'OFF_DAY' | 'WORKING_HOURS' | 'HARD_BLOCK'

@@ -6,20 +6,21 @@ import {
   type Booking,
   type BookingResult,
   type CancelBookingResult,
-  type CheckAvailabilityResult,
   type ListBookingsResult,
   NoSlotsError,
   type OwnerCalendar,
   type OwnerContext,
   type PendingNotification,
   type ScheduleRules,
+  type SearchAvailabilityResult,
 } from '@openavail/sdk';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { buildServer } from '../src/server.js';
 
 function mockClient(overrides: Partial<OpenavailClient> = {}): OpenavailClient {
   return {
-    checkAvailability: vi.fn(),
+    searchAvailability: vi.fn(),
+    createHold: vi.fn(),
     confirmHold: vi.fn(),
     createBooking: vi.fn(),
     simulate: vi.fn(),
@@ -87,11 +88,14 @@ const CALENDARS: OwnerCalendar[] = [
   { calendar_type: 'work', is_primary: true, timezone: 'Europe/Berlin' },
 ];
 
-const AVAILABILITY_RESULT: CheckAvailabilityResult = {
-  holdId: 'c2ffde77-7e1d-4eh8-dd8f-8ddbdf582c33',
-  expiresAt: '2026-07-01T09:05:00.000Z',
-  expiresInSeconds: 300,
-  slots: [{ start: '2026-07-01T09:00:00.000Z', end: '2026-07-01T10:00:00.000Z' }],
+const AVAILABILITY_RESULT: SearchAvailabilityResult = {
+  requestedWindow: {
+    start: '2026-07-01T08:00:00.000Z',
+    end: '2026-07-01T18:00:00.000Z',
+  },
+  candidates: [
+    { start: '2026-07-01T09:00:00.000Z', end: '2026-07-01T10:00:00.000Z', risk: 'free' },
+  ],
   pendingNotifications: NO_NOTIFICATIONS,
   resolvedCalendarType: 'work',
   warnings: [],
@@ -118,7 +122,7 @@ describe('MCP server tools', () => {
       listCalendars: vi.fn().mockResolvedValue(CALENDARS),
       getBooking: vi.fn().mockResolvedValue(BOOKING),
       updateBooking: vi.fn().mockResolvedValue(BOOKING_RESULT),
-      checkAvailability: vi.fn().mockResolvedValue(AVAILABILITY_RESULT),
+      searchAvailability: vi.fn().mockResolvedValue(AVAILABILITY_RESULT),
       getPendingNotifications: vi.fn().mockResolvedValue(NO_NOTIFICATIONS),
       getScheduleRules: vi.fn().mockResolvedValue(SCHEDULE_RULES),
     });
@@ -165,9 +169,9 @@ describe('MCP server tools', () => {
       expect(names).toEqual(
         [
           'ack-notifications',
-          'check-availability',
           'confirm-hold',
           'create-event',
+          'create-hold',
           'delete-event',
           'get-agent-context',
           'get-event',
@@ -176,6 +180,7 @@ describe('MCP server tools', () => {
           'list-calendars',
           'list-events',
           'list-meeting-classes',
+          'search-availability',
           'search-events',
           'simulate',
           'update-event',
@@ -283,12 +288,12 @@ describe('MCP server tools', () => {
     });
   });
 
-  // ── check-availability ────────────────────────────────────────────────────────
+  // ── search-availability ───────────────────────────────────────────────────────
 
-  describe('check-availability', () => {
-    it('passes all params to client.checkAvailability', async () => {
+  describe('search-availability', () => {
+    it('passes all params to client.searchAvailability', async () => {
       const res = await mcpClient.callTool({
-        name: 'check-availability',
+        name: 'search-availability',
         arguments: {
           owner_email: 'owner@example.com',
           duration_minutes: 60,
@@ -298,7 +303,7 @@ describe('MCP server tools', () => {
         },
       });
 
-      expect(vi.mocked(client.checkAvailability)).toHaveBeenCalledWith(
+      expect(vi.mocked(client.searchAvailability)).toHaveBeenCalledWith(
         expect.objectContaining({
           ownerEmail: 'owner@example.com',
           durationMinutes: 60,
@@ -452,13 +457,13 @@ describe('MCP server tools', () => {
   // ── toolError field forwarding ────────────────────────────────────────────────
 
   describe('toolError field forwarding', () => {
-    it('forwards reasonCode from NoSlotsError in check-availability error', async () => {
-      vi.mocked(client.checkAvailability).mockRejectedValue(
+    it('forwards reasonCode from NoSlotsError in search-availability error', async () => {
+      vi.mocked(client.searchAvailability).mockRejectedValue(
         new NoSlotsError('No slots', [], null, [], undefined, 'OFF_DAY'),
       );
 
       const res = await mcpClient.callTool({
-        name: 'check-availability',
+        name: 'search-availability',
         arguments: {
           owner_email: 'owner@example.com',
           duration_minutes: 60,
@@ -475,12 +480,12 @@ describe('MCP server tools', () => {
     });
 
     it('forwards nextAvailableExceedsLookahead from NoSlotsError', async () => {
-      vi.mocked(client.checkAvailability).mockRejectedValue(
+      vi.mocked(client.searchAvailability).mockRejectedValue(
         new NoSlotsError('No slots', [], null, [], undefined, 'WORKING_HOURS', true),
       );
 
       const res = await mcpClient.callTool({
-        name: 'check-availability',
+        name: 'search-availability',
         arguments: {
           owner_email: 'owner@example.com',
           duration_minutes: 60,

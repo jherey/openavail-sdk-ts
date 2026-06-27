@@ -6,10 +6,10 @@ import type {
   Booking,
   BookingResult,
   CancelBookingResult,
-  CheckAvailabilityOptions,
-  CheckAvailabilityResult,
   ConfirmHoldOptions,
   CreateBookingOptions,
+  CreateHoldOptions,
+  CreateHoldResult,
   DisplacedBookingInfo,
   GetScheduleRulesOptions,
   ListBookingsOptions,
@@ -22,6 +22,8 @@ import type {
   PriorityTier,
   RejectionReason,
   ScheduleRules,
+  SearchAvailabilityOptions,
+  SearchAvailabilityResult,
   SimulateOptions,
   SimulateResult,
   UpdateBookingOptions,
@@ -38,14 +40,15 @@ export class OpenavailClient {
     this.#http = new HttpClient(options.apiKey, base);
   }
 
-  async checkAvailability(options: CheckAvailabilityOptions): Promise<CheckAvailabilityResult> {
+  async searchAvailability(options: SearchAvailabilityOptions): Promise<SearchAvailabilityResult> {
+    const earliestStart = options.earliestStart ?? options.window?.start;
+    const latestEnd = options.latestEnd ?? options.window?.end;
     type Raw = {
-      hold_id: string;
-      expires_at: string;
-      expires_in_seconds: number;
-      slots: {
+      requested_window: { start: string; end: string };
+      candidates: {
         start: string;
         end: string;
+        risk: 'free' | 'preemptable';
         preemptable?: {
           occupying_class: string;
           occupying_priority_tier: PriorityTier;
@@ -53,16 +56,16 @@ export class OpenavailClient {
       }[];
       pending_notifications: PendingNotification[];
       resolved_calendar_type: string | null;
-      warnings: { code: 'CALENDAR_BUSY_STALE'; calendar_type: string | null; message: string }[];
+      warnings: AvailabilityWarning[];
     };
     const raw = await this.#http.request<Raw>({
       method: 'POST',
-      path: '/availability',
+      path: '/availability/search',
       body: {
         ...(options.ownerEmail !== undefined && { owner_email: options.ownerEmail }),
         duration_minutes: options.durationMinutes,
-        earliest_start: options.earliestStart,
-        latest_end: options.latestEnd,
+        earliest_start: earliestStart,
+        latest_end: latestEnd,
         meeting_class: options.meetingClass,
         ...(options.calendarType !== undefined && { calendar_type: options.calendarType }),
         ...(options.nextAvailableLookaheadHours !== undefined && {
@@ -73,13 +76,45 @@ export class OpenavailClient {
       idempotencyKey: options.idempotencyKey,
     });
     return {
-      holdId: raw.hold_id,
-      expiresAt: raw.expires_at,
-      expiresInSeconds: raw.expires_in_seconds,
-      slots: raw.slots,
+      requestedWindow: raw.requested_window,
+      candidates: raw.candidates,
       pendingNotifications: raw.pending_notifications,
       resolvedCalendarType: raw.resolved_calendar_type,
       warnings: raw.warnings,
+    };
+  }
+
+  async createHold(options: CreateHoldOptions): Promise<CreateHoldResult> {
+    type Raw = {
+      hold_id: string;
+      hold_scope: 'candidate' | 'window';
+      held_window: { start: string; end: string };
+      expires_at: string;
+      expires_in_seconds: number;
+      resolved_calendar_type: string | null;
+    };
+    const raw = await this.#http.request<Raw>({
+      method: 'POST',
+      path: '/holds',
+      body: {
+        ...(options.ownerEmail !== undefined && { owner_email: options.ownerEmail }),
+        ...(options.calendarType !== undefined && { calendar_type: options.calendarType }),
+        meeting_class: options.meetingClass,
+        hold_scope: options.holdScope,
+        ...(options.holdScope === 'candidate'
+          ? { candidate: options.candidate }
+          : { duration_minutes: options.durationMinutes, window: options.window }),
+      },
+      requiresIdempotency: true,
+      idempotencyKey: options.idempotencyKey,
+    });
+    return {
+      holdId: raw.hold_id,
+      holdScope: raw.hold_scope,
+      heldWindow: raw.held_window,
+      expiresAt: raw.expires_at,
+      expiresInSeconds: raw.expires_in_seconds,
+      resolvedCalendarType: raw.resolved_calendar_type,
     };
   }
 

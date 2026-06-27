@@ -28,10 +28,16 @@ export type PriorityTier = (typeof PRIORITY_TIERS)[number];
 export const PREEMPT_POLICIES = ['protected', 'reschedulable', 'replaceable'] as const;
 export type PreemptPolicy = (typeof PREEMPT_POLICIES)[number];
 
+export type AvailabilityCandidate = {
+  start: string;
+  end: string;
+  risk: 'free' | 'preemptable';
+  preemptable?: { occupying_class: string; occupying_priority_tier: PriorityTier };
+};
+
 export type Slot = {
   start: string;
   end: string;
-  preemptable?: { occupying_class: string; occupying_priority_tier: PriorityTier };
 };
 
 export type RejectionReason =
@@ -44,8 +50,8 @@ export type RejectionReason =
   | 'COUNTER_PROPOSED';
 
 /**
- * Why check-availability returned no slots.
- * Returned as reason_code on the NoSlotsError thrown by checkAvailability().
+ * Why availability search returned no slots.
+ * Returned as reason_code on the NoSlotsError thrown by searchAvailability().
  *
  * - NO_FREE_SLOTS   — working day, right time of day, but the calendar is genuinely busy
  * - DAILY_HOURS_LIMIT — owner has hit their daily meeting cap
@@ -63,7 +69,7 @@ export type NoSlotsReasonCode =
 export type AlternativeSlot = {
   start: string;
   end: string;
-  reason_code: 'suggested_alternative';
+  reason_code: string;
 };
 
 export type Attendee = { email: string; displayName?: string | undefined };
@@ -111,19 +117,42 @@ export type OwnerContext = {
 
 // ── Request option types ──────────────────────────────────────────────────────
 
-export type CheckAvailabilityOptions = {
+export type SearchAvailabilityOptions = {
   /** Optional for user-scoped keys — resolved server-side from the API key's owner scope. */
   ownerEmail?: string;
   durationMinutes: number;
   /** Earliest time the meeting may start (ISO 8601 UTC). */
-  earliestStart: string;
+  earliestStart?: string;
   /** Latest time the meeting may END — not start (ISO 8601 UTC). For a 60-min meeting starting at 2pm, set latestEnd to at least 3pm. */
-  latestEnd: string;
+  latestEnd?: string;
+  /** Legacy alias for earliestStart/latestEnd. */
+  window?: { start: string; end: string };
   meetingClass: string;
   calendarType?: 'work' | 'personal' | 'other';
   nextAvailableLookaheadHours?: number;
   idempotencyKey?: string;
 };
+
+export type CreateCandidateHoldOptions = {
+  ownerEmail?: string;
+  calendarType?: 'work' | 'personal' | 'other';
+  meetingClass: string;
+  holdScope: 'candidate';
+  candidate: { start: string; end: string };
+  idempotencyKey?: string;
+};
+
+export type CreateWindowHoldOptions = {
+  ownerEmail?: string;
+  calendarType?: 'work' | 'personal' | 'other';
+  meetingClass: string;
+  holdScope: 'window';
+  durationMinutes: number;
+  window: { start: string; end: string };
+  idempotencyKey?: string;
+};
+
+export type CreateHoldOptions = CreateCandidateHoldOptions | CreateWindowHoldOptions;
 
 export type ConfirmHoldOptions = {
   holdId: string;
@@ -177,15 +206,21 @@ export type UpdateBookingOptions = {
 
 // ── Result types ──────────────────────────────────────────────────────────────
 
-export type CheckAvailabilityResult = {
-  holdId: string;
-  expiresAt: string;
-  /** Seconds until the hold expires. Use this for TTL checks instead of comparing expiresAt against local time. */
-  expiresInSeconds: number;
-  slots: Slot[];
+export type SearchAvailabilityResult = {
+  requestedWindow: { start: string; end: string };
+  candidates: AvailabilityCandidate[];
   pendingNotifications: PendingNotification[];
   resolvedCalendarType: string | null;
   warnings: AvailabilityWarning[];
+};
+
+export type CreateHoldResult = {
+  holdId: string;
+  holdScope: 'candidate' | 'window';
+  heldWindow: { start: string; end: string };
+  expiresAt: string;
+  expiresInSeconds: number;
+  resolvedCalendarType: string | null;
 };
 
 export type DisplacedBookingInfo = {

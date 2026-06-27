@@ -21,7 +21,7 @@ export function registerGetAgentContext(
       '  - unavailable_features: plan-gated features this account should not call, such as simulation on free accounts',
       'Use the timezone from the primary calendar to convert user-supplied local times to UTC for all subsequent calls.',
       'If setup_warnings includes WORKING_HOURS_NOT_CONFIGURED, bookings are still allowed but Openavail is not enforcing preferred working windows. Confirm before booking evenings, weekends, or unusual local times.',
-      'Use a meeting_class name from meeting_classes — passing an unlisted name to check-availability or create-event will return INVALID_MEETING_CLASS.',
+      'Use a meeting_class name from meeting_classes — passing an unlisted name to search-availability, create-hold, or create-event will return INVALID_MEETING_CLASS.',
       "To pick a meeting class: match the user's intent against the name and description. Do not ask the user to choose. If ambiguous, use the lowest priorityTier that fits the situation.",
       defaultOwnerEmail
         ? `Default owner: ${defaultOwnerEmail} (set via OPENAVAIL_OWNER_EMAIL — override by passing owner_email explicitly).`
