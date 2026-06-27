@@ -32,7 +32,11 @@ export type AvailabilityCandidate = {
   start: string;
   end: string;
   risk: 'free' | 'preemptable';
-  preemptable?: { occupying_class: string; occupying_priority_tier: PriorityTier };
+  preemptable?: {
+    occupying_class: string;
+    occupying_booking_ids: string[];
+    occupying_priority_tier: PriorityTier;
+  };
 };
 
 export type Slot = {
@@ -175,6 +179,60 @@ export type CreateBookingOptions = {
   calendarType?: 'work' | 'personal' | 'other';
   attendees?: Attendee[];
   idempotencyKey?: string;
+};
+
+export type BookingProposalCandidate = {
+  id: string;
+  start: string;
+  end: string;
+  rank: number;
+  agentPreferred: boolean;
+  status: 'valid' | 'invalid';
+  invalidReasons: string[];
+  risk: 'free' | 'preemptable';
+  preemptable: Record<string, unknown> | null;
+};
+
+export type BookingProposal = {
+  proposalId: string;
+  status:
+    | 'pending_owner_decision'
+    | 'approved_executing'
+    | 'booked'
+    | 'needs_new_window'
+    | 'needs_owner_review'
+    | 'rejected'
+    | 'expired'
+    | 'failed';
+  title: string;
+  description: string | null;
+  meetingClass: string;
+  durationMinutes: number;
+  attendees: Attendee[];
+  requestedWindow: { start: string; end: string };
+  expiresAt: string;
+  createdAt: string;
+  calendarOwner: string;
+  requestingAgent: string | null;
+  resolvedCalendarType: string | null;
+  approvedCandidateId: string | null;
+  candidates: BookingProposalCandidate[];
+  decision: string | null;
+  rejectionReason: string | null;
+  ownerNote: string | null;
+  bookingId: string | null;
+};
+
+export type CreateBookingProposalOptions = {
+  ownerEmail?: string;
+  calendarType?: 'work' | 'personal' | 'other';
+  title: string;
+  description?: string;
+  meetingClass: string;
+  durationMinutes: number;
+  attendees?: Attendee[];
+  requestedWindow: { start: string; end: string };
+  preferredTimes?: { start: string; end: string }[];
 };
 
 export type SimulateOptions = {

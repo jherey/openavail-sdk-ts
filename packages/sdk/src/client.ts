@@ -4,10 +4,12 @@ import type {
   AlternativeSlot,
   AvailabilityWarning,
   Booking,
+  BookingProposal,
   BookingResult,
   CancelBookingResult,
   ConfirmHoldOptions,
   CreateBookingOptions,
+  CreateBookingProposalOptions,
   CreateHoldOptions,
   CreateHoldResult,
   DisplacedBookingInfo,
@@ -51,6 +53,7 @@ export class OpenavailClient {
         risk: 'free' | 'preemptable';
         preemptable?: {
           occupying_class: string;
+          occupying_booking_ids: string[];
           occupying_priority_tier: PriorityTier;
         };
       }[];
@@ -239,6 +242,33 @@ export class OpenavailClient {
       warnings: raw.warnings ?? [],
       status: raw.status,
     };
+  }
+
+  async createBookingProposal(options: CreateBookingProposalOptions): Promise<BookingProposal> {
+    const raw = await this.#http.request<RawBookingProposal>({
+      method: 'POST',
+      path: '/booking-proposals',
+      body: {
+        ...(options.ownerEmail !== undefined && { owner_email: options.ownerEmail }),
+        ...(options.calendarType !== undefined && { calendar_type: options.calendarType }),
+        title: options.title,
+        ...(options.description !== undefined && { description: options.description }),
+        meeting_class: options.meetingClass,
+        duration_minutes: options.durationMinutes,
+        ...(options.attendees !== undefined && { attendees: options.attendees }),
+        requested_window: options.requestedWindow,
+        ...(options.preferredTimes !== undefined && { preferred_times: options.preferredTimes }),
+      },
+    });
+    return mapBookingProposal(raw);
+  }
+
+  async getBookingProposal(proposalId: string): Promise<BookingProposal> {
+    const raw = await this.#http.request<RawBookingProposal>({
+      method: 'GET',
+      path: `/booking-proposals/${encodeURIComponent(proposalId)}`,
+    });
+    return mapBookingProposal(raw);
   }
 
   async simulate(options: SimulateOptions): Promise<SimulateResult> {
@@ -552,4 +582,70 @@ export class OpenavailClient {
       maxDailyMeetingHours: raw.max_daily_meeting_hours,
     };
   }
+}
+
+type RawBookingProposal = {
+  proposal_id: string;
+  status: BookingProposal['status'];
+  title: string;
+  description: string | null;
+  meeting_class: string;
+  duration_minutes: number;
+  attendees: { email: string; displayName?: string }[];
+  requested_window: { start: string; end: string };
+  expires_at: string;
+  created_at: string;
+  calendar_owner: string;
+  requesting_agent: string | null;
+  resolved_calendar_type: string | null;
+  approved_candidate_id: string | null;
+  candidates: {
+    id: string;
+    start: string;
+    end: string;
+    rank: number;
+    agent_preferred: boolean;
+    status: 'valid' | 'invalid';
+    invalid_reasons: string[];
+    risk: 'free' | 'preemptable';
+    preemptable: Record<string, unknown> | null;
+  }[];
+  decision: string | null;
+  rejection_reason: string | null;
+  owner_note: string | null;
+  booking_id: string | null;
+};
+
+function mapBookingProposal(raw: RawBookingProposal): BookingProposal {
+  return {
+    proposalId: raw.proposal_id,
+    status: raw.status,
+    title: raw.title,
+    description: raw.description,
+    meetingClass: raw.meeting_class,
+    durationMinutes: raw.duration_minutes,
+    attendees: raw.attendees,
+    requestedWindow: raw.requested_window,
+    expiresAt: raw.expires_at,
+    createdAt: raw.created_at,
+    calendarOwner: raw.calendar_owner,
+    requestingAgent: raw.requesting_agent,
+    resolvedCalendarType: raw.resolved_calendar_type,
+    approvedCandidateId: raw.approved_candidate_id,
+    candidates: raw.candidates.map((candidate) => ({
+      id: candidate.id,
+      start: candidate.start,
+      end: candidate.end,
+      rank: candidate.rank,
+      agentPreferred: candidate.agent_preferred,
+      status: candidate.status,
+      invalidReasons: candidate.invalid_reasons,
+      risk: candidate.risk,
+      preemptable: candidate.preemptable,
+    })),
+    decision: raw.decision,
+    rejectionReason: raw.rejection_reason,
+    ownerNote: raw.owner_note,
+    bookingId: raw.booking_id,
+  };
 }

@@ -20,33 +20,20 @@ const ctx = await client.getOwnerContext('alex@acme.com');
 const tz  = ctx.calendars.find(c => c.is_primary)?.timezone ?? 'UTC';
 const missingHours = ctx.setupWarnings.some(w => w.code === 'WORKING_HOURS_NOT_CONFIGURED');
 
-// 2. Find candidate slots without reserving time
-const { candidates } = await client.searchAvailability({
+// 2. Approval mode: propose a booking without reserving or writing time
+const proposal = await client.createBookingProposal({
   ownerEmail:    'alex@acme.com',
+  title:         'Strategy call',
   durationMinutes: 60,
   meetingClass:  'Critical',
-  earliestStart: '2026-07-01T09:00:00Z', // earliest the meeting may begin (UTC)
-  latestEnd:     '2026-07-01T17:00:00Z', // latest the meeting may END, not start (UTC)
-});
-
-// 3. Reserve the selected candidate
-const hold = await client.createHold({
-  ownerEmail: 'alex@acme.com',
-  meetingClass: 'Critical',
-  holdScope: 'candidate',
-  candidate: candidates[0],
-});
-
-// 4. Confirm the hold → committed booking
-const booking = await client.confirmHold({
-  holdId: hold.holdId,
-  start: hold.heldWindow.start,
-  end:   hold.heldWindow.end,
-  title: 'Strategy call',
+  requestedWindow: {
+    start: '2026-07-01T09:00:00Z',
+    end:   '2026-07-01T17:00:00Z',
+  },
   attendees: [{ email: 'alex@acme.com' }],
 });
 
-console.log('Booked:', booking.bookingId);
+console.log('Awaiting owner approval:', proposal.proposalId);
 ```
 
 **`latestEnd` is a deadline, not a start boundary.** For a 60-min meeting starting at 2 pm, set `latestEnd` to at least 3 pm — the meeting must fully end within it.
@@ -58,7 +45,8 @@ console.log('Booked:', booking.bookingId);
 3. Click **Create API key** under the agent.
 4. Copy the key immediately — it is not shown again. Keys are prefixed `ak_`.
 
-For a standard booking agent, grant `read_freebusy`, `create_holds`, and `create_bookings`.
+For a new approval-mode agent, grant `read_freebusy` and `create_booking_proposals`.
+For a trusted auto-booking agent, grant `read_freebusy`, `create_holds`, and `create_bookings`.
 Grant `read_events` only when the agent should see booking titles, descriptions, and attendees in
 Openavail responses. Grant `preempt` only to trusted agents that may displace lower-priority
 bookings when rules allow it.
@@ -75,6 +63,32 @@ const client = new OpenavailClient({
 ```
 
 ## Methods
+
+### Booking proposals
+
+#### `createBookingProposal(options)`
+
+Create an approval-first proposal. This discovers candidates without creating a hold or calendar
+event. The owner approves or rejects in the dashboard.
+
+```typescript
+const proposal = await client.createBookingProposal({
+  ownerEmail?: string,
+  calendarType?: 'work' | 'personal' | 'other',
+  title: string,
+  description?: string,
+  meetingClass: string,
+  durationMinutes: number,
+  attendees?: { email: string; displayName?: string }[],
+  requestedWindow: { start: string; end: string },
+  preferredTimes?: { start: string; end: string }[], // max 3
+});
+// → BookingProposal
+```
+
+#### `getBookingProposal(proposalId)`
+
+Fetch proposal status, candidates, owner decision, and final booking id when booked.
 
 ### Availability
 
