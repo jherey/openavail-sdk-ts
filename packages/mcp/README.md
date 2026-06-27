@@ -60,8 +60,9 @@ Add the same JSON block to your client's MCP config file. Config file locations:
 3. Click **Create API key** under the agent.
 4. Copy the key immediately — it is not shown again.
 
-For a standard booking agent using this MCP server, grant `read_freebusy`, `create_holds`, and
-`create_bookings`. Grant `read_events` only when the agent should see booking titles,
+For a new approval-mode agent using this MCP server, grant `read_freebusy` and
+`create_booking_proposals`. For trusted auto-booking agents, grant `read_freebusy`,
+`create_holds`, and `create_bookings`. Grant `read_events` only when the agent should see booking titles,
 descriptions, and attendees in Openavail responses. Grant `preempt` only to trusted agents that may
 displace lower-priority bookings when rules allow it.
 
@@ -77,6 +78,7 @@ displace lower-priority bookings when rules allow it.
 
 | Tool | Description |
 |---|---|
+| `create-booking-proposal` | Create an approval-first booking proposal without creating a hold or calendar event. |
 | `search-availability` | Find candidate slots without creating a hold. Pass `earliest_start` and `latest_end` — `latest_end` is when the meeting must **end**, not start. |
 | `create-hold` | Reserve a selected candidate or short negotiation window. |
 | `confirm-hold` | Confirm a hold, committing the booking to the calendar. |

@@ -170,6 +170,7 @@ describe('MCP server tools', () => {
         [
           'ack-notifications',
           'confirm-hold',
+          'create-booking-proposal',
           'create-event',
           'create-hold',
           'delete-event',
