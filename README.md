@@ -66,6 +66,10 @@ Add to your MCP client config (Claude Desktop, Claude Code, Cursor, etc.):
 }
 ```
 
+Public scheduling tools can also run without an owner-agent API key. Set
+`OPENAVAIL_REQUESTER_CREDENTIAL=rc_...` when the agent is a verified external requester, or omit all
+credentials for anonymous public scheduling.
+
 ## Development
 
 ```bash

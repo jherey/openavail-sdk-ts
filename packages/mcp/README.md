@@ -83,6 +83,9 @@ Anonymous public scheduling does not need a requester credential. Set `OPENAVAIL
 
 ### Start here
 
+For private owner-scoped tools, start by reading the owner context. Public scheduling tools can run
+without owner-agent credentials and do not expose this tool unless `OPENAVAIL_API_KEY` is set.
+
 | Tool | Description |
 |---|---|
 | `get-agent-context` | **Call this first.** Returns the owner's timezone, working hours, slot interval, and all valid meeting class names in one call. Everything you need to make a valid booking request. |
@@ -107,17 +110,19 @@ Use these when the agent is an external requester asking another owner for time.
 
 | Tool | Description |
 |---|---|
-| `list-public-meeting-types` | List public-safe meeting types visible on a public scheduling boundary. Uses anonymous identity or `OPENAVAIL_REQUESTER_CREDENTIAL` when set. |
-| `create-public-booking-proposal` | Submit a structured or free-text public booking proposal. Returns a safe status and status URL. |
-| `confirm-public-requester-contact` | Confirm the requester-contact email for an anonymous public proposal. |
+| `list-public-meeting-types` | List public-safe meeting types visible on a public scheduling boundary. Uses anonymous identity or `OPENAVAIL_REQUESTER_CREDENTIAL` when set. Returns suggested times when the owner enabled them. |
+| `create-public-booking-proposal` | Submit a structured or free-text public booking proposal. `requester_contact` is the submitter; `attendees` should include the requester. Returns a safe status and status URL. |
+| `confirm-public-requester-contact` | Confirm the requester-contact email for an anonymous public proposal using the token from the contact verification URL. |
 | `get-public-booking-proposal-status` | Poll safe public status by public proposal access token. |
 | `withdraw-public-booking-proposal` | Withdraw a pending public proposal by public proposal access token. It does not cancel or reschedule booked meetings. |
 
 `list-public-meeting-types` returns the display name, optional description,
-duration, and `public_meeting_type` identifier. Use the identifier when calling
+duration, `public_meeting_type` identifier, and `suggestedTimes` when configured.
+Suggested times are not holds. Use the identifier when calling
 `create-public-booking-proposal`, and use the duration when choosing the request
-window; owner/admin setup derives the identifier from the meeting type name by
-default.
+window. If you choose a suggested time, submit it as the `requested_window`; Openavail
+rechecks the window before the request continues. Owner/admin setup derives the
+identifier from the meeting type name by default.
 
 ### Compatibility tools (Google Calendar MCP-compatible names)
 

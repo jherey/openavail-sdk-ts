@@ -91,6 +91,10 @@ const publicScheduling = new OpenavailPublicSchedulingClient({
 });
 
 const visibleTypes = await publicScheduling.listMeetingTypes('psch_abc123');
+
+for (const type of visibleTypes) {
+  console.log(type.name, type.durationMinutes, type.suggestedTimes);
+}
 ```
 
 ## Methods
@@ -113,6 +117,10 @@ console.log(proposal.statusUrl);
 console.log(proposal.contactVerificationUrl); // anonymous requests confirm one contact email
 ```
 
+`requesterContact` is the person submitting the request. `attendees` is the proposed attendee list
+and should include the requester. If a public meeting type has an attendee cap of `1`, send only the
+requester.
+
 #### Verified requester structured proposal
 
 ```typescript
@@ -134,6 +142,11 @@ const proposal = await publicScheduling.createBookingProposal({
 });
 ```
 
+Use `listMeetingTypes()` first. It returns requester-visible options with `publicMeetingType`,
+display `name`, optional `description`, `durationMinutes`, and `suggestedTimes`. Suggested times
+are not holds; if you submit one as `requestedWindow`, Openavail rechecks that window before the
+request continues.
+
 #### Polling and withdrawal
 
 ```typescript
@@ -143,6 +156,11 @@ if (status.status === 'pending_review') {
   await publicScheduling.withdrawBookingProposal('pat_public_access_token');
 }
 ```
+
+When `contactVerificationUrl` is present, extract the contact verification token from that URL and
+call `confirmRequesterContact(token)` after the requester confirms ownership of the email address.
+The status token is public-safe: it never returns internal proposal IDs, private conflicts, audit
+rows, or raw owner availability.
 
 #### Owner/admin public scheduling setup
 
@@ -155,6 +173,10 @@ const domain = await admin.createVerifiedDomain('acme.com');
 console.log(domain.txtName, domain.txtValue);
 
 const checked = await admin.checkVerifiedDomain(domain.id);
+if (checked.status !== 'verified') {
+  throw new Error('Add the DNS TXT record before creating a domain-bound identity');
+}
+
 const identity = await admin.createRequesterIdentity({
   displayName: 'Acme scheduling agent',
   verifiedDomainId: checked.id,
@@ -166,6 +188,7 @@ const meetingType = await admin.createMeetingType({
   description: 'Urgent customer incidents that need the support lead.',
   meetingClassId: 'meeting-class-id',
   durationMinutes: 30,
+  candidatePreview: true, // dashboard copy: "Show suggested times"
   status: 'published',
 });
 console.log(meetingType.publicMeetingType); // "customer-escalation"; derived from name
@@ -183,6 +206,10 @@ await admin.revokeRequesterCredential(credentials[0]!.id);
 `createMeetingType` accepts an optional `publicMeetingType` override, but most
 owner/admin flows should pass only `name`; the SDK derives the URL/API-safe
 identifier automatically.
+
+Admin meeting type fields mirror the API, so the SDK still uses `candidatePreview`. In the
+dashboard this is labeled **Show suggested times**. Suggested times are cached for requester UX and
+are always rechecked before booking or approval.
 
 ### Booking proposals
 
