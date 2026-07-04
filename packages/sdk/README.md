@@ -62,7 +62,127 @@ const client = new OpenavailClient({
 })
 ```
 
+## Public scheduling auth
+
+Openavail has two separate credential types:
+
+- `OpenavailClient({ apiKey })` uses an owner-agent API key (`ak_...`). It acts inside the key owner's Openavail account and is for private owner-scoped APIs such as availability, holds, bookings, and private booking proposals.
+- `OpenavailPublicSchedulingClient({ requesterCredential })` uses an optional requester credential (`rc_...`). It proves who an external requester is when asking another owner for time through `/public`. It does not grant calendar access.
+
+Anonymous public scheduling does not need a credential. Verified requester flows use a requester credential only to identify the requester; the target owner's public scheduling policy still decides visibility, review, and auto-book behavior.
+
+```typescript
+import {
+  OpenavailPublicSchedulingAdminClient,
+  OpenavailPublicSchedulingClient,
+} from '@openavail/sdk';
+
+// Owner/admin setup: uses an owner-agent API key.
+const admin = new OpenavailPublicSchedulingAdminClient({
+  apiKey: process.env.OPENAVAIL_API_KEY!,
+});
+
+const [boundary] = await admin.listBoundaries();
+const meetingTypes = boundary ? await admin.listMeetingTypes(boundary.id) : [];
+
+// External requester flow: anonymous or requester credential.
+const publicScheduling = new OpenavailPublicSchedulingClient({
+  requesterCredential: process.env.OPENAVAIL_REQUESTER_CREDENTIAL,
+});
+
+const visibleTypes = await publicScheduling.listMeetingTypes('psch_abc123');
+```
+
 ## Methods
+
+### Public scheduling
+
+#### Anonymous free-text proposal
+
+```typescript
+const publicScheduling = new OpenavailPublicSchedulingClient();
+
+const proposal = await publicScheduling.createBookingProposal({
+  boundaryId: 'psch_abc123',
+  message: 'I need 30 minutes next week to discuss a potential partnership.',
+  requesterContact: { email: 'person@example.com' },
+  attendees: [{ email: 'person@example.com' }],
+});
+
+console.log(proposal.statusUrl);
+console.log(proposal.contactVerificationUrl); // anonymous requests confirm one contact email
+```
+
+#### Verified requester structured proposal
+
+```typescript
+const publicScheduling = new OpenavailPublicSchedulingClient({
+  requesterCredential: process.env.OPENAVAIL_REQUESTER_CREDENTIAL!,
+});
+
+const proposal = await publicScheduling.createBookingProposal({
+  boundaryId: 'psch_abc123',
+  publicMeetingType: 'customer_escalation',
+  durationMinutes: 30,
+  requestedWindow: {
+    start: '2026-07-01T09:00:00Z',
+    end: '2026-07-08T17:00:00Z',
+  },
+  requesterContact: { email: 'coordinator@acme.com', name: 'Acme Coordinator' },
+  attendees: [{ email: 'person@acme.com', name: 'Person Name' }],
+  reason: 'Production incident follow-up',
+});
+```
+
+#### Polling and withdrawal
+
+```typescript
+const status = await publicScheduling.getBookingProposalStatus('pat_public_access_token');
+
+if (status.status === 'pending_review') {
+  await publicScheduling.withdrawBookingProposal('pat_public_access_token');
+}
+```
+
+#### Owner/admin public scheduling setup
+
+```typescript
+const admin = new OpenavailPublicSchedulingAdminClient({
+  apiKey: process.env.OPENAVAIL_API_KEY!,
+});
+
+const domain = await admin.createVerifiedDomain('acme.com');
+console.log(domain.txtName, domain.txtValue);
+
+const checked = await admin.checkVerifiedDomain(domain.id);
+const identity = await admin.createRequesterIdentity({
+  displayName: 'Acme scheduling agent',
+  verifiedDomainId: checked.id,
+});
+
+const meetingType = await admin.createMeetingType({
+  boundaryId: 'public-boundary-id',
+  name: 'Customer escalation',
+  description: 'Urgent customer incidents that need the support lead.',
+  meetingClassId: 'meeting-class-id',
+  durationMinutes: 30,
+  status: 'published',
+});
+console.log(meetingType.publicMeetingType); // "customer-escalation"; derived from name
+
+const issued = await admin.issueRequesterCredential({
+  requesterIdentityId: identity.id,
+  displayName: 'production',
+});
+console.log(issued.requesterCredential); // shown once; store it as OPENAVAIL_REQUESTER_CREDENTIAL
+
+const credentials = await admin.listRequesterCredentials(identity.id);
+await admin.revokeRequesterCredential(credentials[0]!.id);
+```
+
+`createMeetingType` accepts an optional `publicMeetingType` override, but most
+owner/admin flows should pass only `name`; the SDK derives the URL/API-safe
+identifier automatically.
 
 ### Booking proposals
 

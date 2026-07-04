@@ -1,5 +1,5 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { OpenavailClient } from '@openavail/sdk';
+import type { OpenavailClient, OpenavailPublicSchedulingClient } from '@openavail/sdk';
 import { registerCreateEvent } from './tools/compatibility/create-event.js';
 import { registerDeleteEvent } from './tools/compatibility/delete-event.js';
 import { registerGetEvent } from './tools/compatibility/get-event.js';
@@ -15,15 +15,27 @@ import { registerGetAgentContext } from './tools/native/get-agent-context.js';
 import { registerGetPendingNotifications } from './tools/native/get-pending-notifications.js';
 import { registerGetScheduleRules } from './tools/native/get-schedule-rules.js';
 import { registerListMeetingClasses } from './tools/native/list-meeting-classes.js';
+import { registerPublicSchedulingTools } from './tools/native/public-scheduling.js';
 import { registerSearchAvailability } from './tools/native/search-availability.js';
 import { registerSimulate } from './tools/native/simulate.js';
 
 export function buildServer(
-  client: OpenavailClient,
-  opts: { defaultOwnerEmail?: string } = {},
+  client?: OpenavailClient,
+  opts: {
+    defaultOwnerEmail?: string;
+    publicSchedulingClient?: OpenavailPublicSchedulingClient;
+  } = {},
 ): McpServer {
   const server = new McpServer({ name: '@openavail/mcp', version: '0.1.0' });
-  const { defaultOwnerEmail } = opts;
+  const { defaultOwnerEmail, publicSchedulingClient } = opts;
+
+  if (publicSchedulingClient) {
+    registerPublicSchedulingTools(server, publicSchedulingClient);
+  }
+
+  if (!client) {
+    return server;
+  }
 
   registerListCalendars(server, client, defaultOwnerEmail);
   registerListEvents(server, client, defaultOwnerEmail);
