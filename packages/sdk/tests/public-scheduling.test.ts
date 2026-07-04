@@ -25,6 +25,14 @@ describe('OpenavailPublicSchedulingClient', () => {
             name: 'Customer escalation',
             description: null,
             duration_minutes: 30,
+            suggested_times: [
+              {
+                start: '2027-01-01T10:00:00.000Z',
+                end: '2027-01-01T10:30:00.000Z',
+                rank: 1,
+                source: 'allocation',
+              },
+            ],
           },
         ],
       }),
@@ -37,6 +45,10 @@ describe('OpenavailPublicSchedulingClient', () => {
     expect(spy.mock.calls[0]?.[0]).toBe('https://api.test/public/schedules/psch_123/meeting-types');
     expect(spy.mock.calls[0]?.[1]?.headers).toEqual({});
     expect(result[0]?.publicMeetingType).toBe('customer_escalation');
+    expect(result[0]?.suggestedTimes[0]).toMatchObject({
+      start: '2027-01-01T10:00:00.000Z',
+      source: 'allocation',
+    });
   });
 
   it('encodes slash aliases as one public schedule path parameter', async () => {

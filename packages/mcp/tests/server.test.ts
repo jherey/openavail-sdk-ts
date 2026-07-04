@@ -563,6 +563,7 @@ describe('MCP public scheduling tools', () => {
           name: 'Customer escalation',
           description: null,
           durationMinutes: 30,
+          suggestedTimes: [],
         },
       ]),
       createBookingProposal: vi.fn().mockResolvedValue({

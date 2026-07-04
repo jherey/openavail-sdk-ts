@@ -915,6 +915,12 @@ export class OpenavailPublicSchedulingClient {
         name: string;
         description: string | null;
         duration_minutes: number;
+        suggested_times?: {
+          start: string;
+          end: string;
+          rank: number;
+          source: 'allocation' | 'rules';
+        }[];
       }[];
     };
     const raw = await this.#request<Raw>({
@@ -926,6 +932,7 @@ export class OpenavailPublicSchedulingClient {
       name: type.name,
       description: type.description,
       durationMinutes: type.duration_minutes,
+      suggestedTimes: type.suggested_times ?? [],
     }));
   }
 

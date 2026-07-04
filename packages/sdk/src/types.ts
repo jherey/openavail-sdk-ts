@@ -361,11 +361,19 @@ export type WorkingHoursRule = {
   timezone: string;
 };
 
+export type PublicSuggestedTime = {
+  start: string;
+  end: string;
+  rank: number;
+  source: 'allocation' | 'rules';
+};
+
 export type PublicMeetingType = {
   publicMeetingType: string;
   name: string;
   description: string | null;
   durationMinutes: number;
+  suggestedTimes: PublicSuggestedTime[];
 };
 
 export type PublicSchedulingBoundary = {
