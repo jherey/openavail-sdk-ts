@@ -1,6 +1,6 @@
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
-import type { OpenavailClient } from '@openavail/sdk';
+import type { OpenavailClient, OpenavailPublicSchedulingClient } from '@openavail/sdk';
 import {
   ArbitrationRejectedError,
   type Booking,
@@ -35,6 +35,19 @@ function mockClient(overrides: Partial<OpenavailClient> = {}): OpenavailClient {
     listMeetingClasses: vi.fn(),
     ...overrides,
   } as unknown as OpenavailClient;
+}
+
+function mockPublicClient(
+  overrides: Partial<OpenavailPublicSchedulingClient> = {},
+): OpenavailPublicSchedulingClient {
+  return {
+    listMeetingTypes: vi.fn(),
+    createBookingProposal: vi.fn(),
+    getBookingProposalStatus: vi.fn(),
+    confirmRequesterContact: vi.fn(),
+    withdrawBookingProposal: vi.fn(),
+    ...overrides,
+  } as unknown as OpenavailPublicSchedulingClient;
 }
 
 const SCHEDULE_RULES: ScheduleRules = {
@@ -103,6 +116,15 @@ const AVAILABILITY_RESULT: SearchAvailabilityResult = {
 
 async function setupServer(client: OpenavailClient) {
   const mcpServer = buildServer(client);
+  const [serverTransport, clientTransport] = InMemoryTransport.createLinkedPair();
+  const mcpClient = new Client({ name: 'test', version: '0.0.0' });
+  await mcpServer.connect(serverTransport);
+  await mcpClient.connect(clientTransport);
+  return { mcpClient, mcpServer };
+}
+
+async function setupPublicServer(publicSchedulingClient: OpenavailPublicSchedulingClient) {
+  const mcpServer = buildServer(undefined, { publicSchedulingClient });
   const [serverTransport, clientTransport] = InMemoryTransport.createLinkedPair();
   const mcpClient = new Client({ name: 'test', version: '0.0.0' });
   await mcpServer.connect(serverTransport);
@@ -529,21 +551,164 @@ describe('MCP server tools', () => {
   });
 });
 
-// ── bin.ts: OPENAVAIL_API_KEY guard ─────────────────────────────────────────
+describe('MCP public scheduling tools', () => {
+  let publicClient: OpenavailPublicSchedulingClient;
+  let mcpClient: Client;
 
-describe('bin.ts', () => {
-  it('exits with code 1 when OPENAVAIL_API_KEY is not set', async () => {
-    const savedKey = process.env.OPENAVAIL_API_KEY;
-    delete process.env.OPENAVAIL_API_KEY;
+  beforeEach(async () => {
+    publicClient = mockPublicClient({
+      listMeetingTypes: vi.fn().mockResolvedValue([
+        {
+          publicMeetingType: 'customer_escalation',
+          name: 'Customer escalation',
+          description: null,
+          durationMinutes: 30,
+          suggestedTimes: [],
+        },
+      ]),
+      createBookingProposal: vi.fn().mockResolvedValue({
+        status: 'pending_review',
+        statusUrl: 'https://api.test/public/booking-proposals/pat_test',
+      }),
+      getBookingProposalStatus: vi.fn().mockResolvedValue({
+        status: 'pending_review',
+        updatedAt: '2026-07-01T00:00:00Z',
+      }),
+      confirmRequesterContact: vi.fn().mockResolvedValue({
+        status: 'pending_review',
+      }),
+      withdrawBookingProposal: vi.fn().mockResolvedValue({
+        status: 'withdrawn',
+        updatedAt: '2026-07-01T00:00:00Z',
+      }),
+    });
+    ({ mcpClient } = await setupPublicServer(publicClient));
+  });
 
-    const exitSpy = vi.spyOn(process, 'exit').mockImplementation((code) => {
-      throw new Error(`process.exit(${code ?? 'undefined'})`);
+  afterEach(async () => {
+    await mcpClient.close();
+  });
+
+  it('registers public scheduling tools without private owner-agent tools', async () => {
+    const listed = await mcpClient.listTools();
+    const names = listed.tools.map((tool) => tool.name).sort();
+    expect(names).toEqual(
+      [
+        'create-public-booking-proposal',
+        'confirm-public-requester-contact',
+        'get-public-booking-proposal-status',
+        'list-public-meeting-types',
+        'withdraw-public-booking-proposal',
+      ].sort(),
+    );
+  });
+
+  it('lists visible public meeting types', async () => {
+    const res = await mcpClient.callTool({
+      name: 'list-public-meeting-types',
+      arguments: { public_scheduling_boundary_id: 'psch_123' },
     });
 
-    vi.resetModules();
-    await expect(import('../src/bin.js')).rejects.toThrow('process.exit(1)');
+    expect(vi.mocked(publicClient.listMeetingTypes)).toHaveBeenCalledWith('psch_123');
+    expect(res.isError).toBeFalsy();
+  });
 
-    exitSpy.mockRestore();
-    if (savedKey !== undefined) process.env.OPENAVAIL_API_KEY = savedKey;
+  it('passes slash aliases through public scheduling tools', async () => {
+    await mcpClient.callTool({
+      name: 'list-public-meeting-types',
+      arguments: { public_scheduling_boundary_id: '/jane/founder-office-hours' },
+    });
+    await mcpClient.callTool({
+      name: 'create-public-booking-proposal',
+      arguments: {
+        public_scheduling_boundary_id: '/jane/founder-office-hours',
+        requester_contact: { email: 'person@example.com' },
+        attendees: [{ email: 'person@example.com' }],
+        message: 'Could we talk next week?',
+      },
+    });
+
+    expect(vi.mocked(publicClient.listMeetingTypes)).toHaveBeenCalledWith(
+      '/jane/founder-office-hours',
+    );
+    expect(vi.mocked(publicClient.createBookingProposal)).toHaveBeenCalledWith(
+      expect.objectContaining({ boundaryId: '/jane/founder-office-hours' }),
+    );
+  });
+
+  it('creates public booking proposals for external requester flow', async () => {
+    await mcpClient.callTool({
+      name: 'create-public-booking-proposal',
+      arguments: {
+        public_scheduling_boundary_id: 'psch_123',
+        public_meeting_type: 'customer_escalation',
+        duration_minutes: 30,
+        requested_window: {
+          start: '2026-07-01T09:00:00Z',
+          end: '2026-07-08T17:00:00Z',
+        },
+        requester_contact: { email: 'coordinator@acme.com', name: 'Acme Coordinator' },
+        attendees: [{ email: 'person@acme.com', name: 'Person Name' }],
+        reason: 'Production incident follow-up',
+      },
+    });
+
+    expect(vi.mocked(publicClient.createBookingProposal)).toHaveBeenCalledWith(
+      expect.objectContaining({
+        boundaryId: 'psch_123',
+        publicMeetingType: 'customer_escalation',
+      }),
+    );
+  });
+
+  it('polls and withdraws public proposal tokens', async () => {
+    await mcpClient.callTool({
+      name: 'confirm-public-requester-contact',
+      arguments: { contact_verification_token: 'pat_contact' },
+    });
+    await mcpClient.callTool({
+      name: 'get-public-booking-proposal-status',
+      arguments: { public_proposal_access_token: 'pat_test' },
+    });
+    await mcpClient.callTool({
+      name: 'withdraw-public-booking-proposal',
+      arguments: { public_proposal_access_token: 'pat_test' },
+    });
+
+    expect(vi.mocked(publicClient.confirmRequesterContact)).toHaveBeenCalledWith('pat_contact');
+    expect(vi.mocked(publicClient.getBookingProposalStatus)).toHaveBeenCalledWith('pat_test');
+    expect(vi.mocked(publicClient.withdrawBookingProposal)).toHaveBeenCalledWith('pat_test');
+  });
+});
+
+// ── bin.ts: anonymous public startup ────────────────────────────────────────
+
+describe('bin.ts', () => {
+  it('starts anonymous public scheduling tools without owner-agent credentials', async () => {
+    vi.resetModules();
+    const { createServerFromEnv } = await import('../src/bin.js');
+    const server = createServerFromEnv({
+      OPENAVAIL_BASE_URL: 'https://api.test',
+    });
+    const [serverTransport, clientTransport] = InMemoryTransport.createLinkedPair();
+    const mcpClient = new Client({ name: 'test', version: '0.0.0' });
+    await server.connect(serverTransport);
+    await mcpClient.connect(clientTransport);
+
+    try {
+      const listed = await mcpClient.listTools();
+      const names = listed.tools.map((tool) => tool.name).sort();
+      expect(names).toEqual(
+        [
+          'create-public-booking-proposal',
+          'confirm-public-requester-contact',
+          'get-public-booking-proposal-status',
+          'list-public-meeting-types',
+          'withdraw-public-booking-proposal',
+        ].sort(),
+      );
+    } finally {
+      await mcpClient.close();
+    }
   });
 });

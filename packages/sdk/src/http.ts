@@ -148,7 +148,11 @@ export class HttpClient {
       ...(body !== undefined && { body: JSON.stringify(body) }),
     });
 
-    const json = (await res.json()) as T | ApiErrorBody;
+    const json = (
+      'text' in res && typeof res.text === 'function'
+        ? await parseResponseText(res)
+        : await res.json()
+    ) as T | ApiErrorBody | undefined;
 
     if (!res.ok) {
       throwFromErrorBody(json as ApiErrorBody, res.status);
@@ -156,4 +160,9 @@ export class HttpClient {
 
     return json as T;
   }
+}
+
+async function parseResponseText(res: Response): Promise<unknown> {
+  const text = await res.text();
+  return text ? JSON.parse(text) : undefined;
 }

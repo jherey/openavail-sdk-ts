@@ -193,16 +193,39 @@ export type BookingProposalCandidate = {
   preemptable: Record<string, unknown> | null;
 };
 
+export type PublicProposalContext = {
+  actorSource:
+    | 'owner_registered_agent'
+    | 'requester_identity'
+    | 'anonymous_requester'
+    | 'dashboard_user'
+    | 'system';
+  requesterIdentityId: string | null;
+  requesterIdentity: string | null;
+  requesterVerifiedDomainId: string | null;
+  requesterVerifiedDomain: string | null;
+  requesterContact: RequesterContact | null;
+  publicSchedulingBoundaryId: string | null;
+  publicSchedulingBoundary: string | null;
+  publicMeetingTypeId: string | null;
+  publicMeetingType: string | null;
+  audienceMatch: string[];
+  publicRequestMessage: string | null;
+  requesterContactVerifiedAt: string | null;
+};
+
 export type BookingProposal = {
   proposalId: string;
   status:
     | 'pending_owner_decision'
+    | 'pending_requester_verification'
     | 'approved_executing'
     | 'booked'
     | 'needs_new_window'
     | 'needs_owner_review'
     | 'rejected'
     | 'expired'
+    | 'withdrawn'
     | 'failed';
   title: string;
   description: string | null;
@@ -221,6 +244,7 @@ export type BookingProposal = {
   rejectionReason: string | null;
   ownerNote: string | null;
   bookingId: string | null;
+  publicContext: PublicProposalContext | null;
 };
 
 export type CreateBookingProposalOptions = {
@@ -335,6 +359,224 @@ export type WorkingHoursRule = {
   startTime: string;
   endTime: string;
   timezone: string;
+};
+
+export type PublicSuggestedTime = {
+  start: string;
+  end: string;
+  rank: number;
+  source: 'allocation' | 'rules';
+};
+
+export type PublicMeetingType = {
+  publicMeetingType: string;
+  name: string;
+  description: string | null;
+  durationMinutes: number;
+  suggestedTimes: PublicSuggestedTime[];
+};
+
+export type PublicSchedulingBoundary = {
+  id: string;
+  publicId: string;
+  calendarOwnerId: string;
+  aliasPath: string | null;
+  status: 'active' | 'disabled';
+  allowFreeText: boolean;
+};
+
+export type PublicMeetingTypeVisibility = 'everyone' | 'verified_requesters' | 'selected_audiences';
+
+export type PublicSchedulingAdminMeetingType = {
+  id: string;
+  boundaryId: string;
+  publicMeetingType: string;
+  name: string;
+  description: string | null;
+  durationMinutes: number;
+  visibility: PublicMeetingTypeVisibility;
+  preemptPolicy: PreemptPolicy | null;
+  status: 'draft' | 'published' | 'disabled';
+  attendeeLimit: number;
+};
+
+export type VerifiedDomain = {
+  id: string;
+  domain: string;
+  status: 'pending' | 'verified' | 'failed';
+  txtName: string;
+  txtValue: string;
+  verifiedAt: string | null;
+};
+
+export type RequesterAudienceMember = {
+  id: string;
+  verifiedDomainId: string | null;
+  requesterIdentityId: string | null;
+  pendingDomain: string | null;
+};
+
+export type RequesterAudience = {
+  id: string;
+  name: string;
+  behavior: 'allow' | 'block';
+  members: RequesterAudienceMember[];
+};
+
+export type RequesterIdentity = {
+  id: string;
+  displayName: string;
+  verifiedDomainId: string | null;
+  status: string;
+};
+
+export type IssuedRequesterCredential = {
+  id: string;
+  credentialRef: string | null;
+  requesterCredential: string;
+};
+
+export type RequesterCredential = {
+  id: string;
+  requesterIdentityId: string;
+  credentialRef: string | null;
+  displayName: string | null;
+  createdAt: string;
+  revokedAt: string | null;
+  lastUsedAt: string | null;
+};
+
+export type BookableAllocation = {
+  id: string;
+  publicMeetingTypeId: string;
+  label: string;
+  window: Record<string, unknown>;
+  bookingLimit: Record<string, unknown> | null;
+  status: 'active' | 'disabled';
+};
+
+export type CreatePublicSchedulingBoundaryOptions = {
+  calendarOwnerId: string;
+  aliasPath?: string;
+};
+
+export type UpdatePublicSchedulingBoundaryOptions = {
+  boundaryId: string;
+  aliasPath?: string | null;
+  allowFreeText?: boolean;
+  status?: PublicSchedulingBoundary['status'];
+};
+
+export type CreatePublicSchedulingMeetingTypeOptions = {
+  boundaryId: string;
+  /**
+   * URL/API-safe meeting type identifier. If omitted, the SDK derives one from `name`.
+   */
+  publicMeetingType?: string;
+  name: string;
+  description?: string;
+  meetingClassId: string;
+  durationMinutes: number;
+  visibility?: PublicMeetingTypeVisibility;
+  audienceIds?: string[];
+  approvalMode?: 'required' | 'not_required';
+  candidatePreview?: boolean;
+  autoBook?: boolean;
+  attendeeLimit?: number;
+  preemptPolicy?: PreemptPolicy;
+  status?: 'draft' | 'published';
+};
+
+export type UpdatePublicSchedulingMeetingTypeOptions = {
+  meetingTypeId: string;
+  name?: string;
+  description?: string | null;
+  durationMinutes?: number;
+  visibility?: PublicMeetingTypeVisibility;
+  audienceIds?: string[];
+  approvalMode?: 'required' | 'not_required';
+  candidatePreview?: boolean;
+  autoBook?: boolean;
+  attendeeLimit?: number;
+  preemptPolicy?: PreemptPolicy | null;
+  status?: PublicSchedulingAdminMeetingType['status'];
+};
+
+export type CreateRequesterAudienceOptions = {
+  name: string;
+  behavior?: 'allow' | 'block';
+};
+
+export type AddRequesterAudienceMemberOptions =
+  | { audienceId: string; verifiedDomainId: string }
+  | { audienceId: string; requesterIdentityId: string }
+  | { audienceId: string; pendingDomain: string };
+
+export type CreateRequesterIdentityOptions = {
+  displayName: string;
+  verifiedDomainId?: string;
+};
+
+export type IssueRequesterCredentialOptions = {
+  requesterIdentityId: string;
+  displayName?: string;
+};
+
+export type CreateBookableAllocationOptions = {
+  publicMeetingTypeId: string;
+  label: string;
+  window: Record<string, unknown>;
+  bookingLimit?: Record<string, unknown>;
+};
+
+export type UpdateBookableAllocationOptions = {
+  allocationId: string;
+  label?: string;
+  window?: Record<string, unknown>;
+  bookingLimit?: Record<string, unknown> | null;
+  status?: BookableAllocation['status'];
+};
+
+export type RequesterContact = {
+  email: string;
+  name?: string;
+};
+
+export type PublicProposalAttendee = {
+  email: string;
+  name?: string;
+};
+
+export type CreatePublicBookingProposalOptions = {
+  boundaryId: string;
+  publicMeetingType?: string;
+  durationMinutes?: number;
+  requestedWindow?: { start: string; end: string };
+  requesterContact: RequesterContact;
+  attendees: PublicProposalAttendee[];
+  reason?: string;
+  message?: string;
+};
+
+export type PublicProposalStatus =
+  | 'pending_review'
+  | 'pending_requester_verification'
+  | 'booked'
+  | 'rejected'
+  | 'expired'
+  | 'withdrawn'
+  | 'countered'
+  | 'needs_more_information';
+
+export type CreatePublicBookingProposalResult = {
+  status: PublicProposalStatus;
+  statusUrl: string;
+  contactVerificationUrl?: string;
+};
+
+export type PublicBookingProposalStatusResult = {
+  status: PublicProposalStatus;
+  updatedAt: string;
 };
 
 export type ScheduleRules = {

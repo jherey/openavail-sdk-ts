@@ -19,6 +19,7 @@ Add to your Claude Desktop config file:
       "args": ["-y", "@openavail/mcp"],
       "env": {
         "OPENAVAIL_API_KEY": "ak_01HX7QQM…",
+        "OPENAVAIL_REQUESTER_CREDENTIAL": "rc_12345678_…",
         "OPENAVAIL_OWNER_EMAIL": "owner@example.com"
       }
     }
@@ -50,8 +51,11 @@ Add the same JSON block to your client's MCP config file. Config file locations:
 
 | Variable | Required | Description |
 |---|---|---|
-| `OPENAVAIL_API_KEY` | Yes | API key from the Openavail dashboard. Go to **Agents → Register agent**, create an agent, then click **Create API key**. Keys are prefixed `ak_`. |
-| `OPENAVAIL_OWNER_EMAIL` | No | Default calendar owner email. When set, all tools omit the `owner_email` parameter. Override per-call by passing `owner_email` explicitly. |
+| `OPENAVAIL_API_KEY` | Required for private owner-scoped tools | Owner-agent API key from the Openavail dashboard. Go to **Agents → Register agent**, create an agent, then click **Create API key**. Keys are prefixed `ak_`. |
+| `OPENAVAIL_REQUESTER_CREDENTIAL` | Optional | Requester credential for public scheduling tools. Keys are prefixed `rc_`. It proves external requester identity when asking another owner for time; it does not grant calendar access. |
+| `OPENAVAIL_OWNER_EMAIL` | No | Default calendar owner email for private owner-scoped tools. When set, those tools omit the `owner_email` parameter. Override per-call by passing `owner_email` explicitly. |
+
+No credential is required for anonymous public scheduling tools. If neither `OPENAVAIL_API_KEY` nor `OPENAVAIL_REQUESTER_CREDENTIAL` is set, the server registers public scheduling tools only and calls public scheduling anonymously. If only `OPENAVAIL_REQUESTER_CREDENTIAL` is set, the server registers public scheduling tools only with verified requester identity. If `OPENAVAIL_API_KEY` is set, private owner-scoped tools are also registered, and public scheduling tools still use anonymous or requester-credential identity rather than owner authority.
 
 ## Getting an API key
 
@@ -66,9 +70,21 @@ For a new approval-mode agent using this MCP server, grant `read_freebusy` and
 descriptions, and attendees in Openavail responses. Grant `preempt` only to trusted agents that may
 displace lower-priority bookings when rules allow it.
 
+## Requester credentials
+
+Requester credentials are different from owner-agent API keys:
+
+- `OPENAVAIL_API_KEY` acts inside the configured owner's account. Use it for private tools such as `search-availability`, `create-hold`, `confirm-hold`, `create-booking-proposal`, and calendar-event compatibility tools.
+- `OPENAVAIL_REQUESTER_CREDENTIAL` proves external requester identity for public scheduling tools. It is used when asking another owner for time through their public scheduling boundary. The target owner's policy still decides visibility, review, and auto-book behavior.
+
+Anonymous public scheduling does not need a requester credential. Set `OPENAVAIL_REQUESTER_CREDENTIAL` when a verified requester should see meeting types or behavior that the target owner has allowed for that requester identity, verified domain, or audience.
+
 ## Available tools
 
 ### Start here
+
+For private owner-scoped tools, start by reading the owner context. Public scheduling tools can run
+without owner-agent credentials and do not expose this tool unless `OPENAVAIL_API_KEY` is set.
 
 | Tool | Description |
 |---|---|
@@ -87,6 +103,26 @@ displace lower-priority bookings when rules allow it.
 | `list-meeting-classes` | List valid meeting class names and their priority/preempt policy. |
 | `get-pending-notifications` | Fetch unread agent notifications (last 7 days). |
 | `ack-notifications` | Acknowledge notifications by ID to mark them as read. |
+
+### Public scheduling tools
+
+Use these when the agent is an external requester asking another owner for time. These tools never expose internal proposal IDs, private conflicts, hidden meeting types, raw owner availability, or owner audit history.
+
+| Tool | Description |
+|---|---|
+| `list-public-meeting-types` | List public-safe meeting types visible on a public scheduling boundary. Uses anonymous identity or `OPENAVAIL_REQUESTER_CREDENTIAL` when set. Returns suggested times when the owner enabled them. |
+| `create-public-booking-proposal` | Submit a structured or free-text public booking proposal. `requester_contact` is the submitter; `attendees` should include the requester. Returns a safe status and status URL. |
+| `confirm-public-requester-contact` | Confirm the requester-contact email for an anonymous public proposal using the token from the contact verification URL. |
+| `get-public-booking-proposal-status` | Poll safe public status by public proposal access token. |
+| `withdraw-public-booking-proposal` | Withdraw a pending public proposal by public proposal access token. It does not cancel or reschedule booked meetings. |
+
+`list-public-meeting-types` returns the display name, optional description,
+duration, `public_meeting_type` identifier, and `suggestedTimes` when configured.
+Suggested times are not holds. Use the identifier when calling
+`create-public-booking-proposal`, and use the duration when choosing the request
+window. If you choose a suggested time, submit it as the `requested_window`; Openavail
+rechecks the window before the request continues. Owner/admin setup derives the
+identifier from the meeting type name by default.
 
 ### Compatibility tools (Google Calendar MCP-compatible names)
 
