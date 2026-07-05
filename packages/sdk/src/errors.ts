@@ -73,6 +73,13 @@ export class CalendarNotFoundError extends OpenavailError {
   }
 }
 
+export class CalendarReauthRequiredError extends OpenavailError {
+  constructor(message: string, pendingNotifications: PendingNotification[]) {
+    super(message, 'CALENDAR_REAUTH_REQUIRED', 409, pendingNotifications);
+    this.name = 'CalendarReauthRequiredError';
+  }
+}
+
 export class LookaheadExceedsMaximumError extends OpenavailError {
   constructor(message: string, pendingNotifications: PendingNotification[]) {
     super(message, 'LOOKAHEAD_EXCEEDS_MAXIMUM', 400, pendingNotifications);

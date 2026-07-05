@@ -8,6 +8,7 @@ export {
   BookingNotCancellableError,
   BookingNotFoundError,
   CalendarNotFoundError,
+  CalendarReauthRequiredError,
   HoldAlreadyPromotedError,
   HoldExpiredError,
   HoldNotFoundError,

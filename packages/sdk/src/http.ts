@@ -3,6 +3,7 @@ import {
   BookingNotCancellableError,
   BookingNotFoundError,
   CalendarNotFoundError,
+  CalendarReauthRequiredError,
   HoldAlreadyPromotedError,
   HoldExpiredError,
   HoldNotFoundError,
@@ -62,6 +63,8 @@ function throwFromErrorBody(body: ApiErrorBody, httpStatus: number): never {
       );
     case 'CALENDAR_NOT_FOUND':
       throw new CalendarNotFoundError(message, pn);
+    case 'CALENDAR_REAUTH_REQUIRED':
+      throw new CalendarReauthRequiredError(message, pn);
     case 'LOOKAHEAD_EXCEEDS_MAXIMUM':
       throw new LookaheadExceedsMaximumError(message, pn);
     case 'ARBITRATION_REJECTED':
