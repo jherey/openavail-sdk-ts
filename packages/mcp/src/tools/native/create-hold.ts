@@ -41,6 +41,7 @@ export function registerCreateHold(
     'create-hold',
     [
       'Reserve Openavail capacity with an explicit candidate or window hold.',
+      'Requires permission: create_holds.',
       'Use candidate holds when you have selected one exact slot. Use window holds for short active negotiations where options inside the window must stay stable.',
       'Candidate holds must be confirmed with the exact same start/end. Window holds may be confirmed with any valid slot inside the held window.',
       'Returns: holdId, holdScope, heldWindow, expiresAt, expiresInSeconds, and resolvedCalendarType.',

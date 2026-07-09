@@ -13,6 +13,7 @@ export function registerSearchAvailability(
     'search-availability',
     [
       'Find candidate time slots without creating a hold.',
+      'Requires permission: read_freebusy.',
       'Use this when you are exploring options or preparing a user approval flow. Call create-hold only after you are ready to reserve capacity.',
       'Returns: requestedWindow, candidates with risk (free | preemptable), resolvedCalendarType, warnings, and pendingNotifications.',
       'latest_end is the latest time the meeting may END, not the latest start time.',

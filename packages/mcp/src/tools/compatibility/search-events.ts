@@ -11,7 +11,7 @@ export function registerSearchEvents(
 ): void {
   server.tool(
     'search-events',
-    'Search committed bookings by title text. Equivalent to Google Calendar search-events. Uses case-insensitive substring match on the event title.',
+    'Requires permission: read_events. Search committed bookings by title text. Equivalent to Google Calendar search-events. Uses case-insensitive substring match on the event title.',
     {
       owner_email: z
         .string()

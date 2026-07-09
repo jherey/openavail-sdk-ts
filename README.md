@@ -5,7 +5,7 @@ TypeScript packages for the [Openavail](https://openavail.com) API.
 | Package | Description | npm |
 |---|---|---|
 | [`@openavail/sdk`](./packages/sdk) | TypeScript client — zero dependencies, Node 18+ | [![npm](https://img.shields.io/npm/v/@openavail/sdk)](https://www.npmjs.com/package/@openavail/sdk) |
-| [`@openavail/mcp`](./packages/mcp) | MCP stdio server — works with Claude, Cursor, Windsurf, and any MCP-compatible client | [![npm](https://img.shields.io/npm/v/@openavail/mcp)](https://www.npmjs.com/package/@openavail/mcp) |
+| [`@openavail/mcp`](./packages/mcp) | MCP stdio fallback for clients that do not support hosted remote MCP | [![npm](https://img.shields.io/npm/v/@openavail/mcp)](https://www.npmjs.com/package/@openavail/mcp) |
 
 ## Quick start
 
@@ -44,6 +44,15 @@ await client.confirmHold({
 ```
 
 ### MCP
+
+Hosted MCP is the primary path for Codex, Claude Code, and other clients that support remote HTTP MCP
+with OAuth:
+
+```text
+https://mcp.openavail.com/mcp
+```
+
+Use the local stdio package when a client needs manual API-key setup:
 
 ```bash
 npx @openavail/mcp

@@ -4,6 +4,46 @@ MCP server for [Openavail](https://openavail.com) — gives AI agents the abilit
 
 ## Quickstart
 
+### Hosted MCP with OAuth
+
+Hosted MCP is the primary setup path for clients that support remote HTTP MCP and browser-based
+OAuth login. Add a remote MCP server named `openavail` with this URL:
+
+```text
+https://mcp.openavail.com/mcp
+```
+
+When the client opens the browser, sign in to Openavail and approve the connection. Openavail creates
+a client-specific backing agent such as `Codex MCP` or `Claude Code MCP`. The default OAuth grant is
+approval-first: `read_freebusy`, `read_events`, and `create_booking_proposals`. It can read calendar
+context and draft booking proposals for approval, but it cannot create holds, book directly, preempt,
+or cancel events unless you later change the backing agent's permissions in the Openavail dashboard.
+
+#### Codex
+
+In Codex, add Openavail as a remote HTTP MCP server:
+
+- Name: `openavail`
+- URL: `https://mcp.openavail.com/mcp`
+- Authentication: OAuth/browser login
+
+After the OAuth approval completes, start with the `get-agent-context` tool. OAuth-created
+user-scoped connections do not need `OPENAVAIL_OWNER_EMAIL`; Openavail resolves the connected calendar
+owner from the signed-in dashboard user.
+
+#### Claude Code
+
+In Claude Code, add Openavail as a remote HTTP MCP server:
+
+- Name: `openavail`
+- URL: `https://mcp.openavail.com/mcp`
+- Authentication: OAuth/browser login
+
+If your Claude Code build does not support remote HTTP MCP with OAuth, use the stdio setup below with
+an `OPENAVAIL_API_KEY`.
+
+## Local stdio fallback
+
 ### Claude Desktop
 
 Add to your Claude Desktop config file:
