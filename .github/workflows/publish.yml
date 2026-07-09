@@ -30,14 +30,33 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm build
+      - name: Check published package versions
+        id: published
+        run: |
+          sdk_version="$(node -p "require('./packages/sdk/package.json').version")"
+          mcp_version="$(node -p "require('./packages/mcp/package.json').version")"
+          echo "sdk_version=${sdk_version}" >> "$GITHUB_OUTPUT"
+          echo "mcp_version=${mcp_version}" >> "$GITHUB_OUTPUT"
+          if npm view "@openavail/sdk@${sdk_version}" version >/dev/null 2>&1; then
+            echo "sdk=true" >> "$GITHUB_OUTPUT"
+            echo "@openavail/sdk@${sdk_version} is already published; skipping publish."
+          else
+            echo "sdk=false" >> "$GITHUB_OUTPUT"
+          fi
+          if npm view "@openavail/mcp@${mcp_version}" version >/dev/null 2>&1; then
+            echo "mcp=true" >> "$GITHUB_OUTPUT"
+            echo "@openavail/mcp@${mcp_version} is already published; skipping publish."
+          else
+            echo "mcp=false" >> "$GITHUB_OUTPUT"
+          fi
       - name: Publish @openavail/sdk
-        if: ${{ !inputs.dry_run }}
+        if: ${{ !inputs.dry_run && steps.published.outputs.sdk != 'true' }}
         run: pnpm publish --no-git-checks
         working-directory: packages/sdk
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Publish @openavail/mcp
-        if: ${{ !inputs.dry_run }}
+        if: ${{ !inputs.dry_run && steps.published.outputs.mcp != 'true' }}
         run: pnpm publish --no-git-checks
         working-directory: packages/mcp
         env:
