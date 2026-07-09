@@ -25,7 +25,7 @@ export function registerUpdateEvent(server: McpServer, client: OpenavailClient):
       'ROLLBACK WARNING: there is no atomic guarantee. If confirm-hold fails after delete-event has already run, the old booking is gone. Inform the user and retry with a fresh search-availability + create-hold flow.',
     ].join('\n'),
     {
-      eventId: z.string().uuid().describe('The booking ID to update.'),
+      id: z.string().uuid().describe('The booking ID to update.'),
       title: z.string().min(1).optional().describe('New event title.'),
       description: z
         .string()
@@ -33,10 +33,10 @@ export function registerUpdateEvent(server: McpServer, client: OpenavailClient):
         .describe('Event body/notes — agenda, dial-in link, prep instructions, etc.'),
       attendees: z.array(AttendeeSchema).optional().describe('Replacement attendee list.'),
     },
-    async ({ eventId, title, description, attendees }) => {
+    async ({ id, title, description, attendees }) => {
       try {
         return ok(
-          await client.updateBooking(eventId, {
+          await client.updateBooking(id, {
             ...(title !== undefined && { title }),
             ...(description !== undefined && { description }),
             ...(attendees !== undefined && { attendees }),

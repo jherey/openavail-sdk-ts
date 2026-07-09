@@ -15,6 +15,7 @@ import {
   type SearchAvailabilityResult,
 } from '@openavail/sdk';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { listOpenavailMcpTools } from '../src/registry.js';
 import { buildServer } from '../src/server.js';
 
 function mockClient(overrides: Partial<OpenavailClient> = {}): OpenavailClient {
@@ -188,27 +189,12 @@ describe('MCP server tools', () => {
       const listed = await mcpClient.listTools();
       const names = listed.tools.map((tool) => tool.name).sort();
 
-      expect(names).toEqual(
-        [
-          'ack-notifications',
-          'confirm-hold',
-          'create-booking-proposal',
-          'create-event',
-          'create-hold',
-          'delete-event',
-          'get-agent-context',
-          'get-event',
-          'get-pending-notifications',
-          'get-schedule-rules',
-          'list-calendars',
-          'list-events',
-          'list-meeting-classes',
-          'search-availability',
-          'search-events',
-          'simulate',
-          'update-event',
-        ].sort(),
-      );
+      const privateRegistryNames = listOpenavailMcpTools({ surface: 'local' })
+        .map((tool) => tool.name)
+        .filter((name) => !name.includes('-public-'))
+        .sort();
+
+      expect(names).toEqual(privateRegistryNames);
     });
   });
 
@@ -250,10 +236,10 @@ describe('MCP server tools', () => {
   // ── delete-event ──────────────────────────────────────────────────────────────
 
   describe('delete-event', () => {
-    it('calls client.cancelBooking with the eventId', async () => {
+    it('calls client.cancelBooking with the id', async () => {
       const res = await mcpClient.callTool({
         name: 'delete-event',
-        arguments: { eventId: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11' },
+        arguments: { id: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11' },
       });
 
       expect(vi.mocked(client.cancelBooking)).toHaveBeenCalledWith(
@@ -370,7 +356,7 @@ describe('MCP server tools', () => {
       await mcpClient.callTool({
         name: 'update-event',
         arguments: {
-          eventId: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
+          id: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
           title: 'Updated title',
         },
       });
@@ -385,7 +371,7 @@ describe('MCP server tools', () => {
       await mcpClient.callTool({
         name: 'update-event',
         arguments: {
-          eventId: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
+          id: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
           description: 'Updated agenda',
         },
       });
@@ -548,6 +534,72 @@ describe('MCP server tools', () => {
       const body = JSON.parse(content[0]?.text ?? '{}') as { nextAvailable: typeof nextAvailable };
       expect(body.nextAvailable).toEqual(nextAvailable);
     });
+  });
+});
+
+describe('MCP tool registry', () => {
+  it('returns the expected full Openavail tool name set', () => {
+    expect(
+      listOpenavailMcpTools()
+        .map((tool) => tool.name)
+        .sort(),
+    ).toEqual(
+      [
+        'ack-notifications',
+        'confirm-hold',
+        'confirm-public-requester-contact',
+        'create-booking-proposal',
+        'create-event',
+        'create-hold',
+        'create-public-booking-proposal',
+        'delete-event',
+        'get-agent-context',
+        'get-event',
+        'get-pending-notifications',
+        'get-public-booking-proposal-status',
+        'get-schedule-rules',
+        'list-calendars',
+        'list-events',
+        'list-meeting-classes',
+        'list-public-meeting-types',
+        'search-availability',
+        'search-events',
+        'simulate',
+        'update-event',
+        'withdraw-public-booking-proposal',
+      ].sort(),
+    );
+  });
+
+  it('matches local listTools when local private and public clients are configured', async () => {
+    const privateClient = mockClient({
+      createBooking: vi.fn().mockResolvedValue(BOOKING_RESULT),
+      cancelBooking: vi.fn().mockResolvedValue(CANCEL_RESULT),
+      listBookings: vi.fn().mockResolvedValue(LIST_RESULT),
+      listCalendars: vi.fn().mockResolvedValue(CALENDARS),
+      getBooking: vi.fn().mockResolvedValue(BOOKING),
+      updateBooking: vi.fn().mockResolvedValue(BOOKING_RESULT),
+      searchAvailability: vi.fn().mockResolvedValue(AVAILABILITY_RESULT),
+      getPendingNotifications: vi.fn().mockResolvedValue(NO_NOTIFICATIONS),
+      getScheduleRules: vi.fn().mockResolvedValue(SCHEDULE_RULES),
+    });
+    const publicClient = mockPublicClient();
+    const mcpServer = buildServer(privateClient, { publicSchedulingClient: publicClient });
+    const [serverTransport, clientTransport] = InMemoryTransport.createLinkedPair();
+    const registryClient = new Client({ name: 'test', version: '0.0.0' });
+    await mcpServer.connect(serverTransport);
+    await registryClient.connect(clientTransport);
+
+    try {
+      const listed = await registryClient.listTools();
+      expect(listed.tools.map((tool) => tool.name).sort()).toEqual(
+        listOpenavailMcpTools({ surface: 'local' })
+          .map((tool) => tool.name)
+          .sort(),
+      );
+    } finally {
+      await registryClient.close();
+    }
   });
 });
 

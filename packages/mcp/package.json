@@ -1,9 +1,15 @@
 {
   "name": "@openavail/mcp",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "type": "module",
   "bin": {
     "openavail-mcp": "./dist/bin.js"
+  },
+  "exports": {
+    "./registry": {
+      "types": "./dist/registry.d.ts",
+      "import": "./dist/registry.js"
+    }
   },
   "files": [
     "dist"

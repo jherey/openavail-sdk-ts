@@ -13,6 +13,7 @@ export function registerCreateBookingProposal(
     'create-booking-proposal',
     [
       'Create a durable booking proposal for calendar-owner approval without creating a hold.',
+      'Requires permission: create_booking_proposals.',
       'Use this for approval-mode agents. The owner approves or rejects in Openavail; if approved, Openavail books automatically when a valid candidate is still available.',
       'preferred_times may contain up to 3 exact candidate windows. Openavail validates them and also generates ranked candidates inside requested_window.',
       'Returns proposal status and candidate history. It does not return an owner review URL.',

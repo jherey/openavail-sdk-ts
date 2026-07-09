@@ -14,10 +14,10 @@ export function registerDeleteEvent(server: McpServer, client: OpenavailClient):
       'Returns BOOKING_NOT_CANCELLABLE (409) if the booking is in a non-cancellable status.',
       'RESCHEDULE ORDER: when rescheduling (moving a booking to a new time), call search-availability and create-hold to secure the new slot BEFORE calling delete-event. Deleting first leaves the user with no booking if the new confirm-hold later fails.',
     ].join('\n'),
-    { eventId: z.string().uuid().describe('The booking ID to cancel.') },
-    async ({ eventId }) => {
+    { id: z.string().uuid().describe('The booking ID to cancel.') },
+    async ({ id }) => {
       try {
-        return ok(await client.cancelBooking(eventId));
+        return ok(await client.cancelBooking(id));
       } catch (err) {
         if (err instanceof OpenavailError) return toolError(err);
         throw err;

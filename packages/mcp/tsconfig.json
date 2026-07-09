@@ -8,6 +8,7 @@
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
     "isolatedModules": true,
+    "ignoreDeprecations": "6.0",
     "allowImportingTsExtensions": true,
     "skipLibCheck": true,
     "noEmit": true,

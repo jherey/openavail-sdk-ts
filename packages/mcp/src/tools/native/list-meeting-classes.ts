@@ -8,6 +8,7 @@ export function registerListMeetingClasses(server: McpServer, client: OpenavailC
     'list-meeting-classes',
     [
       'List all active meeting classes configured for this account.',
+      'Requires permission: read_freebusy.',
       'Returns: name, description, priorityTier, and preemptPolicy for each class.',
       'Call this first to discover valid meeting_class values before calling search-availability, create-hold, create-event, or simulate.',
       'meeting_class is a required parameter on those tools — passing an unknown name returns INVALID_MEETING_CLASS.',

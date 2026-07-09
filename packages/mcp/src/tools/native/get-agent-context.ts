@@ -13,6 +13,7 @@ export function registerGetAgentContext(
     'get-agent-context',
     [
       '# START HERE — call this before any other tool.',
+      'Requires permission: read_freebusy.',
       'Returns everything you need to make a valid booking in a single call:',
       '  - calendars: connected calendars with their type (work/personal/other) and IANA timezone',
       '  - schedule_rules: working hours, slot interval, and daily meeting limit',

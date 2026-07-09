@@ -13,6 +13,7 @@ export function registerGetScheduleRules(
     'get-schedule-rules',
     [
       'Fetch the working hours, slot interval, and daily meeting limit for a calendar owner.',
+      'Requires permission: read_freebusy.',
       'Call this before building time-picker UIs or before attempting bookings in an unfamiliar time window — it lets you reason about valid booking times without trial-and-error rejections.',
       'working_hours: array of recurring weekly windows (days 0=Sun…6=Sat, HH:MM start/end, IANA timezone).',
       'slot_interval_minutes: granularity for slot snapping (e.g. 15 → slots at :00, :15, :30, :45).',

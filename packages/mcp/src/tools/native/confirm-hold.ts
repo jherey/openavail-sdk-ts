@@ -14,6 +14,7 @@ export function registerConfirmHold(server: McpServer, client: OpenavailClient):
     'confirm-hold',
     [
       'Confirm a hold created by create-hold, promoting it to a committed booking.',
+      'Requires permission: create_bookings.',
       'REJECTION: if arbitration rejects the slot, ArbitrationRejectedError is thrown. Possible reasons: NO_CAPACITY (slot taken), WORKING_HOURS (outside working hours), OFF_DAY (non-working day), SACRED_MEETING (immovable protected booking), MAX_DAILY_HOURS (daily limit reached), PERMISSION_DENIED_PREEMPT (no preemption permission). alternatives[] contains contextually close slots; next_available points to the absolute nearest free slot.',
       'Returns: bookingId, correlationId, displacedCount (bookings preempted by higher priority), pendingNotifications (last 60 minutes only — call get-pending-notifications for the full backlog).',
       'For candidate holds, the chosen start/end must match the held candidate exactly. For window holds, the chosen start/end must fall within the held window.',

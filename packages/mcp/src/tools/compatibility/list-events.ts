@@ -11,7 +11,7 @@ export function registerListEvents(
 ): void {
   server.tool(
     'list-events',
-    'List committed bookings (calendar events) for a calendar owner. Equivalent to Google Calendar list-events. timeMin/timeMax filter by meeting start time (ISO 8601 UTC). Omitting timeMin/timeMax returns bookings in the next 3 days.',
+    'Requires permission: read_events. List committed bookings (calendar events) for a calendar owner. Equivalent to Google Calendar list-events. timeMin/timeMax filter by meeting start time (ISO 8601 UTC). Omitting timeMin/timeMax returns bookings in the next 3 days.',
     {
       owner_email: z
         .string()
