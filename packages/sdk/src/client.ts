@@ -94,6 +94,10 @@ export class OpenavailClient {
       pending_notifications: PendingNotification[];
       resolved_calendar_type: string | null;
       warnings: AvailabilityWarning[];
+      candidate_limit: number | null;
+      available_candidate_count: number;
+      candidates_truncated: boolean;
+      candidate_set: 'curated' | 'exhaustive';
     };
     const raw = await this.#http.request<Raw>({
       method: 'POST',
@@ -108,6 +112,7 @@ export class OpenavailClient {
         ...(options.nextAvailableLookaheadHours !== undefined && {
           next_available_lookahead_hours: options.nextAvailableLookaheadHours,
         }),
+        ...(options.maxResults !== undefined && { max_results: options.maxResults }),
       },
       requiresIdempotency: true,
       idempotencyKey: options.idempotencyKey,
@@ -118,6 +123,10 @@ export class OpenavailClient {
       pendingNotifications: raw.pending_notifications,
       resolvedCalendarType: raw.resolved_calendar_type,
       warnings: raw.warnings,
+      candidateLimit: raw.candidate_limit,
+      availableCandidateCount: raw.available_candidate_count,
+      candidatesTruncated: raw.candidates_truncated,
+      candidateSet: raw.candidate_set,
     };
   }
 
@@ -1034,6 +1043,11 @@ type RawBookingProposal = {
   calendar_owner: string;
   requesting_agent: string | null;
   resolved_calendar_type: string | null;
+  candidate_limit: number;
+  available_valid_candidate_count: number;
+  valid_candidate_count: number;
+  candidates_truncated: boolean;
+  candidate_set: 'curated' | 'exhaustive';
   approved_candidate_id: string | null;
   candidates: {
     id: string;
@@ -1274,6 +1288,11 @@ function mapBookingProposal(raw: RawBookingProposal): BookingProposal {
     calendarOwner: raw.calendar_owner,
     requestingAgent: raw.requesting_agent,
     resolvedCalendarType: raw.resolved_calendar_type,
+    candidateLimit: raw.candidate_limit,
+    availableValidCandidateCount: raw.available_valid_candidate_count,
+    validCandidateCount: raw.valid_candidate_count,
+    candidatesTruncated: raw.candidates_truncated,
+    candidateSet: raw.candidate_set,
     approvedCandidateId: raw.approved_candidate_id,
     candidates: raw.candidates.map((candidate) => ({
       id: candidate.id,

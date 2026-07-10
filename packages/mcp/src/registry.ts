@@ -96,7 +96,7 @@ const OPENAVAIL_MCP_TOOLS: readonly OpenavailMcpToolDefinition[] = [
   {
     name: 'search-availability',
     description:
-      'Requires read_freebusy. Find candidate time slots without creating a hold. latest_end is the latest time the meeting may end. All times must be ISO 8601 UTC.',
+      'Requires read_freebusy. Find capped candidate time slots without creating a hold. Defaults to 50 candidates; max_results may request up to 100. latest_end is the latest time the meeting may end. All times must be ISO 8601 UTC.',
     inputSchema: {
       type: 'object',
       required: ['duration_minutes', 'earliest_start', 'latest_end', 'meeting_class'],
@@ -108,6 +108,7 @@ const OPENAVAIL_MCP_TOOLS: readonly OpenavailMcpToolDefinition[] = [
         latest_end: dateTimeProperty,
         meeting_class: { type: 'string' },
         next_available_lookahead_hours: { type: 'integer', minimum: 1, maximum: 72 },
+        max_results: { type: 'integer', minimum: 1, maximum: 100 },
       },
       additionalProperties: false,
     },
@@ -162,7 +163,7 @@ const OPENAVAIL_MCP_TOOLS: readonly OpenavailMcpToolDefinition[] = [
   {
     name: 'create-booking-proposal',
     description:
-      'Requires create_booking_proposals. Create a durable booking proposal for calendar-owner approval without creating a hold or calendar event.',
+      'Requires create_booking_proposals. Create a durable booking proposal for calendar-owner approval without creating a hold or calendar event. Broad requested_window values produce a curated review set, not exhaustive availability; pass up to 3 preferred_times to preserve specific choices first.',
     inputSchema: {
       type: 'object',
       required: ['title', 'meeting_class', 'duration_minutes', 'requested_window'],
