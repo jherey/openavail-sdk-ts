@@ -464,4 +464,4 @@ All errors extend `OpenavailError` and carry:
 
 ## MCP server
 
-Prefer the MCP interface? Use [`@openavail/mcp`](https://www.npmjs.com/package/@openavail/mcp) — an stdio MCP server that wraps this SDK and exposes all tools under Google Calendar MCP-compatible names.
+Prefer MCP? Use hosted OAuth MCP at `https://mcp.openavail.com/mcp` when your client supports remote HTTP MCP. For local stdio fallback, run the scoped package [`@openavail/mcp`](https://www.npmjs.com/package/@openavail/mcp). The unscoped `openavail` package is not published.

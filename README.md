@@ -2,6 +2,9 @@
 
 TypeScript packages for the [Openavail](https://openavail.com) API.
 
+Packages are scoped on npm. Install `@openavail/sdk` for the TypeScript client and `@openavail/mcp`
+for the local MCP fallback; the unscoped `openavail` package is not published.
+
 | Package | Description | npm |
 |---|---|---|
 | [`@openavail/sdk`](./packages/sdk) | TypeScript client — zero dependencies, Node 18+ | [![npm](https://img.shields.io/npm/v/@openavail/sdk)](https://www.npmjs.com/package/@openavail/sdk) |

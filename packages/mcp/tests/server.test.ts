@@ -554,6 +554,7 @@ describe('MCP tool registry', () => {
         'create-public-booking-proposal',
         'delete-event',
         'get-agent-context',
+        'get-booking-proposal',
         'get-event',
         'get-pending-notifications',
         'get-public-booking-proposal-status',

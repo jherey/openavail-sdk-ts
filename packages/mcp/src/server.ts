@@ -12,6 +12,7 @@ import { registerConfirmHold } from './tools/native/confirm-hold.js';
 import { registerCreateBookingProposal } from './tools/native/create-booking-proposal.js';
 import { registerCreateHold } from './tools/native/create-hold.js';
 import { registerGetAgentContext } from './tools/native/get-agent-context.js';
+import { registerGetBookingProposal } from './tools/native/get-booking-proposal.js';
 import { registerGetPendingNotifications } from './tools/native/get-pending-notifications.js';
 import { registerGetScheduleRules } from './tools/native/get-schedule-rules.js';
 import { registerListMeetingClasses } from './tools/native/list-meeting-classes.js';
@@ -49,6 +50,7 @@ export function buildServer(
   registerListMeetingClasses(server, client);
   registerSearchAvailability(server, client, defaultOwnerEmail);
   registerCreateBookingProposal(server, client, defaultOwnerEmail);
+  registerGetBookingProposal(server, client);
   registerCreateHold(server, client, defaultOwnerEmail);
   registerConfirmHold(server, client);
   registerSimulate(server, client, defaultOwnerEmail);
