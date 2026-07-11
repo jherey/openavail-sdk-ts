@@ -2,6 +2,11 @@
   "name": "openavail-sdk-ts",
   "private": true,
   "packageManager": "pnpm@9.12.0",
+  "openavailRelease": {
+    "tagPolicy": "After bumping changed package versions and merging main, tag the repo with the highest package version in the release.",
+    "tagExample": "git tag vX.Y.Z && git push origin vX.Y.Z",
+    "publishBehavior": "The publish workflow skips package versions that already exist on npm, so package versions may differ within this repo."
+  },
   "engines": {
     "node": ">=18"
   },
