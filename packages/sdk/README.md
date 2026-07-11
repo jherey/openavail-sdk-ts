@@ -216,7 +216,9 @@ are always rechecked before booking or approval.
 #### `createBookingProposal(options)`
 
 Create an approval-first proposal. This discovers candidates without creating a hold or calendar
-event. The owner approves or rejects in the dashboard.
+event. The owner approves or rejects in the dashboard. Broad requested windows produce a curated
+review set, not exhaustive availability; in beta, Openavail persists up to 20 valid proposal
+candidates and returns curation metadata.
 
 ```typescript
 const proposal = await client.createBookingProposal({
@@ -252,9 +254,10 @@ const result = await client.searchAvailability({
   latestEnd:                  string,   // latest the meeting may END (not start)
   calendarType?:              'work' | 'personal' | 'other',
   nextAvailableLookaheadHours?: number, // default 72h, max 72h
+  maxResults?:                number,   // default 50, max 100
   idempotencyKey?:            string,   // auto-generated if omitted
 });
-// → { requestedWindow, candidates, resolvedCalendarType, warnings, pendingNotifications }
+// → { requestedWindow, candidates, resolvedCalendarType, warnings, pendingNotifications, candidatesTruncated }
 ```
 
 #### `createHold(options)`

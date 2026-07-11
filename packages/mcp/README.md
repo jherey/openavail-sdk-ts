@@ -134,8 +134,8 @@ without owner-agent credentials and do not expose this tool unless `OPENAVAIL_AP
 
 | Tool | Description |
 |---|---|
-| `create-booking-proposal` | Create an approval-first booking proposal without creating a hold or calendar event. |
-| `search-availability` | Find candidate slots without creating a hold. Pass `earliest_start` and `latest_end` — `latest_end` is when the meeting must **end**, not start. |
+| `create-booking-proposal` | Create an approval-first booking proposal with a curated review set, without creating a hold or calendar event. |
+| `search-availability` | Find capped candidate slots without creating a hold. Pass `earliest_start` and `latest_end` — `latest_end` is when the meeting must **end**, not start. Use `max_results` up to 100. |
 | `create-hold` | Reserve a selected candidate or short negotiation window. |
 | `confirm-hold` | Confirm a hold, committing the booking to the calendar. |
 | `simulate` | Preview the arbitration decision without creating anything (Pro plan). |

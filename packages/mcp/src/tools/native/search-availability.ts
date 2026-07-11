@@ -15,7 +15,8 @@ export function registerSearchAvailability(
       'Find candidate time slots without creating a hold.',
       'Requires permission: read_freebusy.',
       'Use this when you are exploring options or preparing a user approval flow. Call create-hold only after you are ready to reserve capacity.',
-      'Returns: requestedWindow, candidates with risk (free | preemptable), resolvedCalendarType, warnings, and pendingNotifications.',
+      'Responses are capped to 50 candidates by default. Pass max_results up to 100, or narrow the requested window and search again for more exploration.',
+      'Returns: requestedWindow, capped candidates with risk (free | preemptable), resolvedCalendarType, warnings, pendingNotifications, and truncation metadata.',
       'latest_end is the latest time the meeting may END, not the latest start time.',
       'TIMEZONE: all times must be ISO 8601 UTC. Use get-agent-context for owner timezone and setup guidance.',
       defaultOwnerEmail
@@ -30,6 +31,7 @@ export function registerSearchAvailability(
       meeting_class: z.string(),
       calendar_type: z.enum(['work', 'personal', 'other']).optional(),
       next_available_lookahead_hours: z.number().int().min(1).max(72).optional(),
+      max_results: z.number().int().min(1).max(100).optional(),
     },
     async ({
       owner_email,
@@ -39,6 +41,7 @@ export function registerSearchAvailability(
       meeting_class,
       calendar_type,
       next_available_lookahead_hours,
+      max_results,
     }) => {
       const email = owner_email ?? defaultOwnerEmail;
       try {
@@ -53,6 +56,7 @@ export function registerSearchAvailability(
             ...(next_available_lookahead_hours !== undefined && {
               nextAvailableLookaheadHours: next_available_lookahead_hours,
             }),
+            ...(max_results !== undefined && { maxResults: max_results }),
           }),
         );
       } catch (err) {

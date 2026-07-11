@@ -134,6 +134,7 @@ export type SearchAvailabilityOptions = {
   meetingClass: string;
   calendarType?: 'work' | 'personal' | 'other';
   nextAvailableLookaheadHours?: number;
+  maxResults?: number;
   idempotencyKey?: string;
 };
 
@@ -238,6 +239,11 @@ export type BookingProposal = {
   calendarOwner: string;
   requestingAgent: string | null;
   resolvedCalendarType: string | null;
+  candidateLimit: number;
+  availableValidCandidateCount: number;
+  validCandidateCount: number;
+  candidatesTruncated: boolean;
+  candidateSet: 'curated' | 'exhaustive';
   approvedCandidateId: string | null;
   candidates: BookingProposalCandidate[];
   decision: string | null;
@@ -294,6 +300,10 @@ export type SearchAvailabilityResult = {
   pendingNotifications: PendingNotification[];
   resolvedCalendarType: string | null;
   warnings: AvailabilityWarning[];
+  candidateLimit: number | null;
+  availableCandidateCount: number;
+  candidatesTruncated: boolean;
+  candidateSet: 'curated' | 'exhaustive';
 };
 
 export type CreateHoldResult = {
