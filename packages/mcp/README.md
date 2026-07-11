@@ -42,6 +42,27 @@ In Claude Code, add Openavail as a remote HTTP MCP server:
 If your Claude Code build does not support remote HTTP MCP with OAuth, use the stdio setup below with
 an `OPENAVAIL_API_KEY`.
 
+### Permission changes and OAuth refresh
+
+If you later grant additional permissions to the hosted MCP backing agent, refresh the OAuth session
+so the client receives the new grant. In Codex:
+
+```bash
+codex mcp logout openavail
+codex mcp login openavail
+```
+
+If the server was added before OAuth metadata was available, re-add it:
+
+```bash
+codex mcp remove openavail
+codex mcp add openavail --url https://mcp.openavail.com/mcp --oauth-client-id codex
+codex mcp login openavail
+```
+
+Permission downgrades and revoked credentials fail closed on the server. The refresh step is for newly
+granted tools becoming usable in the client.
+
 ## Local stdio fallback
 
 ### Claude Desktop
@@ -86,6 +107,8 @@ Add the same JSON block to your client's MCP config file. Config file locations:
 |---|---|
 | Cursor | `.cursor/mcp.json` (project) or `~/.cursor/mcp.json` (global) |
 | Windsurf | `.codeium/windsurf/mcp_config.json` |
+
+The npm package is scoped. Use `@openavail/mcp`; the unscoped `openavail` package is not published.
 
 ## Environment variables
 
@@ -135,6 +158,7 @@ without owner-agent credentials and do not expose this tool unless `OPENAVAIL_AP
 | Tool | Description |
 |---|---|
 | `create-booking-proposal` | Create an approval-first booking proposal with a curated review set, without creating a hold or calendar event. |
+| `get-booking-proposal` | Fetch a private owner-scoped booking proposal by `proposal_id`, including owner decision, approval status, candidates, and final booking ID when booked. |
 | `search-availability` | Find capped candidate slots without creating a hold. Pass `earliest_start` and `latest_end` — `latest_end` is when the meeting must **end**, not start. Use `max_results` up to 100. |
 | `create-hold` | Reserve a selected candidate or short negotiation window. |
 | `confirm-hold` | Confirm a hold, committing the booking to the calendar. |
@@ -186,7 +210,7 @@ These use the same tool names as `google-calendar-mcp` so agents targeting that 
 
 **Use `expiresInSeconds` for TTL checks.** The `create-hold` response includes both `expiresAt` (absolute UTC timestamp) and `expiresInSeconds` (relative). Use `expiresInSeconds` for hold freshness and retry decisions; use `expiresAt` for logging, display, and correlation.
 
-**Calendar types**: Openavail supports `work`, `personal`, and `other` calendar types per owner. If a user has only connected a personal calendar and you pass `calendar_type: "work"`, the request silently falls back to the primary calendar. Call `list-calendars` first to know which types are connected.
+**Calendar types**: Openavail supports `work`, `personal`, and `other` calendar types per owner. `calendar_type` is a hint, not a hard requirement. If a user has only connected a personal calendar and you pass `calendar_type: "work"`, the request falls back to the primary calendar and returns the resolved calendar type. Call `list-calendars` or `get-agent-context` first to know which types are connected.
 
 **Hold TTL**: `create-hold` creates a 5-minute hold. Confirm promptly for human-in-the-loop flows, or the hold will expire.
 

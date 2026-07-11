@@ -45,6 +45,7 @@ export function registerCreateHold(
       'Use candidate holds when you have selected one exact slot. Use window holds for short active negotiations where options inside the window must stay stable.',
       'Candidate holds must be confirmed with the exact same start/end. Window holds may be confirmed with any valid slot inside the held window.',
       'Returns: holdId, holdScope, heldWindow, expiresAt, expiresInSeconds, and resolvedCalendarType.',
+      'calendar_type is a hint: if the requested type is not connected, Openavail falls back to the primary calendar and returns resolvedCalendarType.',
       defaultOwnerEmail
         ? `Default owner: ${defaultOwnerEmail} (override by passing owner_email explicitly).`
         : 'owner_email is required unless the API key is user-scoped.',

@@ -17,6 +17,7 @@ export function registerCreateBookingProposal(
       'Use this for approval-mode agents. The owner approves or rejects in Openavail; if approved, Openavail books automatically when a valid candidate is still available.',
       'Broad requested_window values produce a curated review set, not exhaustive availability. Narrow the window or create a new proposal if you need a different owner review set.',
       'preferred_times may contain up to 3 exact candidate windows. Use them when you want specific owner choices preserved first.',
+      'calendar_type is a hint: if the requested type is not connected, Openavail falls back to the primary calendar and returns resolvedCalendarType.',
       'Call search-availability first when you need to explore availability before creating the owner-facing proposal.',
       'Returns proposal status, curation metadata, and candidate history. It does not return an owner review URL.',
       defaultOwnerEmail

@@ -96,7 +96,7 @@ const OPENAVAIL_MCP_TOOLS: readonly OpenavailMcpToolDefinition[] = [
   {
     name: 'search-availability',
     description:
-      'Requires read_freebusy. Find capped candidate time slots without creating a hold. Defaults to 50 candidates; max_results may request up to 100. latest_end is the latest time the meeting may end. All times must be ISO 8601 UTC.',
+      'Requires read_freebusy. Find capped candidate time slots without creating a hold. Defaults to 50 candidates; max_results may request up to 100. latest_end is the latest time the meeting may end. All times must be ISO 8601 UTC. calendar_type is a hint: if the requested type is not connected, Openavail falls back to the primary calendar and returns resolved_calendar_type.',
     inputSchema: {
       type: 'object',
       required: ['duration_minutes', 'earliest_start', 'latest_end', 'meeting_class'],
@@ -118,7 +118,7 @@ const OPENAVAIL_MCP_TOOLS: readonly OpenavailMcpToolDefinition[] = [
   {
     name: 'create-hold',
     description:
-      'Requires create_holds. Create a candidate or window hold before booking. Use an idempotency_key when retrying.',
+      'Requires create_holds. Create a candidate or window hold before booking. Use an idempotency_key when retrying. calendar_type is a hint: if the requested type is not connected, Openavail falls back to the primary calendar and returns resolved_calendar_type.',
     inputSchema: {
       type: 'object',
       required: ['meeting_class', 'hold_scope'],
@@ -163,7 +163,7 @@ const OPENAVAIL_MCP_TOOLS: readonly OpenavailMcpToolDefinition[] = [
   {
     name: 'create-booking-proposal',
     description:
-      'Requires create_booking_proposals. Create a durable booking proposal for calendar-owner approval without creating a hold or calendar event. Broad requested_window values produce a curated review set, not exhaustive availability; pass up to 3 preferred_times to preserve specific choices first.',
+      'Requires create_booking_proposals. Create a durable booking proposal for calendar-owner approval without creating a hold or calendar event. Broad requested_window values produce a curated review set, not exhaustive availability; pass up to 3 preferred_times to preserve specific choices first. calendar_type is a hint: if the requested type is not connected, Openavail falls back to the primary calendar and returns resolved_calendar_type.',
     inputSchema: {
       type: 'object',
       required: ['title', 'meeting_class', 'duration_minutes', 'requested_window'],
@@ -182,6 +182,19 @@ const OPENAVAIL_MCP_TOOLS: readonly OpenavailMcpToolDefinition[] = [
     },
     surface: 'all',
     mutating: true,
+    idempotency: 'none',
+  },
+  {
+    name: 'get-booking-proposal',
+    description:
+      'Requires create_booking_proposals. Fetch a private owner-scoped booking proposal by proposal_id, including owner decision, candidates, approval status, and final booking_id when booked. This is not the public requester status tool.',
+    inputSchema: {
+      type: 'object',
+      required: ['proposal_id'],
+      properties: { proposal_id: uuidProperty },
+      additionalProperties: false,
+    },
+    surface: 'all',
     idempotency: 'none',
   },
   {
@@ -284,7 +297,7 @@ const OPENAVAIL_MCP_TOOLS: readonly OpenavailMcpToolDefinition[] = [
   {
     name: 'create-event',
     description:
-      'Requires create_bookings. Create a committed booking directly. Use an idempotency_key when retrying.',
+      'Requires create_bookings. Create a committed booking directly. Use an idempotency_key when retrying. calendar_type is a hint: if the requested type is not connected, Openavail falls back to the primary calendar and returns calendar_type/resolved calendar details in the result.',
     inputSchema: {
       type: 'object',
       required: ['start', 'end', 'meeting_class', 'title'],

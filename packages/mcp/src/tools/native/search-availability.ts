@@ -17,6 +17,7 @@ export function registerSearchAvailability(
       'Use this when you are exploring options or preparing a user approval flow. Call create-hold only after you are ready to reserve capacity.',
       'Responses are capped to 50 candidates by default. Pass max_results up to 100, or narrow the requested window and search again for more exploration.',
       'Returns: requestedWindow, capped candidates with risk (free | preemptable), resolvedCalendarType, warnings, pendingNotifications, and truncation metadata.',
+      'calendar_type is a hint: if the requested type is not connected, Openavail falls back to the primary calendar and returns resolvedCalendarType.',
       'latest_end is the latest time the meeting may END, not the latest start time.',
       'TIMEZONE: all times must be ISO 8601 UTC. Use get-agent-context for owner timezone and setup guidance.',
       defaultOwnerEmail
